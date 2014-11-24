@@ -1,0 +1,44 @@
+{% extends "registration/base_test.html" %}
+{% block content %}
+<ul class="nav nav-tabs">
+                            <li><a href="#create" data-toggle="tab">Login</a></li>
+                        </ul>
+                        <div id="myTabContent" class="tab-content">
+                            <!-- login tab -->
+                            <div class="tab-pane active in" id="login">
+                                <form method="POST" action="/accounts/login/">
+                                    {% csrf_token %}
+                                    <fieldset>
+                                        <div class="control-group">
+                                            <!-- user name -->
+                                            <div class="input-group">
+                                                <span class="input-group-addon"><i class="glyphicon glyphicon-user"></i></span>
+                                                <input id="login_username" type="text" class="form-control" name="username" value="" placeholder="username" required>                                        
+                                            </div>
+                                        </div>                                  
+
+                                        <div class="control-group">
+                                            <!-- Password-->
+                                            <div class="input-group">
+                                                <span class="input-group-addon"><i class="glyphicon glyphicon-lock"></i></span>
+                                                <input id="login_password" type="password" class="form-control" name="password" placeholder="password" required>
+                                            </div>
+                                        </div>
+
+                                        <div class="control-group">
+                                            <!-- Button -->
+                                            <div class="controls">
+    											<input id="login_submit" class="btn btn-success" type="submit" name="submit" value="Sign in" />
+                                                <span class="pull-right" id="forgetPass"><a href="http://128.173.21.175/accounts/register/">Sign Up</a></span>
+                                           
+                                            </div>
+    										<!-- login error message -->
+                                            
+    										<!-- register success message -->
+                                            
+                                        </div>
+                                    </fieldset>
+                                </form>
+                            </div>                            
+                                                
+                            {% endblock %}

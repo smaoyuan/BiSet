@@ -1,0 +1,160 @@
+{% extends "projects/base.html" %}
+{% load staticfiles %}
+
+{% block content %}
+<div class="row">
+	<!-- container of project list -->
+	<div class="panel panel-default widget shade-container">
+		<div class="panel-heading">
+            <span class="glyphicon glyphicon-th-list"></span>
+            <h3 class="panel-title">My Own Project</h3>
+            <span class="label label-info">78</span>
+        </div>
+
+		<div class="panel-body">
+			<table id="project_list" class="table table-bordred table-striped">
+				<!-- head of the table -->
+				<!-- TO DO: dynamically generate table head -->
+				<thead>
+					<th>Project name</th>
+					<th>Dataset</th>
+					<th>Project description</th>
+					<th>Last modifed time</th>
+					<th>Edit</th>
+					<th>Delete</th>
+				</thead>
+				<tbody>
+					{% for project in my_projects %}
+							<tr value="{{ project.id }}">
+								<td><a href = "{% url 'projects:detail' project.id %}">{{ project.name }}</a></td>
+								<td>{{ project.dataset }}</td>
+								<td>{{ project.description }}</td>
+								<td>{{ project.create_time }}</td>
+							    <td><p><button class="btn btn-primary btn-xs plist_update" data-title="Edit" data-toggle="modal" data-target="#edit" value="{{ project.id }}"><span class="glyphicon glyphicon-pencil"></span></button></p></td>
+    							<td><p><button class="btn btn-danger btn-xs p_delete_icon" data-title="Delete" data-toggle="modal" data-target="#delete" value="{{ project.id }}"><span class="glyphicon glyphicon-trash" ></span></button></p></td>
+							</tr>
+					{% endfor %}		
+				</tbody>
+			</table>
+		</div>
+	</div>
+
+	<div>
+		<button type="button" class="btn btn-info btn-xs" id = 'plist_create_new_project'>Create New Project</button>				
+	</div>
+
+	<!-- a popup to ask user to confirm the deletion -->
+	<div class="modal fade" id="delete_alert" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+					<h4 class="modal-title" id="myModalLabel">Delete This Project</h4>
+				</div>
+				<!-- content -->
+				<div class="modal-body">
+					<div class="alert alert-warning"><span class="glyphicon glyphicon-warning-sign"></span> Are you sure you want to delete this Project?</div>
+					<label id="p_hidden_id" style="display: none;"></label>
+				</div>
+
+				<div class="modal-footer">
+					<button type="button" class="btn btn-warning" data-dismiss="modal"><span class="glyphicon glyphicon-remove"></span> No</button>
+					<button type="button" class="btn btn-warning plist_delete_btn"><span class="glyphicon glyphicon-ok-sign"></span> Yes</button>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="row">
+	<div class="panel panel-default widget shade-container">
+		<div class="panel-heading">
+            <span class="glyphicon glyphicon-list"></span>
+            <h3 class="panel-title">Project Shared with Me</h3>
+            <span class="label label-info">23</span>
+        </div>
+
+        <div class="panel-body">
+        <table id="project_list" class="table table-bordred table-striped">
+				<!-- head of the table -->
+				<!-- TO DO: dynamically generate table head -->
+				<thead>
+					<th>Project name</th>
+					<th>Dataset</th>
+					<th>Project description</th>
+					<th>Last modifed time</th>
+					<th>Edit</th>
+					<th>Delete</th>
+				</thead>
+				<tbody>
+					{% for project in shared_projects %}
+							<tr value="{{ project.id }}">
+								<td><a href = "{% url 'projects:detail' project.id %}">{{ project.name }}</a></td>
+								<td>{{ project.dataset }}</td>
+								<td>{{ project.description }}</td>
+								<td>{{ project.create_time }}</td>
+							    <td><p><button class="btn btn-primary btn-xs plist_update" data-title="Edit" data-toggle="modal" data-target="#edit" value="{{ project.id }}"><span class="glyphicon glyphicon-pencil"></span></button></p></td>
+    							<td><p><button class="btn btn-danger btn-xs p_delete_icon" data-title="Delete" data-toggle="modal" data-target="#delete" value="{{ project.id }}"><span class="glyphicon glyphicon-trash" ></span></button></p></td>
+							</tr>
+					{% endfor %}		
+				</tbody>
+			</table>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+	<div class="panel panel-default widget shade-container">
+		<div class="panel-heading">
+            <span class="glyphicon glyphicon-list"></span>
+            <h3 class="panel-title">Public Project</h3>
+            <span class="label label-info">231</span>
+
+<!--<div style="display:inline">
+	<form action="" class="navbar-form navbar-right">
+	   <div class="input-group">
+	       <input type="Search" placeholder="Search..." class="form-control" />
+	       <div class="input-group-btn">
+	           <button class="btn btn-info">
+	           <span class="glyphicon glyphicon-search"></span>
+	           </button>
+	       </div>
+	   </div>
+	</form>	
+</div>-->
+
+        </div>
+
+        <div class="panel-body">
+        <table id="project_list" class="table table-bordred table-striped">
+				<!-- head of the table -->
+				<!-- TO DO: dynamically generate table head -->
+				<thead>
+					<th>Project name</th>
+					<th>Dataset</th>
+					<th>Project description</th>
+					<th>Last modifed time</th>
+					<th>Edit</th>
+					<th>Delete</th>
+				</thead>
+				<tbody>
+					{% for project in public_projects %}
+							<tr value="{{ project.id }}">
+								<td><a href = "{% url 'projects:detail' project.id %}">{{ project.name }}</a></td>
+								<td>{{ project.dataset }}</td>
+								<td>{{ project.description }}</td>
+								<td>{{ project.create_time }}</td>
+							    <td><p><button class="btn btn-primary btn-xs plist_update" data-title="Edit" data-toggle="modal" data-target="#edit" value="{{ project.id }}"><span class="glyphicon glyphicon-pencil"></span></button></p></td>
+    							<td><p><button class="btn btn-danger btn-xs p_delete_icon" data-title="Delete" data-toggle="modal" data-target="#delete" value="{{ project.id }}"><span class="glyphicon glyphicon-trash" ></span></button></p></td>
+							</tr>
+					{% endfor %}		
+				</tbody>
+			</table>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript" src="{% static 'common/js/listprocess.js'%}"></script>
+
+{% endblock %}
+

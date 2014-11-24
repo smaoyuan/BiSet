@@ -1,0 +1,196 @@
+{% extends "projects/base.html" %}
+{% load staticfiles %}
+
+{% load i18n %}
+
+{% if not is_popup %}
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+<a href="{% url 'admin:index' %}">{% trans 'Home' %}</a>
+&rsaquo;
+</div>
+
+first name: {{ user.firstname }}
+{% endblock %}
+{% endif %}
+
+{% block sidebar %}{% endblock %}
+
+{% block content %}
+		<h1>My Profile</h1>
+		<hr>
+		<div class="col-md-7">
+            <div class="panel panel-default widget shade-container">
+                <div class="panel-heading">
+                    <span class="glyphicon glyphicon-user"></span>
+                    <h3 class="panel-title">My profile</h3>
+                </div>
+
+                <div class="panel-body">
+					<!-- left column -->
+			        <div class="col-md-3 col-sm-6 col-xs-12">
+			            <div class="text-center">
+			                <img src="{% static 'common/imgs/default.jpg' %}" class="avatar img-circle img-thumbnail" alt="avatar">
+			            </div>
+			        </div>
+
+			        <!-- edit form column -->
+			        <div class="col-md-8 col-md-offset-1 col-sm-6 col-xs-12">
+			            <div class="form-horizontal">
+                        <input id="csrf_token" type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+			                <div class="form-group">
+			                    <label class="col-md-3 control-label">Username:</label>
+                                <label style = "display:none;" id = 'userid'>{{ this_user.id }}</label>
+			                    <div class="col-md-8">
+			                        <p class="p_aligh_lable" id = 'username'>{{ this_user.username }}</p>
+			                    </div>
+			                </div>
+
+			                <div class="form-group">
+			                    <label class="col-lg-3 control-label">First name:</label>
+			                    <div class="col-lg-8">
+			                        <p class="p_aligh_lable active_this" id="profile_first_name">{{ this_user.first_name }}</p>
+	            					<div class="hide_this">
+										<input type="text" name="firstName" placeholder="First Name" id="edit_first_name" data-toggle="tooltip"><br />
+									</div>			                        
+			                    </div>
+			                </div>
+
+			                <div class="form-group">
+			                    <label class="col-lg-3 control-label">Last name:</label>
+			                    <div class="col-lg-8">
+			                        <p class="p_aligh_lable active_this" id="profile_last_name">{{ this_user.last_name }}</p>
+	            					<div class="hide_this">
+										<input type="text" name="lastName" placeholder="Last Name" id="edit_last_name" data-toggle="tooltip"><br />
+									</div>			                        
+			                    </div>
+			                </div>
+
+			                <div class="form-group">
+			                    <label class="col-lg-3 control-label">Email:</label>
+			                    <div class="col-lg-8">
+			                        <p class="p_aligh_lable active_this" id="profile_email">{{ this_user.email }}</p>
+	            					<div class="hide_this">
+										<input type="text" name="email" placeholder="Email" id="edit_email" data-toggle="tooltip"><br />
+									</div>			                        
+			                    </div>
+			                </div>
+
+			                <div class="form-group">
+			                    <label class="col-lg-3 control-label">Career:</label>
+			                    <div class="col-lg-8">                                    
+			                        <select id="id_career" name="career" style = "margin-top:5px">
+                                    {% for item in profile.CAREER_CHOICES %}                                        
+                                        <option value="{{item.0}}" {% if profile.career = item.0 %} selected{% endif%}>{{item.1}}</option>
+                                    {% endfor %}
+                                    </select>
+                                    
+			                    </div>
+			                </div>
+
+			                <div class="form-group">
+			                    <label class="col-lg-3 control-label">Location:</label>
+			                    <div class="col-lg-8">
+			                        <p class="p_aligh_lable active_this" id="profile_location">{{ profile.location }}</p>
+	            					<div class="hide_this">
+										<input type="text" name="location" placeholder="Location" id="edit_location" data-toggle="tooltip"><br />
+									</div>			                        
+			                    </div>
+			                </div>
+
+			                <div class="form-group">
+			                    <div class="col-md-12">
+			                        <div class="col-md-5"></div>
+			                        <div class="col-md-5">
+                                        {% if perm == True %}
+			                        	<div class="col-md-7">
+		                        			<button type="button" class="btn btn-info btn-x active_this" id="btn_profile_edit"><span class="glyphicon glyphicon-pencil"></span> Edit Profile</button>
+											<button type="button" class="btn btn-success btn-x hide_this" id="btn_profile_save"><span class="glyphicon glyphicon-ok"></span> save</button>
+										</div>
+                                        <div class="col-md-5">
+                                            <button type="button" class="btn btn-info btn-x active_this" id="btn_change_pass"><span class="glyphicon glyphicon-lock"></span> Change Password</button>
+                                        </div>
+										<div class="col-md-5">
+											<button type="button" class="btn btn-default btn-x hide_this" id="btn_profile_cancel">Cancel</button>
+		                        		</div>
+										{% endif %}
+		                        		
+			                        </div>
+			                    </div>
+			                </div>
+			            </div>
+			        </div>
+                </div>
+            </div>			
+		</div>       
+		
+
+		<div class="col-md-4 col-md-offset-1">
+            <!-- collaborator of a project -->
+            <div class="panel panel-default widget shade-container">
+                <div class="panel-heading">
+                    <span class="glyphicon glyphicon-list-alt"></span>
+                    <h3 class="panel-title">My Recent Activities</h3>
+                    <span class="label label-info">{{history_actions|length}}</span>
+                </div>
+                <div class="panel-body">
+                    <ul class="list-group">
+				        {% for item in history_actions%}
+				        	<li class="list-group-item">
+                            	<div class="row">
+	                                <div class="col-xs-4 col-md-2 left_15_gap">
+                                    	<img src="{% static 'common/imgs/default.jpg' %}" class="img-circle img-responsive" alt="" />
+                                	</div>
+                                	<div class="col-xs-7 col-md-9">
+                                		<p>
+                                		{{ item.logAction }} 
+                                        {% if item.logContentType == 'comment' %}
+                                            a comment
+                                            To project 
+                                            {% if item.logObject.project.is_deleted %}
+                                                    '{{ item.logObject.project }}'
+                                                {% else %}
+                                                    <a href = '{% url 'projects:detail' item.logObject.project.pk %}'>{{ item.logObject.project }}</a> 
+                                                {% endif %} 
+                                        {% elif  item.logContentType == 'collaborationship'%}
+                                            a collaborator                                        
+                                            {% if item.logObject != None %}
+                                                at 
+                                                {% if item.logObject.project.is_deleted %}
+                                                    '{{ item.logObject.project }}'
+                                                {% else %}
+                                                    <a href = '{% url 'projects:detail' item.logObject.project.pk %}'>{{ item.logObject.project }}</a> 
+                                                {% endif %}    
+                                            {% endif %}
+                                        {% elif item.logContentType == 'project'%}    
+                                           project                                           
+                                           {% if item.logObject.is_deleted == True%}
+                                                '{{ item.logObject.name}}' <a href = '{% url 'projects:undo_delete' item.logObject.pk %}'>Undo?</a>
+                                           {% else %}
+                                                <a href = '{% url 'projects:detail' item.logObject.pk %}'>{{ item.logObject.name}}</a>
+                                           {% endif %}
+                                        
+                                        {% endif %}
+                                            
+							            {% if item.change_message != '' %}
+                                           , {{ item.change_message }}        
+							            {% endif %}
+                                		</p>
+                                		<div class="mic-info">On {{ item.action_time }}</div>
+                                	</div>
+                            	</div>
+                        	</li>                        	
+				        {% endfor %}
+						                        				        
+                    </ul>
+                    <!-- placeholder for more activities -->
+                    <!-- <a href="#" class="btn btn-info btn-sm btn-block" role="button"><span class="glyphicon glyphicon-refresh"></span> More</a> -->
+                </div>
+            </div>			
+		</div>
+    </div>
+    
+    
+	<script type="text/javascript" src="{% static 'profile/js/edit.js'%}"></script>
+{% endblock %}
+

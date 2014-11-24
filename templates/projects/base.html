@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">    
+{% load staticfiles %}
+<head>
+    <meta charset="utf-8">
+    <title>Bixplorer</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'common/css/lib/bootstrap.min.css'%}" />
+    <link rel="stylesheet" type="text/css" href="{% static 'common/css/lib/bootstrap-select.min.css'%}" />
+    <link rel="stylesheet" type="text/css" href="{% static 'common/css/lib/bootcards-desktop.min.css'%}" />    
+    <link rel="stylesheet" type="text/css" href="{% static 'common/css/lib/jquery.dataTables.min.css'%}" />
+    <link rel="stylesheet" type="text/css" href="{% static 'common/css/style.css'%}" />
+	<script type="text/javascript" src="{% static 'common/js/lib/jquery-2.1.1.min.js'%}"></script>
+    <script type="text/javascript" src="{% static 'common/js/lib/jquery.form.js'%}"></script>
+    <script type="text/javascript" src="{% static 'common/js/lib/bootstrap.min.js'%}"></script>
+    <script type="text/javascript" src="{% static 'common/js/lib/bootstrap-select.min.js'%}"></script>
+	<script type="text/javascript">window.PUBLIC_PATH = "{% static ''%}";</script>
+	<script type="text/javascript">window.SERVER_PATH = "{{ BASE_URL }}";</script>
+</head>
+
+<body class="db_after_login">
+    <!-- top navigation bar -->
+    <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="{% static 'home/index/'%}">Bixplorer</a>
+            </div>
+            
+            <div class="navbar-collapse collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <!-- home menu -->
+                    <li class=" {% if active_tag == 'home'  %} active {% endif %}"><a href="{{ BASE_URL }}projects/"><span class="glyphicon glyphicon-home"></span> Home</a></li>
+                    
+                    <!-- project management menu -->
+                    <li class="dropdown {% if active_tag == 'projects'  %} active {% endif %}">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="glyphicon glyphicon-tasks"></span> Project Management <span class="caret"></span></a>
+                        <ul class="dropdown-menu" role="menu">
+                            <li><a href="{{BASE_URL}}projects/add/"><span class="glyphicon glyphicon-plus"></span> Create a new project</a></li>
+                            <li><a href="{{BASE_URL}}projects/plist/"><span class="glyphicon glyphicon-list"></span> My project list</a></li>
+                        </ul>
+                    </li>
+                    
+                    <!-- dataset management menu -->
+                    <li class="dropdown {% if active_tag == 'dataset'  %} active {% endif %}"><a href="#"><span class="glyphicon glyphicon-cog"></span> Dataset Management</a></li>
+                    
+                    <!-- analytics workspace menu -->
+                    <li class="dropdown {% if active_tag == 'analytics'  %} active {% endif %}"><a href="#"><span class="glyphicon glyphicon-eye-open"></span> Analytical Workspace</a></li>
+                    
+                    <!-- profile menu -->
+                    <li class="{% if active_tag == 'userprofile'  %} active {% endif %}"><a href="{{ BASE_URL }}profile/{{user.id}}/"><span class="glyphicon glyphicon-user"></span> My Profile</a></li>                
+                    
+                    <!-- Hit menu -->
+                    <li class="dropdown {% if active_tag == 'myturk'  %} active {% endif %}">
+                    
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="glyphicon glyphicon-info-sign"></span> Crowdsourcing<span class="caret"></span></a>
+                        <ul class="dropdown-menu" role="menu">
+                            <li><a href="{{ BASE_URL }}myturk/createhit/"><span class="glyphicon glyphicon-plus"></span> Creat Hit</a></li>
+                            <li><a href="{{ BASE_URL }}myturk/hitresult/"><span class="glyphicon glyphicon-list"></span> Hit Result</a></li>
+                        </ul>
+                    </li>
+                    
+                    <!-- logout menu -->
+                    <li class="{% if active_tag == 'logout'  %} active {% endif %}"><a href="{{ BASE_URL}}accounts/logout/"><span class="glyphicon glyphicon-log-out"></span> Logout</a></li>            
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div id="content">
+        {% block content %}{% endblock %}
+    </div>
+</body>
+</html>

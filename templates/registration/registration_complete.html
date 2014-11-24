@@ -1,0 +1,12 @@
+{% extends "registration/registration_base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Activation email sent" %}{% endblock %}
+{% block content %}
+{% blocktrans %} You have created an account.{% endblocktrans %}
+<script>
+setTimeout(function () {
+   window.location.href = "/projects/"; //will redirect to your blog page (an ex: blog.html)
+}, 10);
+</script>
+{% endblock %}
+

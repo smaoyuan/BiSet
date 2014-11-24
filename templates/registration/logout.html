@@ -1,0 +1,12 @@
+{% extends "registration/registration_base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Logged out" %}{% endblock %}
+{% block content %}
+<br>
+<H1>You will be redirected to the home page in 1 second...<H1>
+<script>
+   window.location.href = "/accounts/login/";
+</script>
+{% trans "Successfully logged out!" %}
+{% endblock %}
+

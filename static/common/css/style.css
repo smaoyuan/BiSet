@@ -1,0 +1,181 @@
+
+* This file contains all necessary style controls in views
+*/
+
+/* login page body style */
+body {
+    margin-top: 10px;
+    margin-bottom: 10px;
+    margin-left: 50px;
+    margin-right: 50px;
+}
+
+/* system body style after login */
+body.db_after_login {
+    min-height: 800px;
+    padding-top: 70px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    margin-left: 50px;
+    margin-right: 50px;
+}
+
+/* style for the four blocks in the homepage */
+.panel-body .btn.block_btn { 
+    width: 100%;
+    margin-bottom: 15px;
+    margin-top: 15px;
+}
+
+/* control group style of the login and register page */
+.control-group > div {
+    margin-bottom: 25px;
+}
+
+/* position for the branding in the login page */
+#pheader {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+/* change the color of the branding (after login) of the website */
+.navbar-inverse .navbar-brand {
+    background-color: transparent;
+    color: #eeccaa;
+}
+
+/* style for the slides in the login page */
+#slider h2 {
+    margin: 0;
+    color: #666;
+    padding-top: 90px;
+    font-size: 55px;
+    font-family: "trebuchet ms", sans-serif;
+}
+.item {
+    background: #a0a0a0;
+    text-align: center;
+    height: 460px !important;
+}
+.carousel { margin-top: 20px; }
+#slider { margin-top: 35px; }
+#discription {
+    text-align: center;
+    margin-top: 25px;
+}
+
+/* style for sign in and register panel */
+#pregister {
+    margin-top: 35px;
+    height: 395px;
+}
+
+/* position for forget password */
+#forgetPass {
+    margin-top: 5px;
+    margin-right: 10px;
+}
+
+/* input style in add view and edit view */
+.control-group {
+    margin-top: 15px;
+    margin-bottom: 15px;
+}
+
+/* add border for fieldset in add and edit view */
+fieldset.field-border {
+    border: 1px groove #fff !important;
+    padding: 0 1.4em 1.4em 1.4em !important;
+    margin: 0 0 1.5em 0 !important;
+    box-shadow: 0px 0px 0px 0px #000;
+}
+
+/* add label in the fieldset in add and edit view */
+legend.field-border {
+    font-size: 1.1em !important;
+    font-weight: bold !important;
+    text-align: left !important;
+    width: auto;
+    padding: 0 10px;
+    border-bottom: none;
+}
+
+/* position for privacy radio button */
+div.radio { display: inline; }
+#visability_no { margin-left: 40px; }
+
+/* position for data view */
+#main_data_preview { margin-top: 15px; }
+#main_table_view { height: 490px; }
+
+
+/* add shade in a container */
+div.shade-container{
+    z-index: 10;
+    background-color: #ffffff;
+    padding: 0 !important;
+    border-radius: 4px;
+    -moz-border-radius: 4px;
+    border:1px solid #ddd;
+    margin-top: 20px;
+    margin-left: 0px;
+    -webkit-box-shadow: 0 6px 12px rgba(0,0,0,.175);
+    box-shadow: 0 6px 12px rgba(0,0,0,.175);
+    -moz-box-shadow: 0 6px 12px rgba(0,0,0,.175);
+    background-clip: padding-box;
+    opacity: 0.97;
+    filter: alpha(opacity=97);
+}
+
+
+
+
+
+
+
+
+.widget .panel-body { 
+    padding-left: 0px; 
+    padding-right: 0px; 
+    padding-top: 0px; 
+    padding-bottom: 0px; 
+}
+.widget .list-group { margin-bottom: 0; }
+.widget .panel-title { display:inline }
+.widget .label-info { float: right; }
+.widget li.list-group-item {border-radius: 0;border: 0;border-top: 1px solid #ddd; margin-left: 0px !important;}
+.widget li.list-group-item div.left_15_gap {margin-left: 15px;}
+.widget li.list-group-item:hover { background-color: rgba(86,61,124,.1); }
+.widget .mic-info { color: #666666;font-size: 11px; }
+.widget .action { margin-top:5px; }
+.widget .comment-text { font-size: 12px; }
+.widget .btn-block { border-top-left-radius:0px;border-top-right-radius:0px; }
+.widget .btn_appended {margin-left: 4px;}
+
+/*for profile*/ 
+.p_aligh_lable {
+    padding-top: 7px;
+    margin-bottom: 0;
+}
+
+/*hide a div*/
+.hide_this { display: none; }
+
+/*change mosue for delete sign*/
+.remove_collaborators:hover { cursor: pointer; }
+
+/*set the size of the message board*/
+#comment_message_board { margin-bottom: 0px !important; }
+
+/*style for registration*/
+#id_username { width: 100%; margin-bottom: 10px;}
+#id_email { width: 100%; margin-bottom: 10px;}
+#id_password1 { width: 100%; margin-bottom: 10px;}
+#id_password2 { width: 100%; margin-bottom: 10px;}
+#id_first_name { width: 100%; margin-bottom: 10px;}
+#id_last_name { width: 100%; margin-bottom: 10px;}
+#id_location { width: 100%; margin-bottom: 10px;}
+#id_career { width: 100%; margin-bottom: 15px;}
+.errorlist > li { color: red;}
+#reg_login {margin-left: 20px;}
+

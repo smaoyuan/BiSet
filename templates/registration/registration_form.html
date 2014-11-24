@@ -1,0 +1,17 @@
+{% extends "registration/base_test.html" %}
+{% load i18n %}
+{% block content %}
+<!-- <ul class="nav nav-tabs">
+    <li><a href="#create" data-toggle="tab">Sign up</a></li>
+</ul> -->
+                        
+<div id="myTabContent" class="tab-content">
+    <div class="tab-pane active in" id="create">
+        <form method='post' action=''>{% csrf_token %}
+        {{ form }}
+        <input type="submit" value="{% trans "Sign Up" %}" />
+        <a href="{% url 'django.contrib.auth.views.login' %}" id="reg_login"> Login</a>
+        </form>
+    </div>
+</div>                           
+{% endblock %}

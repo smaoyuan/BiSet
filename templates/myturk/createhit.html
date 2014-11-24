@@ -1,0 +1,153 @@
+{% extends "projects/base.html" %}
+{% load staticfiles %}
+{% block content %}
+<div class="container-fluid">
+	<div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+		<div class="panel panel-default widget shade-container">
+			<div class="panel-heading">
+                <span class="glyphicon glyphicon-paperclip"></span>
+                <h3 class="panel-title">Hit Request</h3>
+            </div>
+
+            <div class="panel-body">
+				<div>
+					<label>Task Title:</label><br />
+					<input type="text" id="myturk_task_title" value = 'Intelligence analysis'>
+				</div>
+				<hr>
+
+                <div>
+                	<label>Task Description:</label><br />
+                	<textarea name="tast_description" placeholder="Task Description" rows="3" style="margin-bottom:10px; width: 100%;" id="myturk_task_description">You will be doing intelligence analysis on approximately 4 short text documents. You have been tasked with identifying any possible terrorist plots and briefing your supervisor on them if any exist. You will need 20-30 minutes to complete your analysis, at which point you will write a description of what you found in the textbox. For example, who will do what at which place at which time. What is the threat. If you feel you are confident in your analysis before this time limit, you can submit your writing early.</textarea> 
+                </div>
+                <hr>
+
+<!--                 <div>
+                	<label>Select Project:</label><br />                
+                    <select id="hit_project_selection" class="selectpicker" data-live-search="true" data-width="80%" required>
+						{% for item in project %}
+                            <option value = "{{project.id}}">{{ project.name }}</option>
+						{% endfor %}
+                    </select>
+                </div> -->
+
+                <div>
+                	<!-- dataset selection -->
+                    <label>Select Dataset:</label><br />
+                    <select id="project_dataset" class="selectpicker" data-live-search="true" data-width="80%" required>
+						{% for dataset in datasets %}
+                            <option value = "{{dataset.id}}">{{ dataset.name }}</option>
+						{% endfor %}
+                    </select>
+                </div>
+                    
+                <!-- data view -->
+                <div>
+                    <fieldset class="field-border">
+                        <!-- <legend class="field-border">Data View</legend> -->
+                        <div id="main_table_view">             
+                            <table id="myturk_doc_list" class="display">
+                                <!-- TO DO: dynamically generate table head -->
+                                <thead>
+                                    <tr>
+                                        <th>Doc ID</th>
+                                        <th>Doc Text</th>
+                                    </tr>
+                                </thead>
+                            </table>
+                        </div>
+                    </fieldset>
+                </div>
+                <hr>
+				
+				<div>
+	                <input id="csrf_token" type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+				</div>
+
+                <div>
+                	<label>AWSAccessKeyId:</label><br />
+                	<input type="text" id="myturk_accesskeyid" value = "">
+                </div>
+                <hr>
+
+                <div>
+                	<label>AWSSecretKey:</label><br />
+                	<input type="text" id="myturk_secretkey" value = "">
+                </div>
+                <hr>
+
+				<div>
+					<label>Task Duration (second):</label><br />
+					<input type="number" id="myturk_duration">
+				</div>
+				<hr>                
+				
+				<div>
+					<label>Max assignments:</label><br />
+					<input type="number" id="myturk_max_assignment">
+				</div>
+				<hr>
+
+				<div>
+					<label>Reward ($):</label><br />
+					<input type="number" id="myturk_reward">
+				</div>
+				<hr>                
+                
+                <div>
+                	<button class="btn btn-primay" type="button" id="btn_submit_turk">submit</button>
+                </div>
+
+            </div>
+		</div>
+		
+	</div>
+
+	<!-- <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+		<div class="panel panel-default widget shade-container">
+			<div class="panel-heading">
+                <span class="glyphicon glyphicon-paperclip"></span>
+                <h3 class="panel-title">Hit Result</h3>
+            </div>
+
+            <div class="panel-body">
+            	<ul class="list-group">
+            		<li class="list-group-item" id="hit_result_list_{{ comment.id }}">
+            			<div class="row">
+            				<div class="col-xs-7 col-md-10">
+            					<div class="col-md-10">
+            						<div class="mic-info">
+                                        By: <a href="#"> A FAKE USER </a> on A FAKE TIME
+                                    </div>
+
+                                    <div>
+                                        <p>This is a fake result!</p>
+                                    </div>
+            					</div>
+            				</div>
+            			</div>
+            		</li>
+
+					<li class="list-group-item" id="hit_result_list_{{ comment.id }}">
+            			<div class="row">
+            				<div class="col-xs-7 col-md-10">
+            					<div class="col-md-10">
+            						<div class="mic-info">
+                                        By: <a href="#"> A FAKE USER </a> on A FAKE TIME
+                                    </div>
+
+                                    <div>
+                                        <p>This is a fake result!</p>
+                                    </div>
+            					</div>
+            				</div>
+            			</div>
+            		</li>            		
+            	</ul>
+            </div>
+		</div>		
+	</div>-->	
+</div>
+<script type="text/javascript" src="{% static 'common/js/lib/jquery.dataTables.min.js' %}"></script> 
+<script type="text/javascript" src="{% static 'myturk/js/turk.js' %}"></script>
+{% endblock %}
