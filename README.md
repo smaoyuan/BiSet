@@ -1,6 +1,7 @@
-bixplorer
+BiSet
 =========
 
+A visual analytics tool with biclusters
 
 Installation:
 
