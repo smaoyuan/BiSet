@@ -43,6 +43,7 @@ INSTALLED_APPS = (
     'dataset',
 	'myturk',
     'wiki',
+    'datamng',
 )
 
 MIDDLEWARE_CLASSES = (
