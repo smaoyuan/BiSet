@@ -5,6 +5,9 @@ import csv, json
 
 import xml.etree.ElementTree as ET
 
+
+from datamng.models import docName
+
 # Create your views here.
 
 def parseRawData(request):
