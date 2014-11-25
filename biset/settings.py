@@ -110,6 +110,8 @@ LOGIN_REDIRECT_URL = "/projects/"
 BASE_URL = "/"
 
 STATIC_URL = '/static/'
+
+CACHE_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "file_cache")
 # Additional locations of static files
 STATICFILES_DIRS = (
     get_path('static'),
