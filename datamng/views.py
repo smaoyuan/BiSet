@@ -33,7 +33,7 @@ def parseRawData(request):
 
 			if person.text is not None:
 				print(person.text)
-				# perDoc = PersonDoc(person_name = person.text, doc_id=curD.pk)
+				perDoc = PersonDoc(person_name = person.text, doc_id=curD.pk)
 
 
 
