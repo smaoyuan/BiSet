@@ -3,7 +3,7 @@ from django.db import models
 # Create your models here.
 
 
-class docName(models.model):
+class docName(models.Model):
 	docName = models.CharField(max_length=30, unique= True)
 
 
