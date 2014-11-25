@@ -49,8 +49,8 @@ def parseRawData(request):
 				personDocObj.save()
 
 
-		location = doc.findall('Location')
-		for location in people:
+		locations = doc.findall('Location')
+		for location in locations:
 
 			if location.text is not None:
 				print(location.text)
@@ -70,9 +70,9 @@ def parseRawData(request):
 
 
 
-		phone = doc.findall('Phone')
+		phones = doc.findall('Phone')
 
-		for phone in people:
+		for phone in phones:
 
 			if phone.text is not None:
 				print(phone.text)
@@ -91,8 +91,8 @@ def parseRawData(request):
 				phoneDocObj.save()
 
 
-		date = doc.findall('Date')
-		for date in people:
+		dates = doc.findall('Date')
+		for date in dates:
 
 			if date.text is not None:
 				print(date.text)
@@ -111,8 +111,8 @@ def parseRawData(request):
 
 
 
-		org = doc.findall('Organization')
-		for org in people:
+		orgs = doc.findall('Organization')
+		for org in orgs:
 
 			if org.text is not None:
 				print(org.text)
@@ -131,8 +131,8 @@ def parseRawData(request):
 
 
 
-		misc = doc.findall('Misc')
-		for misc in people:
+		miscs = doc.findall('Misc')
+		for misc in miscs:
 
 			if misc.text is not None:
 				print(misc.text)
@@ -152,8 +152,8 @@ def parseRawData(request):
 
 
 
-		money = doc.findall('Money')
-		for money in people:
+		moneys = doc.findall('Money')
+		for money in moneys:
 
 			if money.text is not None:
 				print(money.text)
