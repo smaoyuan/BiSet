@@ -6,7 +6,7 @@ import csv, json
 import xml.etree.ElementTree as ET
 
 
-from datamng.models import docName
+from datamng.models import DocName, PersonDoc
 
 # Create your views here.
 
@@ -24,6 +24,8 @@ def parseRawData(request):
 		# print doc.tag, doc.attrib  # Child of root are documents
 		curDocId = doc.find('docID').text
 		print(curDocId)
+		curD = DocName(doc_name = curDocId)
+		curD.save()
 
 		people = doc.findall('Person')
 
@@ -31,7 +33,7 @@ def parseRawData(request):
 
 			if person.text is not None:
 				print(person.text)
-
+				# perDoc = PersonDoc(person_name = person.text, doc_id=curD.pk)
 
 
 
