@@ -59,12 +59,12 @@ class OrgDoc(models.Model):
 
 ####
 
-class Mic(models.Model):
-	mic_string = models.CharField(max_length = 50, unique = True)
-	mic_count = models.IntegerField(default=0)
+class Misc(models.Model):
+	misc_string = models.CharField(max_length = 50, unique = True)
+	misc_count = models.IntegerField(default=0)
 
-class MicDoc(models.Model):
-	mic_string = models.ForeignKey(Mic)
+class MiscDoc(models.Model):
+	misc_string = models.ForeignKey(Misc)
 	doc_id = models.ForeignKey(DocName)
 
 ####
