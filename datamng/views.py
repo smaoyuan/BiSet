@@ -24,7 +24,7 @@ def parseRawData(request):
 		# print doc.tag, doc.attrib  # Child of root are documents
 		curDocId = doc.find('docID').text
 		print(curDocId)
-		if not DocName.objects.get(doc_name = curDocId):
+		if not DocName.objects.filter(doc_name = curDocId):
 			curD = DocName(doc_name = curDocId)
 			curD.save()
 

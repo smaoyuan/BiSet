@@ -19,6 +19,8 @@ def index(request, template_name='home/index.html', authentication_form=Authenti
 def testFile(request):
     from django.core.files import File
     
+    
+    
     file_dir = os.path.join(settings.CACHE_DIR, "test.txt")
     print file_dir
     # Create a Python file object using open() and the with statement
