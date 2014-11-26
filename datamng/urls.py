@@ -8,5 +8,6 @@ urlpatterns = patterns('',
     # url(r'^$', views.index, name='index'),
     url(r'^parseRawData/$', views.parseRawData, name='parseRawData'),
     url(r'^test/$', views.genLcmInput, name='test'),
+    url(r'^testLCM/$', views.genLcmOutput, name='testLCM'),
 )
 
