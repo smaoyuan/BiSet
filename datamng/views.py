@@ -1,5 +1,8 @@
 from django.shortcuts import render
 from django.http import HttpResponse
+from django.core.files import File
+from django.conf import settings
+import os
 
 import csv, json
 
@@ -179,3 +182,33 @@ def parseRawData(request):
 
 	return HttpResponse(json.dumps(output), content_type = "application/json")
 
+###### Running Algorithm
+from django.db import connection
+    
+'''
+Generate People_Location matrix input
+'''
+def genLcmInput(request):
+    cursor = connection.cursor()
+    cursor.execute("SELECT A.person_name_id, B.location_name_id FROM datamng_persondoc as A, datamng_locationdoc as B WHERE A.doc_id_id = B.doc_id_id order by A.person_name_id")
+    rows = cursor.fetchall()   
+    
+    file_dir = os.path.join(settings.CACHE_DIR, "test.txt")
+    
+    # Create a Python file object using open() and the with statement
+    with open(file_dir, 'w') as f:
+        myfile = File(f)
+        lastRow = rows[0][0]
+        currLine = ""
+        for row in rows:
+            #print row
+            if row[0] == lastRow:
+                currLine += str(row[1]) + " "
+            else:
+                lastRow = row[0]
+                myfile.write(currLine + "\r\n")
+                currLine = str(row[1])                
+        myfile.write(currLine + "\r\n")
+        myfile.closed
+        f.closed        
+    return HttpResponse("Done")
