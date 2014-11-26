@@ -337,7 +337,8 @@ def genLcmOutput(request):
     return HttpResponse("good")
 
 def genOneLcmOutput(inputFileName, outputFileName, lcmFilePath):
-    proc = subprocess.Popen([lcmFilePath, 'MqI', inputFileName, '2', outputFileName], stdout=subprocess.PIPE, universal_newlines = True)
+    proc = subprocess.Popen([lcmFilePath, 'MqI', inputFileName, '2', outputFileName])
+    '''proc = subprocess.Popen([lcmFilePath, 'MqI', inputFileName, '2', outputFileName], stdout=subprocess.PIPE, universal_newlines = True)
     proc.wait()
     output = proc.communicate()
     allLines = output[0].splitlines()
@@ -348,5 +349,5 @@ def genOneLcmOutput(inputFileName, outputFileName, lcmFilePath):
         for word in thisLine:
             res += word + 'WORD'
         res +=  'SEP'    
-    print res
+    print res'''
     
