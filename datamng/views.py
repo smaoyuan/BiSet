@@ -337,7 +337,7 @@ def genLcmOutput(request):
     return HttpResponse("good")
 
 def genOneLcmOutput(inputFileName, outputFileName, lcmFilePath):
-    proc = subprocess.Popen([lcmFilePath, 'MqI', inputFileName, '2', outputFileName])
+    proc = subprocess.Popen([lcmFilePath, 'MqI', inputFileName, '3', outputFileName])
     '''proc = subprocess.Popen([lcmFilePath, 'MqI', inputFileName, '2', outputFileName], stdout=subprocess.PIPE, universal_newlines = True)
     proc.wait()
     output = proc.communicate()
