@@ -27,20 +27,20 @@ def getVisJson(request, table1 = "person", table2 = "location", table3 = "org", 
     
     length = len(tableList)
     biclusDict = {}
-    entryLists = []
+    entryLists = {}
     preCols = None
     
     
     for i in range(0, length):
         if i == 0:
             theList, preCols = getListDict(None, tableList[i], tableList[i+1], preCols, biclusDict)
-            entryLists.append({tableList[i]: {"listID": i + 1, "leftType": "", "listType": tableList[i], "rightType": tableList[i+1], "entities": theList}})
+            entryLists[tableList[i]] = {"listID": i + 1, "leftType": "", "listType": tableList[i], "rightType": tableList[i+1], "entities": theList}
         elif i == length - 1:
             theList, preCols = getListDict(tableList[i-1], tableList[i], None, preCols, biclusDict)
-            entryLists.append({tableList[i]: {"listID": i + 1, "leftType": tableList[i-1], "listType": tableList[i], "rightType": "","entities": theList}})
+            entryLists[tableList[i]] = {"listID": i + 1, "leftType": tableList[i-1], "listType": tableList[i], "rightType": "","entities": theList}
         else:           
             theList, preCols = getListDict(tableList[i-1], tableList[i], tableList[i+1], preCols, biclusDict)
-            entryLists.append({tableList[i]: {"listID": i + 1, "leftType": tableList[i-1], "listType": tableList[i], "rightType": tableList[i+1], "entities": theList}})
+            entryLists[tableList[i]] = {"listID": i + 1, "leftType": tableList[i-1], "listType": tableList[i], "rightType": tableList[i+1], "entities": theList}
         
     '''removedKeyList = []
     for key, val in biclusDict.iteritems():
