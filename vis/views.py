@@ -32,16 +32,15 @@ def getVisJson(request, table1 = "person", table2 = "location", table3 = "org", 
     
     
     for i in range(0, length):
-        print i
         if i == 0:
             theList, preCols = getListDict(None, tableList[i], tableList[i+1], preCols, biclusDict)
-            entryLists.append({"listID": i + 1, "leftType": "", "listType": tableList[i], "rightType": tableList[i+1], "entities": theList})
+            entryLists.append({tableList[i]: {"listID": i + 1, "leftType": "", "listType": tableList[i], "rightType": tableList[i+1], "entities": theList}})
         elif i == length - 1:
             theList, preCols = getListDict(tableList[i-1], tableList[i], None, preCols, biclusDict)
-            entryLists.append({"listID": i + 1, "leftType": tableList[i-1], "listType": tableList[i], "rightType": "","entities": theList})
+            entryLists.append({tableList[i]: {"listID": i + 1, "leftType": tableList[i-1], "listType": tableList[i], "rightType": "","entities": theList}})
         else:           
             theList, preCols = getListDict(tableList[i-1], tableList[i], tableList[i+1], preCols, biclusDict)
-            entryLists.append({"listID": i + 1, "leftType": tableList[i-1], "listType": tableList[i], "rightType": tableList[i+1], "entities": theList})
+            entryLists.append({tableList[i]: {"listID": i + 1, "leftType": tableList[i-1], "listType": tableList[i], "rightType": tableList[i+1], "entities": theList}})
         
     '''removedKeyList = []
     for key, val in biclusDict.iteritems():
@@ -59,6 +58,7 @@ def getListDict(tableLeft, table, tableRight, leftClusCols, biclusDict):
     if not table == "EMPTY":
         cursor = connection.cursor()
         sql_str = "SELECT * FROM datamng_" + table
+        print sql_str
         cursor.execute(sql_str)
         table1_rows = cursor.fetchall()
         
