@@ -581,3 +581,44 @@ var addLink = function (obj1, obj2, line, d3obj, bg) {
         };
     }
 };
+
+
+/*
+*
+*/
+function datasetRequest() {
+    var csrftoken = $('#csrf_token').val();
+
+    var requestJSON = {
+
+    }    
+
+    $.ajax({
+        url: window.SERVER_PATH + 'vis/loadbisets/',
+        type: "POST",
+        data: JSON.stringify(requestJSON),
+        contentType: "application/json",
+        success: function(data){
+        	console.log(data);
+            // if(data['status'] == 'success') {
+
+                // refreshColList('#list_collaborator', data['collaborators']);
+            // }
+        },
+        beforeSend: function(xhr, settings) {
+            if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                xhr.setRequestHeader("X-CSRFToken", csrftoken);
+            }
+        }
+    });    
+}
+
+// these HTTP methods do not require CSRF protection
+function csrfSafeMethod(method) {
+    return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+}
+
+
+$(document).ready(function() {
+	datasetRequest();
+});
