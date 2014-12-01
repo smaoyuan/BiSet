@@ -328,8 +328,7 @@ function addList(canvas, listData, bicList, startPos) {
 						var tmpCount = bicDisplayed.get(thisEnt.bicSetsRight[i]);
 						tmpCount -= 1;
 						bicDisplayed.put(thisEnt.bicSetsRight[i], tmpCount);
-						// reduce the bic count by 1
-						bic.count--;
+						
 
 						console.log(bicDisplayed.get(thisEnt.bicSetsRight[i]));
 						console.log("values: ");
@@ -354,6 +353,13 @@ function addList(canvas, listData, bicList, startPos) {
 								counter--;
 							}						
 							d3.select("#bic_" + thisEnt.bicSetsRight[i]).remove();
+                            // reduce the bic count by 1
+                            if(bic.count > 0){
+                                bic.count--;
+                            }
+                            console.log(bic);
+                            
+                            
 						}
 						// other entities related to this bic has been selected
 						else {
