@@ -15,6 +15,9 @@ from django.contrib.auth.decorators import login_required
 
 @login_required   
 def index(request):
+    '''
+    This is the backend dashbord
+    '''
     theUser = request.user
         
     # Load the total number of projects for the user
@@ -50,12 +53,18 @@ def index(request):
     except Exception as e:
         return HttpResponse(e)
         print e
-        
+    
+    # rendering the template
     context = { 'active_tag': 'home', 'BASE_URL':settings.BASE_URL, 'count': count}
     return TemplateResponse(request, 'projects/index.html', context)
 
 @login_required    
 def add(request):
+    '''
+    Loading the project adding view for "GET" request.
+    Creating a new project for "POST" request
+    @param request: Django http request
+    '''
     if request.method == 'GET':
         dataset = DataSet.objects.all()
         context = { 'active_tag': 'projects', 'BASE_URL':settings.BASE_URL, 'dataset': dataset}
@@ -130,13 +139,21 @@ def add(request):
         
 @login_required
 def edit(request, project_id):
+    '''
+    Loading the project edit view for "GET" request
+    Updating a project to database for "POST" request
+    @param request: Django http request
+    @param project_id: the id of the project to update
+    '''
+    
+    # Handing the "GET" request
     if request.method == 'GET':
         datasets = DataSet.objects.all()
         project = Project.objects.get(id = project_id)
         context = { 'active_tag': 'home', 'BASE_URL':settings.BASE_URL, 'datasets': datasets, 'selectedDatasetID':project.dataset.id, 'project': project}
         return TemplateResponse(request, 'projects/edit.html', context)
         
-    # TO-DO    
+    # Handling the "POST" request    
     elif request.method == 'POST':    
         theUser = request.user
         
@@ -158,6 +175,11 @@ def edit(request, project_id):
 
 @login_required 
 def delete(request, project_id):
+    '''
+    Delete a project from database.
+    @param request: Django http request
+    @param project_id: the id of the project to delete
+    '''
     theUser = request.user
     # Load project data from the database                
     toDelete = Project.objects.get(pk = project_id)
@@ -180,6 +202,11 @@ def delete(request, project_id):
     
 @login_required     
 def plist(request):
+    '''
+    This page displays all available projects for a user.
+    Grouping by public projects, private projects and shared projects.
+    @param request: Django http request
+    '''
     if request.method == 'GET':
         # Retrieve projects list from database
         # Should use request.user.id to fix simpleLazyObject error        
@@ -226,6 +253,12 @@ def plist(request):
 
 @login_required    
 def detail(request, project_id, sort_order = 'asc'):
+    '''
+    This is project detail page. 
+    @param request: Django http request
+    @param project_id: the id of the project to show
+    @param sort_order: optional param for the order of the comments of the project
+    '''
     theproject = Project.objects.get(id = project_id)
     
     if theproject.is_deleted:
@@ -292,12 +325,15 @@ def detail(request, project_id, sort_order = 'asc'):
         'collaborators':collaborators, 'collaborate_permisson' : perm, 'history_actions':hist_actions}
     return TemplateResponse(request, 'projects/detail.html', context)
  
-@login_required  
-def addCollaborator(request, project_id):
-    theproject = Project.objects.get(id = project_id)
-    
+  
 @login_required   
 def load_project_activity_feed(request, project_id):
+    '''
+    Loading activity feeds for a project. 
+    Returns a list of activity feed objects.
+    @param request: Django http request
+    @param project_id: the id of the project
+    '''
     thisuser = request.user
     #theProject = Project.objects.get(id = project_id)
     # try:        
@@ -367,8 +403,14 @@ def load_project_activity_feed(request, project_id):
         # return HttpResponse(e)
    
 @login_required 
-def load_project_comment_json(request, project_id):
-    ''' Helper function for loading comments'''
+def load_project_comment_list(request, project_id):
+    '''
+    Loading all comments for a project.
+    Returns a lst of comments objects.
+    @param request: Django http request
+    @param project_id: the id of the project of the coments.
+    '''
+    
     theproject = get_object_or_404(Project, pk = project_id)
     allComments =    theproject.comment_set.all().order_by('-create_time');
     allComments = allComments.filter(is_deleted = False)
@@ -395,10 +437,13 @@ def load_project_comment_json(request, project_id):
     return comments_list  
     
 @login_required 
-def load_project_collaborators_json(request, project_id):
-    ''' Helper function for loading collaborators
-        Only the project owner, collaborators and
-        super user can request the collaborators
+def load_project_collaborators_list(request, project_id):
+    ''' 
+    Helper function for loading collaborators
+    Only the project owner, collaborators and
+    super user can request the collaborators
+    @param request: Django http request
+    @param project_id: the id of the project for loading the collaborators
     '''
     try:
         theproject = get_object_or_404(Project, pk = project_id)
@@ -427,6 +472,10 @@ def load_project_collaborators_json(request, project_id):
  
 @login_required  
 def add_comment(request):
+    '''
+    Handing adding a new comment.
+    @param request: Django http request
+    '''
     if request.method == 'POST':
         # parse from front end
         projectRaw = json.loads(request.body)
@@ -463,7 +512,7 @@ def add_comment(request):
             log_addition(request, newComment)              
             
             # Prepare the return json data           
-            comments_json = load_project_comment_json(request, project_id)
+            comments_json = load_project_comment_list(request, project_id)
             responseData = {'status':'success', 'comments': comments_json}
             return HttpResponse(json.dumps(responseData), content_type = "application/json")
         except Exception as e:
@@ -473,6 +522,10 @@ def add_comment(request):
     
 @login_required     
 def delete_comment(request):
+    '''
+    Handling request for deleting a comment from database.
+    @param request: Django http request
+    '''
     if request.method == 'POST':
         projectRaw = json.loads(request.body)
         try:
@@ -498,7 +551,7 @@ def delete_comment(request):
             
             
             # Reload the comments from the database
-            comments_json = load_project_comment_json(request, project_id)
+            comments_json = load_project_comment_list(request, project_id)
             responseData = {'status':'success', 'comments': comments_json}
             return HttpResponse(json.dumps(responseData), content_type = "application/json")
         except Exception as e:        
@@ -528,7 +581,7 @@ def save_comment(request):
             theComment.save()
             
             # Reload the comments from the database
-            comments_json = load_project_comment_json(request, project_id) 
+            comments_json = load_project_comment_list(request, project_id) 
             
             responseData = {'status':'success', 'comments': comments_json}
             return HttpResponse(json.dumps(responseData), content_type = "application/json")
@@ -594,7 +647,7 @@ def add_collaborator(request):
             # log_addition(request, collaborator)              
             
             # Reload the collaborators from the database
-            collaborators_list = load_project_collaborators_json(request, project_id)
+            collaborators_list = load_project_collaborators_list(request, project_id)
             responseData = {'status':'success', 'collaborators': collaborators_list}
             return HttpResponse(json.dumps(responseData), content_type = "application/json")
         except Exception as e:      
@@ -644,7 +697,7 @@ def delete_collaborator(request):
             
             
             # Reload the collaborators from the database
-            collaborators_list = load_project_collaborators_json(request, project_id)
+            collaborators_list = load_project_collaborators_list(request, project_id)
             responseData = {'status':'success', 'collaborators': collaborators_list}
             return HttpResponse(json.dumps(responseData), content_type = "application/json")
         except Exception as e:
