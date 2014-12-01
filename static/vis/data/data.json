@@ -11,7 +11,7 @@
 					"entValue": "Bob", 
 					"entFreq": 12, 
 					"bicSetsLeft": [],
-					"bicSetsRight": [1],
+					"bicSetsRight": [0],
 					"entSelected": 0
 				},
 				{ 
@@ -19,7 +19,7 @@
 					"entValue": "Alex", 
 					"entFreq": 3,
 					"bicSetsLeft": [],
-					"bicSetsRight": [1, 2],
+					"bicSetsRight": [0, 1],
 					"entSelected": 0					
 				},
 				{ 
@@ -27,7 +27,7 @@
 					"entValue": "Lily", 
 					"entFreq": 20,
 					"bicSetsLeft": [],
-					"bicSetsRight": [2],
+					"bicSetsRight": [1],
 					"entSelected": 0					
 				},
 				{ 
@@ -35,7 +35,7 @@
 					"entValue": "David", 
 					"entFreq": 7,
 					"bicSetsLeft": [],
-					"bicSetsRight": [1, 2],
+					"bicSetsRight": [0, 1],
 					"entSelected": 0					
 				}
 			]
@@ -50,7 +50,7 @@
 					"entityID": 1, 
 					"entValue": "New York", 
 					"entFreq": 3,
-					"bicSetsLeft": [1, 2],
+					"bicSetsLeft": [0, 1],
 					"bicSetsRight": [],
 					"entSelected": 0										
 				},
@@ -58,7 +58,7 @@
 					"entityID": 2, 
 					"entValue": "Boston", 
 					"entFreq": 12,
-					"bicSetsLeft": [1],
+					"bicSetsLeft": [0],
 					"bicSetsRight": [],
 					"entSelected": 0					
 				},
@@ -66,7 +66,7 @@
 					"entityID": 3, 
 					"entValue": "Washington, DC", 
 					"entFreq": 5,
-					"bicSetsLeft": [1, 2],
+					"bicSetsLeft": [0, 1],
 					"bicSetsRight": [],
 					"entSelected": 0					
 				},
@@ -74,7 +74,7 @@
 					"entityID": 4, 
 					"entValue": "Charlottesville", 
 					"entFreq": 18,
-					"bicSetsLeft": [1, 2],
+					"bicSetsLeft": [0, 1],
 					"bicSetsRight": [],
 					"entSelected": 0					
 				}
@@ -82,9 +82,9 @@
 		}
 	],
 
-	"bics": [
-		{ 
-			"bicID": 1,
+	"bics": [ 
+		{
+			"bicID": 0,
 			"rowField": "person",
 			"colField": "location",
 			"entNumInRow": 3,
@@ -94,14 +94,14 @@
 			"bicSelected": 0
 		},
 		{ 
-			"bicID": 2,
+			"bicID": 1,
 			"rowField": "person",
 			"colField": "location",
 			"entNumInRow": 3,
-			"entNumInCol": 4,			
+			"entNumInCol": 4,
 			"row": [2, 3, 4],
 			"col": [1, 2, 3, 4],
-			"bicSelected": 0			
+			"bicSelected": 0
 		}
 	],
 
