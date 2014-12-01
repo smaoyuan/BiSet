@@ -5,55 +5,175 @@ from sets import Set
 import json
 from django.db import connection
 from django.conf import settings
+from vis.models import Vis, VisNodes
 
 
 def analytics(request):
+    '''
+    This is visualization page. 
+    @param request: the Django HttpRequest object
+    '''
     context = { 'active_tag': 'analytics', 'BASE_URL':settings.BASE_URL}
     return TemplateResponse(request, 'vis/index.html', context)
+
+def saveVis(request):
+    '''
+    Handling vis saving request to save a vis to database.
+    @param request: the Django HttpRequest object
+    '''
+    visID = 1;
+    toUpdate = [{"nodeType": "person", "nodeId": 1},{"nodeType": "person", "nodeId": 2},{"nodeType": "location", "nodeId": 3}]
+        
+    print toUpdate
+        
+    # get the lists names of the vis
+    listNames = []
+    theVis = Vis.objects.get(id = visID)
+    
+    oldSelectedNodes = VisNodes.objects.filter(vis = theVis)
+    
+    # Checking which records should be added and removed
+    for oldItem in oldSelectedNodes:
+        print oldItem.nodeType, oldItem.nodeId
+        isExist = False
+        for newItem in toUpdate:
+            if oldItem.nodeType == newItem['nodeType'] and oldItem.nodeId == newItem['nodeId']:
+                newItem['nodeType'] = "exist"
+                isExist = True
+                break;
+        # delete the record from database if the node was unhighlighted
+        if not isExist:
+            oldItem.delete();
+    
+    # Adding new highlighted nodes
+    for newItem in toUpdate:
+        if not newItem['nodeType'] == "exist":
+            newVisNode = VisNodes(vis = theVis, nodeType = newItem['nodeType'], nodeId = newItem['nodeId'])
+            newVisNode.save()
+    
+    responseJson = {"status": "success"}
+    
+    return HttpResponse(json.dumps(responseJson))
+
+def deleteVis(request):
+    '''
+    Deleting a visualization
+    '''
+    try:
+        visID = 1
+        
+        # Deleting all highlighted nodes
+        nodesToDelete = VisNodes.objects.filter(vis = visID)
+        
+        for toDelete in nodesToDelete:
+            toDelete.delete()
+            
+        # Deleting record from vis table
+        theVis = Vis.objects.get(id = visID)
+        theVis.delete()
+        
+        responseJson = {"status": "success"}
+        
+    except Exception as e:
+        responseJson = {"status": "error", "error":e}
+    
+    return HttpResponse(json.dumps(responseJson))
+    
+    
+def loadVis(request):
+    '''
+    Loading a saved vis. Returning a json object.
+    @param request: the Django HttpRequest object
+    '''
+    visID = 1
+    # get the lists names of the vis
+    listNames = []
+    theVis = Vis.objects.get(id = visID)
+    if theVis.personIn:
+        listNames.append("person")
+    if theVis.locationIn:
+        listNames.append("location")
+    if theVis.phoneIn:
+        listNames.append("phone")
+    if theVis.dateIn:
+        listNames.append("date")
+    if theVis.orgIn:
+        listNames.append("org")
+    if theVis.miscIn:
+        listNames.append("misc")
+    
+    print listNames
+    
+    lstsBisetsJson = getLstsBisets(listNames)
+    
+    selectedNodes = VisNodes.objects.filter(vis = visID)
+    
+    lstsBisetsJson["selectedNodes"] = {}
+    
+    for item in selectedNodes:
+        identity = str(item.nodeType) + "_" + str(item.nodeId)
+        lstsBisetsJson["selectedNodes"][identity] = \
+            {"listType": item.nodeType, "nodeID": item.nodeId}
+    
+    
+    return HttpResponse(json.dumps(lstsBisetsJson))
     
 
-# Create your views here.
+# All available pairs
 PAIRS = Set(['person_location', 'person_phone', 'person_date', 'person_org', 'person_misc', 
     'location_phone', 'location_date', 'location_org', 'location_misc', 
     'phone_date', 'phone_org', 'phone_misc', 
     'date_org', 'date_misc', 
     'org_misc'])
-    
+
 def getVisJson(request, table1 = "person", table2 = "location", table3 = "org", table4 = "EMPTY", table5 = "EMPTY", table6 = "EMPTY"):
+    '''
+    Returns a json object for visualization. 
+    The json contains lists and bicsets objects.
+    @param request: the Django HttpRequest object
+    '''
     tableList = []
     tableList.append(table1)
     tableList.append(table2)
-    tableList.append(table3)
+    tableList.append(table3)    
     
-    length = len(tableList)
+    return HttpResponse(json.dumps(getLstsBisets(tableList)))
+    
+  
+def getLstsBisets(lstNames):
+    '''
+    Returns a json object for visualization. 
+    The json contains lists and bicsets objects.
+    @param lstNames: the names of lists
+    '''
+    
+    length = len(lstNames)
     biclusDict = {}
     entryLists = {}
-    preCols = None
-    
+    preCols = None    
     
     for i in range(0, length):
         if i == 0:
-            theList, preCols = getListDict(None, tableList[i], tableList[i+1], preCols, biclusDict)
-            entryLists[tableList[i]] = {"listID": i + 1, "leftType": "", "listType": tableList[i], "rightType": tableList[i+1], "entities": theList}
+            theList, preCols = getListDict(None, lstNames[i], lstNames[i+1], preCols, biclusDict)
+            entryLists[lstNames[i]] = {"listID": i + 1, "leftType": "", "listType": lstNames[i], "rightType": lstNames[i+1], "entities": theList}
         elif i == length - 1:
-            theList, preCols = getListDict(tableList[i-1], tableList[i], None, preCols, biclusDict)
-            entryLists[tableList[i]] = {"listID": i + 1, "leftType": tableList[i-1], "listType": tableList[i], "rightType": "","entities": theList}
+            theList, preCols = getListDict(lstNames[i-1], lstNames[i], None, preCols, biclusDict)
+            entryLists[lstNames[i]] = {"listID": i + 1, "leftType": lstNames[i-1], "listType": lstNames[i], "rightType": "","entities": theList}
         else:           
-            theList, preCols = getListDict(tableList[i-1], tableList[i], tableList[i+1], preCols, biclusDict)
-            entryLists[tableList[i]] = {"listID": i + 1, "leftType": tableList[i-1], "listType": tableList[i], "rightType": tableList[i+1], "entities": theList}
-        
-    '''removedKeyList = []
-    for key, val in biclusDict.iteritems():
-        removedKeyList.append(val)    '''
-        
-    #print entryLists    
-    return HttpResponse(json.dumps({"lists":entryLists, "bics":biclusDict}))
-    #return HttpResponse("Done!")
+            theList, preCols = getListDict(lstNames[i-1], lstNames[i], lstNames[i+1], preCols, biclusDict)
+            entryLists[lstNames[i]] = {"listID": i + 1, "leftType": lstNames[i-1], "listType": lstNames[i], "rightType": lstNames[i+1], "entities": theList}
+   
+    return {"lists":entryLists, "bics":biclusDict}
     
-'''
-Generate list items and clusters based on two neighbors
-'''    
+   
 def getListDict(tableLeft, table, tableRight, leftClusCols, biclusDict):
+    '''
+    Generate list items and clusters based on list name, the name of left list, 
+    and the name of right list
+    @param tableLeft: left list name
+    @param table: the current list name
+    @param tableRight: right list name
+    ''' 
     # retrieve data for field1
     if not table == "EMPTY":
         cursor = connection.cursor()
@@ -74,7 +194,8 @@ def getListDict(tableLeft, table, tableRight, leftClusCols, biclusDict):
                 table1_item_dict[row[0]]['entSelected'] = 0
     else:
         return None, None
-
+    
+    #retrieve biset list
     if not (tableRight == "EMPTY" or tableRight == None):        
         isInOrder = True
         cursor = connection.cursor()
@@ -90,7 +211,7 @@ def getListDict(tableLeft, table, tableRight, leftClusCols, biclusDict):
             sql_str = "SELECT * FROM datamng_clusterrow as A, datamng_cluster as B where A.cluster_id = B.id and B.field1 = '" + table + "' and B.field2 = '" + tableRight + "' order by B.id"
             cursor.execute(sql_str)
             t1_t2_ClusRows = cursor.fetchall()
-            #and A.rid = C.id
+            # retrieve data from cluster col for field1
             sql_str = "SELECT * FROM datamng_clustercol as A, datamng_cluster as B where A.cluster_id = B.id and B.field1 = '" + table + "' and B.field2 = '" + tableRight + "' order by B.id"
             cursor.execute(sql_str)
             t1_t2_ClusCols = cursor.fetchall()
@@ -134,20 +255,21 @@ def getListDict(tableLeft, table, tableRight, leftClusCols, biclusDict):
                     else:
                         table1_item_dict[col[1]]['bicSetsLeft'].append(col[2]);
             
-            #print table1_item_dict
+            # removing id from the list item dictionary
             removedKeyList = []
             for key, val in table1_item_dict.iteritems():
                 removedKeyList.append(val)
-                #print key, val
+                
             return removedKeyList, t1_t2_ClusCols
-    else:   
+    else:
+        # adding col list to list items.
         for col in leftClusCols:
                 if not col[1] in table1_item_dict:
                     print "Bug here, at line 454"
                 else:
                     table1_item_dict[col[1]]['bicSetsLeft'].append(col[2]);
         
-        #print table1_item_dict
+        # removing id from the list item dictionary
         removedKeyList = []
         for key, val in table1_item_dict.iteritems():
             removedKeyList.append(val)

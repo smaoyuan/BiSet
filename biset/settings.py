@@ -44,6 +44,7 @@ INSTALLED_APPS = (
 	'myturk',
     'wiki',
     'datamng',
+    'vis',
 )
 
 MIDDLEWARE_CLASSES = (

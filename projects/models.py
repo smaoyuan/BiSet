@@ -30,15 +30,9 @@ class Project(models.Model):
         change_message.append(_('Changed %(list)s.')
                 % {'list': get_text_list(changed_fields, _('and'))})        
                 
-        # change_message.append(_('Changed %(list)s for %(name)s "%(object)s".')
-                # % {'list': get_text_list(changed_fields, _('and')),
-                # 'name': force_text(self._meta.verbose_name),
-                # 'object': force_text(self)})
-        #print "Field:%s Old:%s New:%s" % (name, value, getattr(self, name, None))
+        
         change_message = ' '.join(change_message)
-        return change_message or _('No fields changed.')  
-        # old values can be accessed through the self.unsaved member
-        # super(MyModel, self).save(force_insert, force_update, using)
+        return change_message or _('No fields changed.')        
         
     user = models.ForeignKey(User)
     dataset = models.ForeignKey(DataSet)
@@ -71,10 +65,9 @@ class Project(models.Model):
     
     def add_collaborator(self, user):
         """ 
-        Adds a new teacher to this course. Teachers are also teachers in all course 
-        instances that belong to this course. 
+        Adds a new collaborator. 
         
-        @param userprofile: the user profile to add as a teacher
+        @param user: the user to add as a collaborator
         """
         self.collaborators.add(user)
         
