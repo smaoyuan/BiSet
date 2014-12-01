@@ -179,3 +179,30 @@ div.shade-container{
 .errorlist > li { color: red;}
 #reg_login {margin-left: 20px;}
 
+
+/*vis view style*/
+#vis_canvas rect:hover{
+    cursor: pointer;
+}
+
+
+#vis_canvas text {
+  fill: black;
+  font: 11px sans-serif;
+  text-anchor: start;
+}
+
+/*size of the list control group*/
+#biset_control {
+    height: 70px;
+    width: 1200px;
+}
+
+div.listControlGroup {
+    width: 400px;
+    float: left;
+}
+
+#biset_canvas{
+    position: absolute;
+}
