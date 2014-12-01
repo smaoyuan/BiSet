@@ -79,3 +79,15 @@ class MoneyDoc(models.Model):
 	doc_id = models.ForeignKey(DocName)
 
 ####
+
+class Cluster(models.Model):
+    field1 = models.CharField(max_length = 50)
+    field2 = models.CharField(max_length = 50)
+    
+class ClusterRow(models.Model):
+    cluster = models.ForeignKey(Cluster)
+    rid = models.IntegerField(default=0)
+    
+class ClusterCol(models.Model):
+    cluster = models.ForeignKey(Cluster)
+    cid = models.IntegerField(default=0)    

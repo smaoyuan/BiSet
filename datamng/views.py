@@ -4,11 +4,12 @@ from django.core.files import File
 from django.conf import settings
 import os, subprocess, sys, csv, json
 
+
 import xml.etree.ElementTree as ET
 
 
 from datamng.models import DocName, Person, PersonDoc, Location, LocationDoc, Phone, PhoneDoc,Date ,DateDoc ,Org ,OrgDoc,Misc ,MiscDoc ,Money ,MoneyDoc
-
+from datamng.models import Cluster, ClusterCol, ClusterRow
 # Create your views here.
 
 def parseRawData(request):
@@ -191,11 +192,11 @@ def genLcmInput(request):
     file_name = "datamng/lcmdata/Input_Person_Location.txt"
     genOneLcmInput(file_name, "person_name", "location_name", "datamng_persondoc", "datamng_locationdoc");
     
-    file_name = "datamng/lcmdata/Input_Person_Date.txt"
-    genOneLcmInput(file_name, "person_name", "date_string", "datamng_persondoc", "datamng_datedoc");
-    
     file_name = "datamng/lcmdata/Input_Person_Phone.txt"
     genOneLcmInput(file_name, "person_name", "phone_number", "datamng_persondoc", "datamng_phonedoc");
+    
+    file_name = "datamng/lcmdata/Input_Person_Date.txt"
+    genOneLcmInput(file_name, "person_name", "date_string", "datamng_persondoc", "datamng_datedoc");
     
     file_name = "datamng/lcmdata/Input_Person_Org.txt"
     genOneLcmInput(file_name, "person_name", "org_name", "datamng_persondoc", "datamng_orgdoc");
@@ -204,12 +205,33 @@ def genLcmInput(request):
     genOneLcmInput(file_name, "person_name", "misc_string", "datamng_persondoc", "datamng_miscdoc");
     
     
+    ########################################    
+    file_name = "datamng/lcmdata/Input_Location_Phone.txt"
+    genOneLcmInput(file_name, "location_name", "phone_number", "datamng_locationdoc", "datamng_phonedoc");
     
-    file_name = "datamng/lcmdata/Input_Date_Location.txt"
-    genOneLcmInput(file_name, "date_string", "location_name", "datamng_datedoc", "datamng_locationdoc");    
+    file_name = "datamng/lcmdata/Input_Location_Date.txt"
+    genOneLcmInput(file_name, "location_name", "date_string", "datamng_locationdoc", "datamng_datedoc");
     
-    file_name = "datamng/lcmdata/Input_Date_Phone.txt"
-    genOneLcmInput(file_name, "date_string", "phone_number", "datamng_datedoc", "datamng_phonedoc");
+    file_name = "datamng/lcmdata/Input_Location_Org.txt"
+    genOneLcmInput(file_name, "location_name", "org_name", "datamng_locationdoc", "datamng_orgdoc");
+    
+    file_name = "datamng/lcmdata/Input_Location_Misc.txt"
+    genOneLcmInput(file_name, "location_name", "misc_string", "datamng_locationdoc", "datamng_miscdoc");
+    
+    
+    
+    #################################################################
+    
+    file_name = "datamng/lcmdata/Input_Phone_Date.txt"
+    genOneLcmInput(file_name, "phone_number", "date_string", "datamng_phonedoc", "datamng_datedoc");
+    
+    file_name = "datamng/lcmdata/Input_Phone_Org.txt"
+    genOneLcmInput(file_name, "phone_number", "org_name", "datamng_phonedoc", "datamng_orgdoc");
+    
+    file_name = "datamng/lcmdata/Input_Phone_Misc.txt"
+    genOneLcmInput(file_name, "phone_number", "misc_string", "datamng_phonedoc", "datamng_miscdoc");
+    
+    #################################################################
     
     file_name = "datamng/lcmdata/Input_Date_Org.txt"
     genOneLcmInput(file_name, "date_string", "org_name", "datamng_datedoc", "datamng_orgdoc");
@@ -217,25 +239,10 @@ def genLcmInput(request):
     file_name = "datamng/lcmdata/Input_Date_Misc.txt"
     genOneLcmInput(file_name, "date_string", "misc_string", "datamng_datedoc", "datamng_miscdoc");
     
-    
-    file_name = "datamng/lcmdata/Input_Phone_Location.txt"
-    genOneLcmInput(file_name, "phone_number", "location_name", "datamng_phonedoc", "datamng_locationdoc");    
-        
-    file_name = "datamng/lcmdata/Input_Phone_Org.txt"
-    genOneLcmInput(file_name, "phone_number", "org_name", "datamng_phonedoc", "datamng_orgdoc");
-    
-    file_name = "datamng/lcmdata/Input_Phone_Misc.txt"
-    genOneLcmInput(file_name, "phone_number", "misc_string", "datamng_phonedoc", "datamng_miscdoc");
-    
-    
-    file_name = "datamng/lcmdata/Input_Org_Location.txt"
-    genOneLcmInput(file_name, "org_name", "location_name", "datamng_orgdoc", "datamng_locationdoc");    
+    #################################################################
     
     file_name = "datamng/lcmdata/Input_Org_Misc.txt"
-    genOneLcmInput(file_name, "org_name", "misc_string", "datamng_orgdoc", "datamng_miscdoc");  
-    
-    file_name = "datamng/lcmdata/Input_Misc_Location.txt"
-    genOneLcmInput(file_name, "misc_string", "location_name", "datamng_miscdoc", "datamng_locationdoc");   
+    genOneLcmInput(file_name, "org_name", "misc_string", "datamng_orgdoc", "datamng_miscdoc");
     
     return HttpResponse("Done")
     
@@ -244,100 +251,131 @@ def genOneLcmInput(fileName, field1, field2, table1, table2):
     sql_str = "SELECT A." + field1 + "_id, B."+ field2 + "_id FROM " + table1 + " as A, "+ table2 + \
         " as B WHERE A.doc_id_id = B.doc_id_id order by A." + field1 +"_id"
     
+    
     cursor.execute(sql_str)
     rows = cursor.fetchall()     
+    
     
     # Create a Python file object using open() and the with statement
     with open(fileName, 'w') as f:
         myfile = File(f)
-        lastRow = rows[0][0]
+        lastRow = 0
         currLine = ""
-        for row in rows:
+        rowIndex = 0
+        for row in rows:        
             #print row
             if row[0] == lastRow:
                 currLine += str(row[1]) + " "
-            else:
-                lastRow = row[0]
+            else:            
                 myfile.write(currLine + "\n")
-                currLine = str(row[1])                
+                rowIndex += 1
+                while not row[0] == rowIndex:
+                    myfile.write("\n")
+                    rowIndex += 1
+                lastRow = row[0]
+                currLine = str(row[1]) + " "            
+            
         myfile.write(currLine + "\n")
         myfile.closed
         f.closed
-    
-    
-    
-    
+   
 # Generate the output based on the input
 def genLcmOutput(request):
     lcmFilePath = "datamng/lcmdata/lcm.exe"
     
+    '''inputFileName = "datamng/lcmdata/test.txt"
+    outputFileName = "datamng/lcmdata/test_out.txt"    
+    genOneLcmOutput(inputFileName, outputFileName, lcmFilePath)'''
+    #########################
     inputFileName = "datamng/lcmdata/Input_Person_Location.txt"
-    outputFileName = "datamng/lcmdata/Output_People_Location.txt"    
-    genOneLcmOutput(inputFileName, outputFileName, lcmFilePath)
-    
-    inputFileName = "datamng/lcmdata/Input_Person_Date.txt"
-    outputFileName = "datamng/lcmdata/Output_Person_Date.txt"    
-    genOneLcmOutput(inputFileName, outputFileName, lcmFilePath)
+    outputFileName = "datamng/lcmdata/Output_Person_Location.txt"    
+    genOneLcmOutput(inputFileName, outputFileName, lcmFilePath, "person", "location")
     
     inputFileName = "datamng/lcmdata/Input_Person_Phone.txt"
     outputFileName = "datamng/lcmdata/Output_Person_Phone.txt"    
-    genOneLcmOutput(inputFileName, outputFileName, lcmFilePath)
+    genOneLcmOutput(inputFileName, outputFileName, lcmFilePath, "person", "phone")
+    
+    inputFileName = "datamng/lcmdata/Input_Person_Date.txt"
+    outputFileName = "datamng/lcmdata/Output_Person_Date.txt"    
+    genOneLcmOutput(inputFileName, outputFileName, lcmFilePath,"person", "date")
     
     inputFileName = "datamng/lcmdata/Input_Person_Org.txt"
     outputFileName = "datamng/lcmdata/Output_Person_Org.txt"    
-    genOneLcmOutput(inputFileName, outputFileName, lcmFilePath)
+    genOneLcmOutput(inputFileName, outputFileName, lcmFilePath, "person", "org")
     
     inputFileName = "datamng/lcmdata/Input_Person_Misc.txt"
     outputFileName = "datamng/lcmdata/Output_Person_Misc.txt"    
-    genOneLcmOutput(inputFileName, outputFileName, lcmFilePath)
+    genOneLcmOutput(inputFileName, outputFileName, lcmFilePath, "person", "misc")
     
     
-    inputFileName = "datamng/lcmdata/Input_Date_Location.txt"
-    outputFileName = "datamng/lcmdata/Output_Date_Location.txt"    
-    genOneLcmOutput(inputFileName, outputFileName, lcmFilePath)
+    #########################    
+    inputFileName = "datamng/lcmdata/Input_Location_Phone.txt"
+    outputFileName = "datamng/lcmdata/Output_Location_Phone.txt"    
+    genOneLcmOutput(inputFileName, outputFileName, lcmFilePath, "location", "phone")
     
-    inputFileName = "datamng/lcmdata/Input_Date_Phone.txt"
-    outputFileName = "datamng/lcmdata/Output_Date_Phone.txt"    
-    genOneLcmOutput(inputFileName, outputFileName, lcmFilePath)
+    inputFileName = "datamng/lcmdata/Input_Location_Date.txt"
+    outputFileName = "datamng/lcmdata/Output_Location_Date.txt"    
+    genOneLcmOutput(inputFileName, outputFileName, lcmFilePath,"location", "date")
     
-    inputFileName = "datamng/lcmdata/Input_Date_Org.txt"
-    outputFileName = "datamng/lcmdata/Output_Date_Org.txt"    
-    genOneLcmOutput(inputFileName, outputFileName, lcmFilePath)
+    inputFileName = "datamng/lcmdata/Input_Location_Org.txt"
+    outputFileName = "datamng/lcmdata/Output_Location_Org.txt"    
+    genOneLcmOutput(inputFileName, outputFileName, lcmFilePath, "location", "org")
     
-    inputFileName = "datamng/lcmdata/Input_Date_Misc.txt"
-    outputFileName = "datamng/lcmdata/Output_Date_Misc.txt"    
-    genOneLcmOutput(inputFileName, outputFileName, lcmFilePath)    
+    inputFileName = "datamng/lcmdata/Input_Location_Misc.txt"
+    outputFileName = "datamng/lcmdata/Output_Location_Misc.txt"    
+    genOneLcmOutput(inputFileName, outputFileName, lcmFilePath, "location", "misc")
     
-    inputFileName = "datamng/lcmdata/Input_Phone_Location.txt"
-    outputFileName = "datamng/lcmdata/Output_Phone_Location.txt"    
-    genOneLcmOutput(inputFileName, outputFileName, lcmFilePath)
+    #########################    
+    inputFileName = "datamng/lcmdata/Input_Phone_Date.txt"
+    outputFileName = "datamng/lcmdata/Output_Phone_Date.txt"    
+    genOneLcmOutput(inputFileName, outputFileName, lcmFilePath,"phone", "date")
     
     inputFileName = "datamng/lcmdata/Input_Phone_Org.txt"
     outputFileName = "datamng/lcmdata/Output_Phone_Org.txt"    
-    genOneLcmOutput(inputFileName, outputFileName, lcmFilePath)
+    genOneLcmOutput(inputFileName, outputFileName, lcmFilePath, "phone", "org")
     
     inputFileName = "datamng/lcmdata/Input_Phone_Misc.txt"
     outputFileName = "datamng/lcmdata/Output_Phone_Misc.txt"    
-    genOneLcmOutput(inputFileName, outputFileName, lcmFilePath)
+    genOneLcmOutput(inputFileName, outputFileName, lcmFilePath, "phone", "misc")
     
+    #########################    
+    inputFileName = "datamng/lcmdata/Input_Date_Org.txt"
+    outputFileName = "datamng/lcmdata/Output_Date_Org.txt"    
+    genOneLcmOutput(inputFileName, outputFileName, lcmFilePath, "date", "org")
     
-    inputFileName = "datamng/lcmdata/Input_Org_Location.txt"
-    outputFileName = "datamng/lcmdata/Output_Org_Location.txt"    
-    genOneLcmOutput(inputFileName, outputFileName, lcmFilePath)
+    inputFileName = "datamng/lcmdata/Input_Date_Misc.txt"
+    outputFileName = "datamng/lcmdata/Output_Date_Misc.txt"    
+    genOneLcmOutput(inputFileName, outputFileName, lcmFilePath, "date", "misc")
     
+    #########################    
     inputFileName = "datamng/lcmdata/Input_Org_Misc.txt"
     outputFileName = "datamng/lcmdata/Output_Org_Misc.txt"    
-    genOneLcmOutput(inputFileName, outputFileName, lcmFilePath)
-    
-    
-    inputFileName = "datamng/lcmdata/Input_Misc_Location.txt"
-    outputFileName = "datamng/lcmdata/Output_Misc_Location.txt"    
-    genOneLcmOutput(inputFileName, outputFileName, lcmFilePath)
+    genOneLcmOutput(inputFileName, outputFileName, lcmFilePath, "org", "misc")
     
     return HttpResponse("good")
 
-def genOneLcmOutput(inputFileName, outputFileName, lcmFilePath):
+def genOneLcmOutput(inputFileName, outputFileName, lcmFilePath, f1, f2):
     proc = subprocess.Popen([lcmFilePath, 'MqI', inputFileName, '3', outputFileName])
+    proc.wait()
+    
+    with open(outputFileName, 'r') as f:
+        oeIndex = 0
+        for line in f:
+            words = line.split()
+            if oeIndex%2 == 0: #col
+                clus = Cluster(field1 = f1, field2 = f2)
+                clus.save()
+                for col in words:
+                    clusterCol = ClusterCol(cluster = clus, cid = col)
+                    clusterCol.save()
+            else:
+                for row in words:
+                    clusterRow = ClusterRow(cluster = clus, rid = row)
+                    clusterRow.save()
+                
+            print "EEE" + str(words)
+            oeIndex += 1
+    
     '''proc = subprocess.Popen([lcmFilePath, 'MqI', inputFileName, '2', outputFileName], stdout=subprocess.PIPE, universal_newlines = True)
     proc.wait()
     output = proc.communicate()
@@ -350,4 +388,6 @@ def genOneLcmOutput(inputFileName, outputFileName, lcmFilePath):
             res += word + 'WORD'
         res +=  'SEP'    
     print res'''
-    
+
+
+        

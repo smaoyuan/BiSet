@@ -7,7 +7,7 @@ urlpatterns = patterns('',
     # ex: /polls/
     # url(r'^$', views.index, name='index'),
     url(r'^parseRawData/$', views.parseRawData, name='parseRawData'),
-    url(r'^test/$', views.genLcmInput, name='test'),
-    url(r'^testLCM/$', views.genLcmOutput, name='testLCM'),
+    url(r'^testInput/$', views.genLcmInput, name='test'),
+    url(r'^testOutput/$', views.genLcmOutput, name='testLCM'),
 )
 
