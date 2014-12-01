@@ -76,6 +76,7 @@ d3.json(window.SERVER_PATH + 'vis/loadbisets/', function(error, json) { //"http:
 		bicData = dumData.bics;
 
 		console.log(json);
+		console.log(bicData);
 
 	// set all bics has not been displayed
 	for (var i = 0; i < bicData.length; i++)
@@ -94,6 +95,8 @@ d3.json(window.SERVER_PATH + 'vis/loadbisets/', function(error, json) { //"http:
 		// get selected dimensions
 		var selDims = $("input:checkbox:checked");
 		for (var i = 0; i < selDims.length; i++) {
+
+			console.log($(selDims[i]).val());
 
 			entList.count += 1;
 
@@ -246,7 +249,7 @@ function addList(canvas, listData, bicList, startPos) {
 						  		.attr("transform", function() {
 						  			var tmpX = startPos + entity.width + ((entList.width + entList.gap) * 2 - entity.width - bic.frameWidth)/2;
 						  			bic.count += 1;
-						  			console.log(bic);
+						  			console.log(bic.count);
 						  			return "translate(" + tmpX + "," + bic.count * bic.frameHeight + ")";
 						  		});
 
@@ -328,6 +331,9 @@ function addList(canvas, listData, bicList, startPos) {
 						var tmpCount = bicDisplayed.get(thisEnt.bicSetsRight[i]);
 						tmpCount -= 1;
 						bicDisplayed.put(thisEnt.bicSetsRight[i], tmpCount);
+
+						console.log(bic.count);
+
 						// reduce the bic count by 1
 						bic.count--;
 
