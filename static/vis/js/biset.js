@@ -71,12 +71,14 @@ $("#dataDimensionList").append(
     "<input type='checkbox' name='dimensions' value='org' id='d_org'> Organization<br />"
 );    
 
-d3.json("http://localhost:8000/static/vis/data/data.json", function(error, json) {
+d3.json(window.SERVER_PATH + 'vis/loadbisets/', function(error, json) { //"http://localhost:8000/static/vis/data/data.json"
 	var dumData = json,
 		bicData = dumData.bics;
 
+		console.log(json);
+
 	// set all bics has not been displayed
-	for (var i = 0; i < bicData.length; i++)				
+	for (var i = 0; i < bicData.length; i++)
 		bicDisplayed.put(bicData[i].bicID, 0);
 
 	// var svg = $("svg#vis_canvas")[0];
@@ -85,7 +87,9 @@ d3.json("http://localhost:8000/static/vis/data/data.json", function(error, json)
 	//svg.setAttribute("viewBox", [bbox.x, bbox.y, bbox.width, bbox.height]);
 
 	// testing for adding a new list
-	$('#btn_change').click(function(){
+	$('#btn_add_list').click(function(){
+
+		datasetRequest();
 
 		// get selected dimensions
 		var selDims = $("input:checkbox:checked");
@@ -599,7 +603,9 @@ function datasetRequest() {
         data: JSON.stringify(requestJSON),
         contentType: "application/json",
         success: function(data){
-        	console.log(data);
+        	// console.log(data);
+        	// var dataJson = eval(data);
+        	// console.log(dataJson);
             // if(data['status'] == 'success') {
 
                 // refreshColList('#list_collaborator', data['collaborators']);
