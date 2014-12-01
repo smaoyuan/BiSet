@@ -1,6 +1,7 @@
 {% extends "projects/base.html" %}
 {% load staticfiles %}
 {% block content %}
+<input id="csrf_token" type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
 	<div class="container-fluid">
 		<div class="col-md-2">
 			<div>
