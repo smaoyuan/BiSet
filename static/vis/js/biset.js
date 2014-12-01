@@ -1,6 +1,6 @@
 
 // initial canvas settings
-var visCanvas = { width: 1280, height: 1400 };
+var visCanvas = { width: 1280, height: 2650 };
 
 // entity settings
 var entity = { width: 140, height: 25, rdCorner: 5, freqWidth: 15 };
@@ -71,8 +71,8 @@ $("#dataDimensionList").append(
     "<input type='checkbox' name='dimensions' value='org' id='d_org'> Organization<br />"
 );    
 
-// d3.json(window.SERVER_PATH + 'vis/loadbisets/', function(error, json) {
-d3.json("http://localhost:8000/static/vis/data/data.json", function(error, json) {	
+d3.json(window.SERVER_PATH + 'vis/loadbisets/', function(error, json) {
+// d3.json("http://localhost:8000/static/vis/data/data.json", function(error, json) {	
 	var dumData = json,
 		bicData = dumData.bics;
 
@@ -107,11 +107,15 @@ d3.json("http://localhost:8000/static/vis/data/data.json", function(error, json)
 				.attr('width', entList.width)
 				.attr('height', entList.height);
 
-			var aListData = dumData.lists[i];				
+			var aListData = dumData.lists[i];
+
+			console.log(aListData);			
 
 			// add a list to the vis canvas
 			var aListView = addList(aList, aListData, bicData, entList.startPos);
-			addSortCtrl(aListView);				 
+			addSortCtrl(aListView);
+
+			addBics(aList, aListData, bicData, entList.startPos);			 
 		}
 	});	
 });
@@ -358,34 +362,6 @@ function addList(canvas, listData, bicList, startPos) {
 						}
 					}
 				}
-
-				// d3.select(this)
-				// 	.classed("entHighlight", false)
-				// 	.attr("fill", color.entNormal);
-
-				// if (thisEnt.bicSetsRight.length != 0) {
-				// 	for (var i = 0; i < thisEnt.bicSetsRight.length; i++){
-				// 		var targetBicID = "bic_" + thisEnt.bicSetsRight[i];
-				// 		for(var j = 0; j < connections.length; j++) {
-				// 			if (connections[j].from.attr("id") == targetBicID
-				// 				|| connections[j].to.attr("id") == targetBicID) {
-				// 				connections[j].line.remove();
-				// 				connections[j] = null;
-				// 			}
-				// 		}
-				// 		var counter = connections.length - 1;
-				// 		// console.log(connections);
-				// 		// console.log("here");						
-				// 		while(counter >=0 ) {	
-				// 			if (connections[counter] == null)
-				// 				connections.splice(counter, 1);
-				// 			counter--;
-				// 		}						
-				// 		d3.select("#bic_" + thisEnt.bicSetsRight[i]).remove();
-				// 		// d3.select("#bic_left_" + thisEnt.bicSetsRight[i]).remove();
-				// 		// d3.select("#bic_frame_" + thisEnt.bicSetsRight[i]).remove();
-				// 	}
-				// }
 			}	  		
   		});
 
@@ -435,6 +411,11 @@ function addList(canvas, listData, bicList, startPos) {
 		"texts": viewText
 	}
     return listView;	    
+}
+
+
+function addBics(canvas, listData, bicList, bicStartPos) {
+
 }
 
 
@@ -622,6 +603,6 @@ function csrfSafeMethod(method) {
 }
 
 
-$(document).ready(function() {
-	datasetRequest();
-});
+// $(document).ready(function() {
+// 	datasetRequest();
+// });
