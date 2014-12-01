@@ -8,7 +8,7 @@ from django.conf import settings
 
 
 def analytics(request):
-    context = { 'active_tag': 'home', 'BASE_URL':settings.BASE_URL}
+    context = { 'active_tag': 'analytics', 'BASE_URL':settings.BASE_URL}
     return TemplateResponse(request, 'vis/index.html', context)
     
 
