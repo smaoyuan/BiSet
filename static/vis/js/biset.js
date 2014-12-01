@@ -3,13 +3,15 @@
 var visCanvas = { width: 1280, height: 2650 };
 
 // entity settings
-var entity = { width: 140, height: 25, rdCorner: 5, freqWidth: 15 };
+var entity = { width: 260, height: 25, rdCorner: 5, freqWidth: 30 };
 
 // entity list settings
-var entList = { width: 140, height: 400, gap: 80, topGap: 10, startPos: 0, count: 0 };
+var entList = { width: 260, height: 2650, gap: 80, topGap: 10, startPos: 0, count: 0 };
 
 // in-between bar settings
 var bic = { frameWidth: 60, frameHeight: 30, frameRdCorner: 0, innerRdCorner: 0, count: 0 };
+
+var bicList = { width: 60, height: 2650 }
 
 // color settings
 var color = {
@@ -22,7 +24,8 @@ var color = {
 };
 
 // an array to store all links
-var connections = [];
+var connections = [],
+	biclusters = [];
 
 // a hash table to maintain the displayed bics
 //var bicDisplayed = [];
@@ -71,23 +74,16 @@ $("#dataDimensionList").append(
     "<input type='checkbox' name='dimensions' value='org' id='d_org'> Organization<br />"
 );    
 
-<<<<<<< HEAD
 d3.json(window.SERVER_PATH + 'vis/loadbisets/', function(error, json) {
 // d3.json("http://localhost:8000/static/vis/data/data.json", function(error, json) {	
-=======
-d3.json(window.SERVER_PATH + 'vis/loadbisets/', function(error, json) { //"http://localhost:8000/static/vis/data/data.json"
->>>>>>> cb44da925bd06cc81b790bff6b18201da1470885
 	var dumData = json,
 		bicData = dumData.bics;
-
-		console.log(json);
 
 	// set all bics has not been displayed
 	for (var i = 0; i < bicData.length; i++)
 		bicDisplayed.put(bicData[i].bicID, 0);
 
 	// var svg = $("svg#vis_canvas")[0];
-	// console.log(svg);
 	// var bbox = svg.getBBox();
 	//svg.setAttribute("viewBox", [bbox.x, bbox.y, bbox.width, bbox.height]);
 
@@ -100,24 +96,36 @@ d3.json(window.SERVER_PATH + 'vis/loadbisets/', function(error, json) { //"http:
 		var selDims = $("input:checkbox:checked");
 		for (var i = 0; i < selDims.length; i++) {
 
-			entList.count += 1;
+			var lkey = $(selDims[i]).val();
 
+			entList.count += 1;
 			entList.startPos += (entList.width + entList.gap) * 2 * i;
 
 			var aList = canvas.append('g')
 				.attr('id', 'list_' + entList.count)
 				.attr('width', entList.width)
-				.attr('height', entList.height);
+				.attr('height', entList.height)
+				.attr("transform", function(d, i) { return "translate(" + entList.startPos + "," + 0 + ")"; });
 
-			var aListData = dumData.lists[i];
-
-			console.log(aListData);			
+			var aListData = dumData.lists[lkey];		
 
 			// add a list to the vis canvas
 			var aListView = addList(aList, aListData, bicData, entList.startPos);
-			addSortCtrl(aListView);
+			addSortCtrl(aListView);			 
+		}
 
-			addBics(aList, aListData, bicData, entList.startPos);			 
+		// position of the bics
+		for (var i = 0; i < entList.count / 2; i++) {
+
+			var bicStartPos = (entList.width + entList.gap) * 2 * (i + 1) - ((entList.width + entList.gap) * 2 * (i + 1) - entList.width - bic.frameWidth) / 2 - bic.frameWidth;
+
+			var aBicList = canvas.append('g')
+				.attr('id', 'bic_list_' + entList.count)
+				.attr('width', bicList.width)
+				.attr('height', bicList.height)
+				.attr("transform", function(d, i) { return "translate(" + bicStartPos + "," + 0 + ")"; });;
+
+			addBics(aBicList, aListData, bicData, bicStartPos);
 		}
 	});	
 });
@@ -212,7 +220,8 @@ function addList(canvas, listData, bicList, startPos) {
   		.enter().append("g")
   		.attr('class', type)
   		.attr("id", function(d, i) { return type + "_" + d.entityID;})
-  		.attr("transform", function(d, i) { return "translate(" + startPos + "," + y(d.entValue) + ")"; })
+  		.attr("transform", function(d, i) { return "translate(" + 0 + "," + y(d.entValue) + ")"; })
+  		// .attr("transform", function(d, i) { return "translate(" + startPos + "," + y(d.entValue) + ")"; })
 		.on("click", function() {
 
     		var tmpID = d3.select(this).attr("id"),
@@ -255,7 +264,6 @@ function addList(canvas, listData, bicList, startPos) {
 						  		.attr("transform", function() {
 						  			var tmpX = startPos + entity.width + ((entList.width + entList.gap) * 2 - entity.width - bic.frameWidth)/2;
 						  			bic.count += 1;
-						  			console.log(bic);
 						  			return "translate(" + tmpX + "," + bic.count * bic.frameHeight + ")";
 						  		});
 
@@ -280,11 +288,12 @@ function addList(canvas, listData, bicList, startPos) {
 							    .attr("fill", color.bicFrameColor);
                            
 							var	obj2 = d3.select("#bic_" + thisEnt.bicSetsRight[i]),
-							// get the field of another column
+								// get the field of another column
 								colField = bicList[thisEnt.bicSetsRight[i]].colField,
 								rowField = bicList[thisEnt.bicSetsRight[i]].rowField,
 								col = bicList[thisEnt.bicSetsRight[i]].col,
 								row = bicList[thisEnt.bicSetsRight[i]].row;
+
 
 							// lines from left to cluster
 							for (var k = 0; k < row.length; k++) {
@@ -337,11 +346,6 @@ function addList(canvas, listData, bicList, startPos) {
 						var tmpCount = bicDisplayed.get(thisEnt.bicSetsRight[i]);
 						tmpCount -= 1;
 						bicDisplayed.put(thisEnt.bicSetsRight[i], tmpCount);
-						
-
-						console.log(bicDisplayed.get(thisEnt.bicSetsRight[i]));
-						console.log("values: ");
-						console.log(bicDisplayed.values());
 
 						// no other related entities selected
 						if (bicDisplayed.get(thisEnt.bicSetsRight[i]) == 0) {
@@ -353,22 +357,15 @@ function addList(canvas, listData, bicList, startPos) {
 									connections[j] = null;
 								}
 							}
-							var counter = connections.length - 1;
-							// console.log(connections);
-							// console.log("here");						
+							var counter = connections.length - 1;					
 							while(counter >=0 ) {	
 								if (connections[counter] == null)
 									connections.splice(counter, 1);
 								counter--;
 							}						
 							d3.select("#bic_" + thisEnt.bicSetsRight[i]).remove();
-                            // reduce the bic count by 1
-                            if(bic.count > 0){
-                                bic.count--;
-                            }
-                            console.log(bic);
-                            
-                            
+							// reduce the bic count by 1
+							bic.count--;				
 						}
 						// other entities related to this bic has been selected
 						else {
@@ -429,6 +426,61 @@ function addList(canvas, listData, bicList, startPos) {
 
 
 function addBics(canvas, listData, bicList, bicStartPos) {
+	console.log(bicList);
+	console.log(bicStartPos);
+    		
+	// ratio between row and column
+	var bicRowPercent = [];
+	for (key in bicList) {
+		var entNumInRow = bicList[key].row.length,
+			entNumInCol = bicList[key].col.length,
+			tmpRatio = entNumInRow / (entNumInRow + entNumInCol);
+		// ratio of each bic
+		bicRowPercent.push(tmpRatio);
+		// get all biclusters
+		biclusters.push(bicList[key]);
+	}
+
+	// visual percentage based on ratio
+	var bicRatio = d3.scale.linear()
+	    .domain([0, 1])
+	    .range([1, bic.frameWidth]);	
+
+	var bics = canvas.selectAll(".bics")
+		.data(biclusters)
+		.enter().append("g")
+  		.attr("transform", function(d, i) {
+  			console.log(d);
+  			return "translate(" + 0 + "," + (i + 1) * bic.frameHeight + ")"; 
+  		});
+
+	// proportion of row
+	bics.append("rect")
+  		.attr("id", function(d, i) { return "bic_left_" + d.bicID })
+	    .attr("width", function(d, i) {
+	    	console.log(bicRatio(bicRowPercent[i]))
+	    	return bicRatio(bicRowPercent[i]);
+	    })
+	    .attr("height", entity.height - 1)
+	    .attr("rx", bic.innerRdCorner)
+	    .attr("ry", bic.innerRdCorner)
+	    .attr("fill", color.entFreColor);
+
+	// 100% proportion
+	bics.append("rect")
+		.attr("id", function(d, i) { return "bic_frame_" + d.bicID })
+	    .attr("width", bic.frameWidth)
+	    .attr("height", entity.height - 1)
+	    .attr("rx", bic.frameRdCorner)
+	    .attr("ry", bic.frameRdCorner)
+	    .attr("fill", color.bicFrameColor);	      			
+
+
+	// for (var i = 0; i < bicList.length; i++) {
+	// 	var tmpRatio = bicList[i].entNumInRow / (bicList[i].entNumInRow + bicList[i].entNumInCol);
+	// 	bicRowPercent.push(tmpRatio);
+	// 	console.log(tmpRatio);
+	// }
 
 }
 
