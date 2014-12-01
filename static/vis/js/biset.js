@@ -1,12 +1,12 @@
 
 // initial canvas settings
-var visCanvas = { width: 1280, height: 400 };
+var visCanvas = { width: 1280, height: 1400 };
 
 // entity settings
-var entity = { width: 100, height: 25, rdCorner: 5, freqWidth: 15 };
+var entity = { width: 140, height: 25, rdCorner: 5, freqWidth: 15 };
 
 // entity list settings
-var entList = { width: 120, height: 400, gap: 80, topGap: 10, startPos: 0, count: 0 };
+var entList = { width: 140, height: 400, gap: 80, topGap: 10, startPos: 0, count: 0 };
 
 // in-between bar settings
 var bic = { frameWidth: 60, frameHeight: 30, frameRdCorner: 0, innerRdCorner: 0, count: 0 };
