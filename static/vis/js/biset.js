@@ -232,7 +232,7 @@ function addList(canvas, listData, bicList, startPos) {
 					// var aBicList = canvas.append('g')
 					// 	.attr('width', bic.frameWidth)
 					// 	.attr('height', entList.height);
-
+                    
 					for (var i = 0; i < thisEnt.bicSetsRight.length; i++) {
 						if (bicDisplayed.get(thisEnt.bicSetsRight[i]) == 0) {
 							// add flag for dispaying the bic
@@ -269,13 +269,13 @@ function addList(canvas, listData, bicList, startPos) {
 							    .attr("rx", bic.frameRdCorner)
 							    .attr("ry", bic.frameRdCorner)
 							    .attr("fill", color.bicFrameColor);
-
+                           
 							var	obj2 = d3.select("#bic_" + thisEnt.bicSetsRight[i]),
 							// get the field of another column
-								colField = bicList[thisEnt.bicSetsRight[i] - 1].colField,
-								rowField = bicList[thisEnt.bicSetsRight[i] - 1].rowField,
-								col = bicList[thisEnt.bicSetsRight[i] - 1].col,
-								row = bicList[thisEnt.bicSetsRight[i] - 1].row;
+								colField = bicList[thisEnt.bicSetsRight[i]].colField,
+								rowField = bicList[thisEnt.bicSetsRight[i]].rowField,
+								col = bicList[thisEnt.bicSetsRight[i]].col,
+								row = bicList[thisEnt.bicSetsRight[i]].row;
 
 							// lines from left to cluster
 							for (var k = 0; k < row.length; k++) {

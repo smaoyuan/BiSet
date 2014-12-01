@@ -43,12 +43,12 @@ def getVisJson(request, table1 = "person", table2 = "location", table3 = "org", 
             theList, preCols = getListDict(tableList[i-1], tableList[i], tableList[i+1], preCols, biclusDict)
             entryLists.append({"listID": i + 1, "leftType": tableList[i-1], "listType": tableList[i], "rightType": tableList[i+1], "entities": theList})
         
-    removedKeyList = []
+    '''removedKeyList = []
     for key, val in biclusDict.iteritems():
-        removedKeyList.append(val)    
+        removedKeyList.append(val)    '''
         
     #print entryLists    
-    return HttpResponse(json.dumps({"lists":entryLists, "bics":removedKeyList}))
+    return HttpResponse(json.dumps({"lists":entryLists, "bics":biclusDict}))
     #return HttpResponse("Done!")
     
 '''
