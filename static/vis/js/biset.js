@@ -71,7 +71,8 @@ $("#dataDimensionList").append(
     "<input type='checkbox' name='dimensions' value='org' id='d_org'> Organization<br />"
 );    
 
-d3.json(window.SERVER_PATH + 'vis/loadbisets/', function(error, json) { //"http://localhost:8000/static/vis/data/data.json"
+// d3.json(window.SERVER_PATH + 'vis/loadbisets/', function(error, json) {
+d3.json("http://localhost:8000/static/vis/data/data.json", function(error, json) {	
 	var dumData = json,
 		bicData = dumData.bics;
 
@@ -83,7 +84,6 @@ d3.json(window.SERVER_PATH + 'vis/loadbisets/', function(error, json) { //"http:
 		bicDisplayed.put(bicData[i].bicID, 0);
 
 	// var svg = $("svg#vis_canvas")[0];
-	// console.log(svg);
 	// var bbox = svg.getBBox();
 	//svg.setAttribute("viewBox", [bbox.x, bbox.y, bbox.width, bbox.height]);
 
@@ -249,7 +249,6 @@ function addList(canvas, listData, bicList, startPos) {
 						  		.attr("transform", function() {
 						  			var tmpX = startPos + entity.width + ((entList.width + entList.gap) * 2 - entity.width - bic.frameWidth)/2;
 						  			bic.count += 1;
-						  			console.log(bic.count);
 						  			return "translate(" + tmpX + "," + bic.count * bic.frameHeight + ")";
 						  		});
 
@@ -274,11 +273,12 @@ function addList(canvas, listData, bicList, startPos) {
 							    .attr("fill", color.bicFrameColor);
                            
 							var	obj2 = d3.select("#bic_" + thisEnt.bicSetsRight[i]),
-							// get the field of another column
+								// get the field of another column
 								colField = bicList[thisEnt.bicSetsRight[i]].colField,
 								rowField = bicList[thisEnt.bicSetsRight[i]].rowField,
 								col = bicList[thisEnt.bicSetsRight[i]].col,
 								row = bicList[thisEnt.bicSetsRight[i]].row;
+
 
 							// lines from left to cluster
 							for (var k = 0; k < row.length; k++) {
@@ -332,15 +332,6 @@ function addList(canvas, listData, bicList, startPos) {
 						tmpCount -= 1;
 						bicDisplayed.put(thisEnt.bicSetsRight[i], tmpCount);
 
-						console.log(bic.count);
-
-						// reduce the bic count by 1
-						bic.count--;
-
-						console.log(bicDisplayed.get(thisEnt.bicSetsRight[i]));
-						console.log("values: ");
-						console.log(bicDisplayed.values());
-
 						// no other related entities selected
 						if (bicDisplayed.get(thisEnt.bicSetsRight[i]) == 0) {
 							var targetBicID = "bic_" + thisEnt.bicSetsRight[i];
@@ -351,15 +342,15 @@ function addList(canvas, listData, bicList, startPos) {
 									connections[j] = null;
 								}
 							}
-							var counter = connections.length - 1;
-							// console.log(connections);
-							// console.log("here");						
+							var counter = connections.length - 1;					
 							while(counter >=0 ) {	
 								if (connections[counter] == null)
 									connections.splice(counter, 1);
 								counter--;
 							}						
 							d3.select("#bic_" + thisEnt.bicSetsRight[i]).remove();
+							// reduce the bic count by 1
+							bic.count--;				
 						}
 						// other entities related to this bic has been selected
 						else {
