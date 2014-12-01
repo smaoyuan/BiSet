@@ -1,0 +1,50 @@
+<!doctype html>
+{% load staticfiles %}
+<html>
+<head>
+	<link rel="stylesheet" type="text/css" href="{%static 'vis/css/lib/bootstrap.min.css'%}">
+	<link rel="stylesheet" type="text/css" href="{%static 'vis/css/lib/bootstrap-select.min.css'%}">	
+	<link rel="stylesheet" type="text/css" href="{%static 'vis/css/style.css'%}">
+	<script type="text/javascript" src="{%static 'vis/js/lib/jquery-2.1.1.min.js'%}"></script>
+	<script type="text/javascript" src="{%static 'vis/js/lib/bootstrap.min.js'%}"></script>
+	<script type="text/javascript" src="{%static 'vis/js/lib/bootstrap-select.min.js'%}"></script>			
+	<script type="text/javascript" src="{%static 'vis/js/lib/d3.min.js'%}"></script>
+	<script type="text/javascript" src="{%static 'vis/js/lib/hashtable.js'%}"></script>	
+</head>
+
+<body>
+	<div class="container-fluid">
+		<div class="col-md-2">
+			<div>
+				<label>Dataset Selection</label>
+	            <select class="selectpicker" data-live-search="true" data-width="auto" id="selDataSet">
+	                    <option>dataset1</option>
+	                    <option>dataset2</option>
+	                    <option>dataset3</option>
+	            </select>				
+			</div>
+        	<hr>
+
+            <div>
+                <label>Dimension List</label>
+                <fieldset id="dataDimensionList">
+<!--                     <input type="checkbox" name="dimensions" value="person" id="d_person"> Person<br />
+                    <input type="checkbox" name="dimensions" value="location" id="d_location"> Location<br />
+                    <input type="checkbox" name="dimensions" value="date" id="d_date"> Date<br />
+                    <input type="checkbox" name="dimensions" value="org" id="d_org"> Organization -->
+                </fieldset>
+            </div>
+		</div>
+
+		<div class="col-md-10">
+			<div id="biset_control"></div>
+			<div id="biset_canvas"></div>
+		</div>
+	</div>
+
+	
+	<input type="button" value="Add" id="btn_change">
+
+	<script type="text/javascript" src="{%static 'vis/js/biset.js'%}"></script>
+</body>
+</html>

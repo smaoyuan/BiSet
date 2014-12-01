@@ -16,7 +16,7 @@ urlpatterns = patterns('',
     url(r'^myturk/', include('myturk.urls', namespace="myturk")),
     url(r'^wiki/', include('wiki.urls', namespace="wiki")),
     url(r'^datamng/', include('datamng.urls', namespace="datamng")),
-    url(r'^viz/', include('viz.urls', namespace="viz")),
+    url(r'^vis/', include('vis.urls', namespace="vis")),
     url(r'^home/', include('home.urls', namespace="home")),
 	
 ) + staticfiles_urlpatterns()

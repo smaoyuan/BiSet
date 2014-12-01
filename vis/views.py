@@ -1,8 +1,16 @@
 from django.shortcuts import render
 from django.http import HttpResponse
+from django.template.response import TemplateResponse
 from sets import Set
 import json
 from django.db import connection
+from django.conf import settings
+
+
+def analytics(request):
+    context = { 'active_tag': 'home', 'BASE_URL':settings.BASE_URL}
+    return TemplateResponse(request, 'vis/index.html', context)
+    
 
 # Create your views here.
 PAIRS = Set(['person_location', 'person_phone', 'person_date', 'person_org', 'person_misc', 
@@ -11,12 +19,11 @@ PAIRS = Set(['person_location', 'person_phone', 'person_date', 'person_org', 'pe
     'date_org', 'date_misc', 
     'org_misc'])
     
-def getVizJson(request, table1 = "person", table2 = "location", table3 = "org", table4 = "EMPTY", table5 = "EMPTY", table6 = "EMPTY"):
+def getVisJson(request, table1 = "person", table2 = "location", table3 = "org", table4 = "EMPTY", table5 = "EMPTY", table6 = "EMPTY"):
     tableList = []
     tableList.append(table1)
     tableList.append(table2)
     tableList.append(table3)
-    tableList.append(table4)
     
     length = len(tableList)
     biclusDict = {}
