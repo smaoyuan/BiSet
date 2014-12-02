@@ -442,8 +442,6 @@ function addList(canvas, listData, bicList, startPos) {
 		        		optiontxt = data.option,
 		        		empTxt = data.empty;
 
-	        		console.log(data);
-
 	        		$("#vis_wiki_title").html(requestVal);
 
 	        		if (sumtxt.length != 0)

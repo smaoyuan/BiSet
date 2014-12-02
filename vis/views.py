@@ -76,8 +76,8 @@ def addVis(request):
             raise Http404
 
         
-        personField = 1
-        locationField = 1
+        personField = 0
+        locationField = 0
         phoneField = 0
         dateField = 0
         orgField = 0
