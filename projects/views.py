@@ -667,8 +667,7 @@ def add_collaborator(request):
             collaborators_list = load_project_collaborators_list(request, project_id)
             responseData = {'status':'success', 'collaborators': collaborators_list}
             return HttpResponse(json.dumps(responseData), content_type = "application/json")
-        except Exception as e:      
-            print e
+        except Exception as e: 
             raise Http404
     else:
         raise Http404
