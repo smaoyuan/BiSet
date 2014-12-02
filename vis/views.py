@@ -237,17 +237,16 @@ def getVisJson(request, table1 = "person", table2 = "location", table3 = "org", 
     tableList.append(table1)
     tableList.append(table2)
     tableList.append(table3)    
-    
     return HttpResponse(json.dumps(getLstsBisets(tableList)))
     
-@login_required  
+  
 def getLstsBisets(lstNames):
     '''
     Returns a json object for visualization. 
     The json contains lists and bicsets objects.
     @param lstNames: the names of lists
     '''
-    
+    print lstNames
     length = len(lstNames)
     biclusDict = {}
     entryLists = {}
@@ -266,7 +265,7 @@ def getLstsBisets(lstNames):
    
     return {"lists":entryLists, "bics":biclusDict}
     
-@login_required    
+    
 def getListDict(tableLeft, table, tableRight, leftClusCols, biclusDict):
     '''
     Generate list items and clusters based on list name, the name of left list, 
