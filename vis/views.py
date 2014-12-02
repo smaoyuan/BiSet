@@ -1,13 +1,15 @@
-from django.shortcuts import render
-from django.http import HttpResponse
+from django.shortcuts import render, get_object_or_404
+from django.http import HttpResponse, Http404
 from django.template.response import TemplateResponse
 from sets import Set
 import json
 from django.db import connection
 from django.conf import settings
 from vis.models import Vis, VisNodes
+from projects.models import Project
+from django.contrib.auth.decorators import login_required
 
-
+@login_required 
 def analytics(request):
     '''
     This is visualization page. 
@@ -15,13 +17,80 @@ def analytics(request):
     '''
     context = { 'active_tag': 'analytics', 'BASE_URL':settings.BASE_URL}
     return TemplateResponse(request, 'vis/index.html', context)
+    
+@login_required     
+def addVis(request):
+    '''
+    Creating a visualization for "POST" request.
+    @param request: Django http request
+    '''
+    try:
+        # Loading front end data
+        requestJson = {} #json.loads(request.body)
+        
+        theUser = request.user
+        project_id = 1 #requestJson['project_id']
+        theProject = get_object_or_404(Project, pk = project_id)
+        
+        print theProject
+        
+        # Only the project creator, super user can delete the project
+        has_permission = theProject.is_creator(theUser) or theProject.is_collaborator(theUser) or theUser.is_superuser
+        
+        if not has_permission:
+            raise Http404
 
+        
+        personField = 1
+        locationField = 1
+        phoneField = 0
+        dateField = 0
+        orgField = 0
+        miscField = 0
+        
+        if 'person' in requestJson:
+            personField = 1
+        if 'location' in requestJson:
+            locationField = 1
+        if 'phone' in requestJson:
+            phoneField = 1        
+        if 'date' in requestJson:
+            dateField = 1
+        if 'org' in requestJson:
+            orgField = 1
+        if 'misc' in requestJson:
+            miscField = 1
+        
+        newVis = Vis(user = theUser, project = theProject, personIn = personField, locationIn = locationField, phoneIn = phoneField, dateIn = dateField, orgIn = orgField, miscIn = miscField)
+            
+        newVis.save()
+        responseJson = {"status": "success"}
+    except Exception as e:
+        print e
+        responseJson = {"status": "error"}    
+    print responseJson
+    return HttpResponse(json.dumps(responseJson))
+    
+@login_required 
 def saveVis(request):
     '''
     Handling vis saving request to save a vis to database.
     @param request: the Django HttpRequest object
     '''
-    visID = 1;
+    # Loading front end data
+    requestJson = {} #json.loads(request.body)
+    
+    theUser = request.user
+    project_id = 1 #requestJson['project_id']
+    theProject = get_object_or_404(Project, pk = project_id)
+    
+    # Only the project creator, super user can delete the project
+    has_permission = theProject.is_creator(theUser) or theProject.is_collaborator(theUser) or theUser.is_superuser
+    
+    if not has_permission:
+        raise Http404
+    
+    visID = 2;
     toUpdate = [{"nodeType": "person", "nodeId": 1},{"nodeType": "person", "nodeId": 2},{"nodeType": "location", "nodeId": 3}]
         
     print toUpdate
@@ -54,12 +123,29 @@ def saveVis(request):
     responseJson = {"status": "success"}
     
     return HttpResponse(json.dumps(responseJson))
-
+    
+@login_required 
 def deleteVis(request):
     '''
     Deleting a visualization
+    @param request: Django http request
     '''
     try:
+        # Loading front end data
+        requestJson = {} #json.loads(request.body)
+        
+        theUser = request.user
+        project_id = 1 #requestJson['project_id']
+        theProject = get_object_or_404(Project, pk = project_id)
+        
+        print theProject
+        
+        # Only the project creator, super user can delete the project
+        has_permission = theProject.is_creator(theUser) or theProject.is_collaborator(theUser) or theUser.is_superuser
+        
+        if not has_permission:
+            raise Http404
+            
         visID = 1
         
         # Deleting all highlighted nodes
@@ -79,13 +165,27 @@ def deleteVis(request):
     
     return HttpResponse(json.dumps(responseJson))
     
-    
+@login_required    
 def loadVis(request):
     '''
     Loading a saved vis. Returning a json object.
     @param request: the Django HttpRequest object
     '''
     visID = 1
+    # Loading front end data
+    requestJson = {} #json.loads(request.body)
+    
+    theUser = request.user
+    project_id = 1 #requestJson['project_id']
+    theProject = get_object_or_404(Project, pk = project_id)
+    
+    print theProject
+    
+    # Only the project creator, super user can delete the project
+    has_permission = theProject.is_creator(theUser) or theProject.is_collaborator(theUser) or theUser.is_superuser
+    
+    if not has_permission:
+        raise Http404
     # get the lists names of the vis
     listNames = []
     theVis = Vis.objects.get(id = visID)
@@ -125,7 +225,8 @@ PAIRS = Set(['person_location', 'person_phone', 'person_date', 'person_org', 'pe
     'phone_date', 'phone_org', 'phone_misc', 
     'date_org', 'date_misc', 
     'org_misc'])
-
+    
+@login_required 
 def getVisJson(request, table1 = "person", table2 = "location", table3 = "org", table4 = "EMPTY", table5 = "EMPTY", table6 = "EMPTY"):
     '''
     Returns a json object for visualization. 
@@ -139,7 +240,7 @@ def getVisJson(request, table1 = "person", table2 = "location", table3 = "org", 
     
     return HttpResponse(json.dumps(getLstsBisets(tableList)))
     
-  
+@login_required  
 def getLstsBisets(lstNames):
     '''
     Returns a json object for visualization. 
@@ -165,7 +266,7 @@ def getLstsBisets(lstNames):
    
     return {"lists":entryLists, "bics":biclusDict}
     
-   
+@login_required    
 def getListDict(tableLeft, table, tableRight, leftClusCols, biclusDict):
     '''
     Generate list items and clusters based on list name, the name of left list, 

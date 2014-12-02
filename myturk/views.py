@@ -15,23 +15,21 @@ from home.utils import *
 
 
 
-def index(request):
-    context = 'The index method is called'
-    return TemplateResponse(request, 'myturk/index.html', context)
-
-# def createhit(request):
-#     # Load dataset from database
-#     datasets = DataSet.objects.all()    
-#     context = { 'active_tag': 'myturk', 'BASE_URL':settings.BASE_URL, 'datasets':datasets}
-#     return TemplateResponse(request, 'myturk/createhit.html', context)
-
 def createhit(request):
+    '''
+    This is create hit page.
+    @param request: Django http request
+    '''
     datasets = DataSet.objects.all()   
     context = { 'active_tag': 'myturk', 'BASE_URL':settings.BASE_URL, 'datasets':datasets}  
     return TemplateResponse(request, 'myturk/createhit.html', context)
     
     
 def createhitsubmit(request):
+    '''
+    Submitting mkturk to amazon web service.
+    @param request: Django http request containing keys and other task arguments.
+    '''
     from boto.mturk.connection import MTurkConnection
     from boto.mturk.question import QuestionContent,Question,QuestionForm,Overview,AnswerSpecification,SelectionAnswer,FormattedContent,FreeTextAnswer
     print 'Ok'
@@ -64,9 +62,7 @@ def createhitsubmit(request):
     overview = Overview()
     overview.append_field('Title', task_title)
     overview.append(FormattedContent('<b>' + task_description + '</b><p></p>'))
-    
-    # overview.append(FormattedContent('<table><tr><td>test</td><td>try</td></tr><tr><td>5</td><td>7</td></tr></table>'))
-    
+       
     tableStr = '<ul>'
     for docID in task_selected_docs:
         docText = Doc.objects.get(pk = docID)
@@ -110,12 +106,19 @@ def createhitsubmit(request):
 
 
 def hitresult(request):
- 
+    '''
+    This is hit result page.
+    @param request: Django http request
+    '''
     context = { 'active_tag': 'myturk', 'BASE_URL':settings.BASE_URL}  
     return TemplateResponse(request, 'myturk/hitResult.html', context)
 
 
 def hitresultfetch(request):
+    '''
+    Request data from amazon web service.
+    @param request: Django http request containing mkturk keys
+    '''
     from boto.mturk.connection import MTurkConnection
     from boto.mturk.question import QuestionContent,Question,QuestionForm,Overview,AnswerSpecification,SelectionAnswer,FormattedContent,FreeTextAnswer
   
@@ -125,8 +128,6 @@ def hitresultfetch(request):
     
     user_aws_secret_key = requestJson['myturk_secretkey']    
     user_aws_access_key_id = requestJson['myturk_accesskeyid']
-
-    # return TemplateResponse(request, 'myturk/hitResult.html', context)
 
     # adjust host setting, depending on whether HIT is live (production) or in testing mode (sandbox)
     mode = "sandbox"

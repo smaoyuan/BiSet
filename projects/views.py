@@ -16,7 +16,8 @@ from django.contrib.auth.decorators import login_required
 @login_required   
 def index(request):
     '''
-    This is the backend dashbord
+    This is the backend dashbord page.
+    @param request: Django http request containing logged in user.
     '''
     theUser = request.user
         
@@ -666,8 +667,7 @@ def add_collaborator(request):
             collaborators_list = load_project_collaborators_list(request, project_id)
             responseData = {'status':'success', 'collaborators': collaborators_list}
             return HttpResponse(json.dumps(responseData), content_type = "application/json")
-        except Exception as e:      
-            print e
+        except Exception as e: 
             raise Http404
     else:
         raise Http404
