@@ -14,16 +14,17 @@ wikipedia.set_lang("en")
 
 def wikisummary(request):
 
-	# searchterm = json.loads(request.POST['query'])
+	rq = json.loads(request.body)
 
-	searchterm = "orgimage"
+	searchterm = rq['query']
+	# searchterm = "orgimage"
 
 	resultDict = {"sumtxt":'',"option":'', "empty":''}
-
 
 	try:
 		resultDict["sumtxt"] = wikipedia.summary(searchterm)
 		return HttpResponse(json.dumps(resultDict), content_type = "application/json")
+
 	except (wikipedia.exceptions.DisambiguationError, wikipedia.exceptions.WikipediaException) as e:
 		
 
@@ -31,6 +32,8 @@ def wikisummary(request):
 		if type(e) is wikipedia.exceptions.DisambiguationError:
 
 			resultDict["option"] = e.options
+			# print(resultDict)
+			# print(type(resultDict["option"] ))
 
 			return 	HttpResponse(json.dumps(resultDict), content_type = "application/json")
 
