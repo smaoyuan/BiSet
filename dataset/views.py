@@ -8,21 +8,17 @@ def index():
     return HttpResponse("Under construction!")
 
 def load_datasets_json(request):
-    ''' Helper function for loading all datasets
-        from the database
     '''
-    # if not request.method == 'POST':
-        # raise Http404
+    Helper function for loading all datasets
+    from the database.
+    @param request: Django http request
+    '''
     
     try:
         datasets = get_list_or_404(DataSet)
         for item in datasets:
             print item
-        # Check permission
-        # theUser = request.user
-        # if not (theproject.is_creator(theUser) or theUser.isupper or 
-            # theproject.is_collaborator(theUser)):
-            # raise Http404
+            
         datasets_list = [] 
         for dataset in datasets:
             tmp = []        
@@ -37,11 +33,11 @@ def load_datasets_json(request):
     return HttpResponse(json.dumps(responseData), content_type = "application/json")  
     
 def load_docs_by_datasetId(request):
-    ''' Helper function for loading all datasets
-        from the database
+    ''' 
+    Helper function for loading all datasets
+    from the database.
+    @param request: Django http requst containing dataset id
     '''
-    # if not request.method == 'POST':
-        # raise Http404
         
     try:
         requestJson = json.loads(request.body)

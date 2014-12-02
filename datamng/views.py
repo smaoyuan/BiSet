@@ -13,7 +13,10 @@ from datamng.models import Cluster, ClusterCol, ClusterRow
 # Create your views here.
 
 def parseRawData(request):
-
+	'''
+	Process the Raw data and save to the database.
+	@param request: Django http request
+	'''
 	f = open('datamng/rawdata/crescent.jig')
 
 	tree = ET.parse(f)
@@ -172,22 +175,17 @@ def parseRawData(request):
 				moneyDocObj = MoneyDoc(money_string = Money.objects.get(money_string = money.text), doc_id = DocName.objects.get(doc_name = curDocId))
 				moneyDocObj.save()
 
-
-
-
-
-
 	output = 'after parse Raw data'
 
 	return HttpResponse(json.dumps(output), content_type = "application/json")
 
 ###### Running Algorithm
 from django.db import connection
-    
 
 def genLcmInput(request):
     '''
-    Generate People_Location matrix input
+    Generate all combinations of input files for LCM progarm
+    @param request: Django http request
     '''    
     file_name = "datamng/lcmdata/Input_Person_Location.txt"
     genOneLcmInput(file_name, "person_name", "location_name", "datamng_persondoc", "datamng_locationdoc");
@@ -247,11 +245,19 @@ def genLcmInput(request):
     return HttpResponse("Done")
     
 def genOneLcmInput(fileName, field1, field2, table1, table2):
+    '''
+    Generate one input file for LCM program.
+    @param fileName: file name of the input file to be saved.
+    @param field1: row name of the cluster
+    @param field2: col name of the cluster
+    @param table1: database table name for the row field
+    @param table2: database table name for the col field.
+    '''
+    
+    # Fetch the row information of the cluster
     cursor = connection.cursor()
     sql_str = "SELECT A." + field1 + "_id, B."+ field2 + "_id FROM " + table1 + " as A, "+ table2 + \
-        " as B WHERE A.doc_id_id = B.doc_id_id order by A." + field1 +"_id"
-    
-    
+        " as B WHERE A.doc_id_id = B.doc_id_id order by A." + field1 +"_id"   
     cursor.execute(sql_str)
     rows = cursor.fetchall()     
     
@@ -281,11 +287,12 @@ def genOneLcmInput(fileName, field1, field2, table1, table2):
    
 # Generate the output based on the input
 def genLcmOutput(request):
+    '''
+    Generate all combinations of bicluster.
+    @param request: Django http request
+    '''
     lcmFilePath = "datamng/lcmdata/lcm.exe"
     
-    '''inputFileName = "datamng/lcmdata/test.txt"
-    outputFileName = "datamng/lcmdata/test_out.txt"    
-    genOneLcmOutput(inputFileName, outputFileName, lcmFilePath)'''
     #########################
     inputFileName = "datamng/lcmdata/Input_Person_Location.txt"
     outputFileName = "datamng/lcmdata/Output_Person_Location.txt"    
@@ -355,9 +362,20 @@ def genLcmOutput(request):
     return HttpResponse("good")
 
 def genOneLcmOutput(inputFileName, outputFileName, lcmFilePath, f1, f2):
+    '''
+    Generate One LCM output file using a input file and save the output to database.
+    @param inputFileName: the input file name for the LCM algorithm
+    @param outputFileName: store the result after running the LCM algorithm.
+    @param lcmFilePath: path of the LCM program
+    @param f1: row field of the cluster
+    @param f2: col field of the cluster
+    '''
+    # Runing the LCM program
     proc = subprocess.Popen([lcmFilePath, 'MqI', inputFileName, '3', outputFileName])
+    # Waiting for the LCM program to finish
     proc.wait()
     
+    # Saving the output of the LCM to the database.
     with open(outputFileName, 'r') as f:
         oeIndex = 0
         for line in f:
@@ -375,19 +393,6 @@ def genOneLcmOutput(inputFileName, outputFileName, lcmFilePath, f1, f2):
                 
             print "EEE" + str(words)
             oeIndex += 1
-    
-    '''proc = subprocess.Popen([lcmFilePath, 'MqI', inputFileName, '2', outputFileName], stdout=subprocess.PIPE, universal_newlines = True)
-    proc.wait()
-    output = proc.communicate()
-    allLines = output[0].splitlines()
-    #allLines = proc.stdout
-    res = ''
-    for line in allLines:
-        thisLine = line.split(' ')
-        for word in thisLine:
-            res += word + 'WORD'
-        res +=  'SEP'    
-    print res'''
 
 
         

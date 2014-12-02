@@ -16,7 +16,8 @@ from django.contrib.auth.decorators import login_required
 @login_required   
 def index(request):
     '''
-    This is the backend dashbord
+    This is the backend dashbord page.
+    @param request: Django http request containing logged in user.
     '''
     theUser = request.user
         

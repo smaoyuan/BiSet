@@ -19,14 +19,11 @@ def view_profile(request, user_id):
     Display a user's profile. If user_id if provided, then the user 
     will be the user of the user id. Otherwise, the user will be the
     login user.
+    @param request: Django http request
+    @param user_id: the id of a user
     '''
     
-    # if 'user_id' in kwargs:
-        # user_id = kwargs['user_id']
     thisuser = User.objects.get(pk = user_id)
-    # else:
-        # thisuser = request.user
-    
     
     if thisuser == request.user:
         perm = True
@@ -74,7 +71,10 @@ def view_profile(request, user_id):
 
 @login_required
 def edit_profile(request):
-    
+    '''
+    Updating user profile.
+    @param request: Django http request
+    '''
     if request.method == 'POST':
         try:
             requestJson = json.loads(request.body)
@@ -106,6 +106,10 @@ def edit_profile(request):
         
 @login_required
 def change_password(request):
+    '''
+    Handing password change request.
+    @param request: Django http request
+    '''
     if request.method == 'GET':
         context = { 'active_tag': 'profile', 'BASE_URL':settings.BASE_URL}
         return TemplateResponse(request, 'userprofile/change_pass.html', context)
@@ -128,7 +132,4 @@ def change_password(request):
         
         return HttpResponse(json.dumps({'status':'success'}), content_type = "application/json")        
     else:
-        raise Http404
-    
-    
-    
+        raise Http404   
