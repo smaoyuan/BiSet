@@ -17,13 +17,13 @@ first name: {{ user.firstname }}
 {% block sidebar %}{% endblock %}
 
 {% block content %}
-		<h1>My Profile</h1>
+		<h1>{% if perm == True %} My {% else %} {{ this_user.first_name }} {{ this_user.last_name }}'s {% endif %} profile</h1>
 		<hr>
 		<div class="col-md-7">
             <div class="panel panel-default widget shade-container">
                 <div class="panel-heading">
                     <span class="glyphicon glyphicon-user"></span>
-                    <h3 class="panel-title">My profile</h3>
+                    <h3 class="panel-title">{% if perm == True %} My {% else %} {{ this_user.first_name }} {{ this_user.last_name }}'s {% endif %} profile</h3>
                 </div>
 
                 <div class="panel-body">
@@ -124,8 +124,7 @@ first name: {{ user.firstname }}
             </div>			
 		</div>       
 		
-
-		<div class="col-md-4 col-md-offset-1">
+		<div class="col-md-4 col-md-offset-1 {% if perm == False %} hide_this {% endif %}">
             <!-- collaborator of a project -->
             <div class="panel panel-default widget shade-container">
                 <div class="panel-heading">
