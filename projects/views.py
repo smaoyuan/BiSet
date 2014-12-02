@@ -391,16 +391,10 @@ def load_project_activity_feed(request, project_id):
             'logObject':logObject, 
             'logAction' : logAction,
             'logContentType': logContentType.name})
-            
-    return new_logging_list 
-
-        # profile = thisuser.userprofile
-              
-        # context = { "profile":profile, "this_user":thisuser, 'active_tag': 'userprofile', 
-            # 'BASE_URL':settings.BASE_URL, 'history_actions': new_logging_list}
-        # return TemplateResponse(request, 'userprofile/view_profile.html', context) 
-    # except Exception as e:
-        # return HttpResponse(e)
+     
+    newList = sorted(new_logging_list, key=lambda x: x['action_time'], reverse=True)
+    
+    return newList 
    
 @login_required 
 def load_project_comment_list(request, project_id):
