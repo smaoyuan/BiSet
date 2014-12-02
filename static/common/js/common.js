@@ -66,9 +66,9 @@ function requestDataset(datasetId){
         data: JSON.stringify({'dataset_id': datasetId}),
         contentType: "application/json",
         success: function(data){
-            console.log(data);
             if(data['status'] == 'success') {
                 // delete the previous table
+                $('#dataset_header').removeClass("hide_this");
                 $('#data_view').dataTable().fnDestroy();
                 // initialize the table
                 $('#data_view').dataTable( {

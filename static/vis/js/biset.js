@@ -72,7 +72,7 @@ var selData = $('#selDataSet').val();
 $("#dataDimensionList").append(
 	"<input type='checkbox' name='dimensions' value='person' id='d_person'> Person<br />" + 
 	"<input type='checkbox' name='dimensions' value='location' id='d_location'> Location<br />" +
-    "<input type='checkbox' name='dimensions' value='date' id='d_date'> Date<br />" +
+    // "<input type='checkbox' name='dimensions' value='date' id='d_date'> Date<br />" +
     "<input type='checkbox' name='dimensions' value='org' id='d_org'> Organization<br />"
 );    
 
@@ -211,7 +211,7 @@ function addList(canvas, listData, bicList, startPos) {
 	    	"<h5 class='listTitle' id='listTitle_" + listNum + "'>" + type + "</h5>" + 
 	    	"<select class='orderCtrl' id='list_" + listNum + "_sortCtrl'>" + 
 	    		"<option value='alph'>alphabeic</option>" + 
-	    		"<option value='freq'>frequency</option>" + 
+	    		"<option value='freq' disabled>frequency</option>" + 
 			"</select>" + 
 		"</div>");
 	else
@@ -219,7 +219,7 @@ function addList(canvas, listData, bicList, startPos) {
 	    	"<h5 class='listTitle' id='listTitle_" + listNum + "'>" + type + "</h5>" +
 	    	"<select class='orderCtrl' id='list_" + listNum + "_sortCtrl'>" + 
 	    		"<option value='alph'>alphabeic</option>" +
-	    		"<option value='freq'>frequency</option>" + 
+	    		"<option value='freq' disabled>frequency</option>" + 
 			"</select>" + 
 		"</div>");
 
