@@ -2,25 +2,49 @@
 {% load staticfiles %}
 {% block content %}
 <input id="csrf_token" type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+    {%if pCount == 0 %} 
+        <script>
+            alert("You don't have any private projects, the page will be redirected to project creating page.");
+            window.location.replace(window.SERVER_PATH + 'projects/add/');
+        </script>
+    {%endif%}
 	<div class="container-fluid">
 		<div class="col-md-2">
 			<div>
-				<label>Dataset Selection</label>
-	            <select class="selectpicker" data-live-search="true" data-width="80%" id="selDataSet">
-	                    <option>dataset1</option>
-	                    <option>dataset2</option>
-	                    <option>dataset3</option>
-	            </select>				
+				<label>Project List</label>
+	            <select class="selectpicker" data-live-search="true" data-width="80%" id="vis_sel_project">
+                    <option value=""></option>
+                {% for project in projects %}
+                    <option value="{{project.id}}">{{project.name}}</option>
+                {% endfor %}
+	            </select>
 			</div>
         	<hr>
 
-            <div>
+			<div>
+				<label>Visualization List</label>
+	            <select class="selectpicker" data-live-search="true" data-width="80%" id="vis_list">
+                    <option>vis1</option>
+	            </select>				
+			</div>
+			<hr>
+
+			<div>
+				<input id="btn_new_vis" class="btn btn-info btn-xs" type="button" value="Create New Visualiation" >
+			</div>
+			<hr>
+
+            <div class="hide_this" id="vis_dim_select">
                 <label>Dimension List</label>
                 <fieldset id="dataDimensionList"></fieldset>
                 <hr>
             	<input id="btn_add_list" class="btn btn-info btn-xs" type="button" value="Add List" >
             	<hr>
             </div>
+
+			<div id="vis_wiki_summary" class="ui-widget-content hide_this shade-container">
+				<h5>Wiki Summary</h5>
+			</div>
 		</div>
 
 		<div class="col-md-10">
@@ -30,4 +54,6 @@
 	</div>
 
 	<script type="text/javascript" src="{%static 'vis/js/biset.js'%}"></script>
+	<script type="text/javascript" src="{%static 'vis/js/visctrl.js'%}"></script>	
+	<script src="//code.jquery.com/ui/1.11.2/jquery-ui.js"></script>
 {% endblock %}

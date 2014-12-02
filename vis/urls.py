@@ -12,5 +12,6 @@ urlpatterns = patterns('',
     url(r'^saveVis/$', views.saveVis, name='saveVis'),
     url(r'^deleteVis/$', views.deleteVis, name='deleteVis'),
     url(r'^addVis/$', views.addVis, name='addVis'),
+    url(r'^loadVisList/$', views.loadVisList, name='loadVisList'),
 )
 

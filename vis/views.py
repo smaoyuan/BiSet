@@ -16,18 +16,17 @@ def analytics(request):
     @param request: the Django HttpRequest object
     '''
     theUser = request.user    
-    projects =  Project.objects.filter(user = theUser)
+    myProjects =  Project.objects.filter(user = theUser)
     
     privateProjects = []
     pCount = 0
-    for item in projects:
+    for item in myProjects:
         thisProject = {}
         thisProject['id'] = item.id
         thisProject['name'] = item.name
         thisProject['dataset'] = item.dataset        
-        privateProjects.append(thisProject)
+        privateProjects.append(item)
         pCount += 1
-    
     context = { 'active_tag': 'analytics', 'BASE_URL':settings.BASE_URL, 'projects':privateProjects, 'pCount': pCount}
     return TemplateResponse(request, 'vis/index.html', context)
 
@@ -38,16 +37,19 @@ def loadVisList(request):
     @param request: Django http request
     '''
     theUser = request.user    
-    projects =  Project.objects.filter(user = theUser)
+    requestJson = json.loads(request.body)
+    project_id = requestJson['project_id']
     
-    privateProjects = []
-    for item in projects:
-        thisProject = {}
-        thisProject['id'] = item.id
-        thisProject['name'] = item.name
-        thisProject['dataset'] = item.dataset        
-        privateProjects.append(thisProject)
+    theVisList =  Vis.objects.filter(project = project_id)
     
+    visList = []
+    for item in theVisList:
+        thisVis = {}
+        thisVis['id'] = item.id
+        thisVis['create_time'] = str(item.create_time)     
+        visList.append(thisVis)
+        
+    return HttpResponse(json.dumps(visList))
     
 @login_required     
 def addVis(request):
@@ -57,10 +59,10 @@ def addVis(request):
     '''
     try:
         # Loading front end data
-        requestJson = {} #json.loads(request.body)
+        requestJson = json.loads(request.body)
         
         theUser = request.user
-        project_id = 1 #requestJson['project_id']
+        project_id = requestJson['project_id']
         theProject = get_object_or_404(Project, pk = project_id)
         
         print theProject
@@ -99,7 +101,7 @@ def addVis(request):
     except Exception as e:
         print e
         responseJson = {"status": "error"}    
-    print responseJson
+        
     return HttpResponse(json.dumps(responseJson))
     
 @login_required 
