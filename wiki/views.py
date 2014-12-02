@@ -8,8 +8,28 @@ import wikipedia
 # import wikisettings
 
 
-# Create your views here.
+# Only search for english content.
 wikipedia.set_lang("en")
+
+
+def wikisummary(request):
+
+	rq = json.loads(request.POST['query'])
+
+	# searchterm = "orgimage"
+
+	try:
+		result = wikipedia.summary(rq)
+	except (wikipedia.exceptions.DisambiguationError, wikipedia.exceptions.WikipediaException) as e:
+		
+		if type(e) is wikipedia.exceptions.DisambiguationError:
+			options = e.options
+			return 	HttpResponse(json.dumps(options), content_type = "application/json")
+		else:
+			result = "No further information"
+			return HttpResponse(json.dumps(result), content_type = "application/json")
+
+	return HttpResponse(json.dumps(result), content_type = "application/json")
 
 
 def orgsum(request):
@@ -44,20 +64,4 @@ def orgimage(request):
 
 
 
-
-def wikilocation(request):
-
-		
-	try:
-		mercury = wikipedia.summary("blacksburg")
-	except wikipedia.exceptions.DisambiguationError as e:
-		options = e.options
-
-		return HttpResponse(options) 
-
-
-	result = []
-	result.append (wikipedia.summary("blacksburg"))
-
-	return HttpResponse(result) 
 
