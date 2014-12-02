@@ -561,10 +561,15 @@ def delete_comment(request):
         
 @login_required  
 def save_comment(request):
+    '''
+    Updating a comment using comment id.
+    @param request: Django http request containing comment id, comment content and project id.
+    '''
     if request.method == 'POST':
         commentJson = json.loads(request.body)
         
         try:
+            # Get the data from front end
             project_id = commentJson['project_id']
             comment_id = commentJson['comment_id']
             comment_content = commentJson['comment_content']
@@ -572,7 +577,6 @@ def save_comment(request):
             
             theComment = Comment.objects.get(pk = comment_id)
             
-            # TO-DO check permissions
             # Only the comment creator or super user can edit the comment            
             if not (theComment.user == theUser or theUser.is_superuser):
                 raise Http404           
@@ -586,18 +590,26 @@ def save_comment(request):
             responseData = {'status':'success', 'comments': comments_json}
             return HttpResponse(json.dumps(responseData), content_type = "application/json")
         except Exception as e:  
-            print e
             raise Http404    
     else:
         raise Http404
         
 @login_required         
 def sort_comment_asc(request, project_id):
-    
+    '''
+    Sorting the comments in asc order for a project.
+    @param request: Diango http request
+    @param project_id: the id of project for sorting.
+    '''
     return detail(request, project_id, sort_order = 'asc')
     
 @login_required         
-def sort_comment_desc(request, project_id): 
+def sort_comment_desc(request, project_id):
+    '''
+    Sorting the comments in desc order for a project.
+    @param request: Django http request
+    @param project_id: the id of project for sorting
+    '''
     return detail(request, project_id, sort_order = 'desc')
     
 @login_required         
@@ -605,20 +617,24 @@ def add_collaborator(request):
     '''
     Handles request for adding a collaborator to a project.
     Request data is sent by POST.
+    @param request: Django http request containing project id, and the collaborator name
     '''
     if request.method == 'POST':
         # request json data
         projectRaw = json.loads(request.body)
         try:
+            # data from front end
             project_id = projectRaw['project_id']
             collaborator_name = projectRaw['collaborator_name']
             theUser = request.user
             
-            # TO-DO handle situations when collaborator_name does not exist
+            # retrieve collaborator, raise 404 if the collaborator does not exist
             collaborator = get_object_or_404(User, username = collaborator_name)
             
+            # Can not add the user himself to be collaborator
             if collaborator == theUser:
                 raise Http404
+            
             
             theProject = get_object_or_404(Project, pk = project_id)
             # check if the project is delted
@@ -657,17 +673,21 @@ def add_collaborator(request):
         raise Http404
         
 @login_required         
-def delete_collaborator(request):    
+def delete_collaborator(request):
+    '''
+    Deleting the collaborator from a project.
+    @param request: Django http request containing project id and the collaborator's name
+    '''
     if request.method == 'POST':
         collaboratorRaw = json.loads(request.body)
         try:            
+            # data from the front end
             project_id = collaboratorRaw['project_id']
             collaborator_name = collaboratorRaw['collaborator_name']
             theUser = request.user
-            # TO-DO handle situations when collaborator_name does not exist
             collaborator = get_object_or_404(User, username = collaborator_name)
             
-            # TO-DO send feedback
+            # The collaborator can not be the logged in user.
             if theUser == collaborator:
                 raise Http404
             
@@ -689,13 +709,6 @@ def delete_collaborator(request):
             obj_display = force_text(collaborationship)
             log_deletion(request, collaborationship, obj_display)
             
-            '''
-            theComment.is_deleted = True
-            theComment.save()    
-            obj_display = force_text(theComment)
-            log_deletion(request, theComment, obj_display)'''           
-            
-            
             # Reload the collaborators from the database
             collaborators_list = load_project_collaborators_list(request, project_id)
             responseData = {'status':'success', 'collaborators': collaborators_list}
@@ -708,15 +721,23 @@ def delete_collaborator(request):
         
 @login_required        
 def undo_delete(request, project_id): 
-    print project_id
+    '''
+    Deleting a project by flipping a flag in database table.
+    @param request: Django http request
+    @param project_id: the id of project to be deleted.
+    '''
     theProject = Project.objects.get(id = project_id)
     theProject.is_deleted = False
     theProject.save()
     return HttpResponseRedirect("/projects/" + project_id + "/")
  
 @login_required 
-def undo_comment_delete(request, comment_id): 
-    print comment_id
+def undo_comment_delete(request, comment_id):
+    '''
+    Deleting a comment by flipping a flag in database table.
+    @param request: Django http request
+    @param comment_id: the id of comment to be deleted.
+    '''
     theComment = Comment.objects.get(id = comment_id)
     theComment.is_deleted = False
     theComment.save()
