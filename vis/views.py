@@ -8,6 +8,7 @@ from django.conf import settings
 from vis.models import Vis, VisNodes
 from projects.models import Project
 from django.contrib.auth.decorators import login_required
+from django.utils import timezone
 
 @login_required 
 def analytics(request):
@@ -55,6 +56,7 @@ def loadVisList(request):
 def addVis(request):
     '''
     Creating a visualization for "POST" request.
+    Returning list and bisets json.
     @param request: Django http request
     '''
     try:
@@ -81,28 +83,43 @@ def addVis(request):
         orgField = 0
         miscField = 0
         
+        listNames = []
         if 'person' in requestJson:
             personField = 1
+            listNames.append("person")
         if 'location' in requestJson:
             locationField = 1
+            listNames.append("location")
         if 'phone' in requestJson:
-            phoneField = 1        
+            phoneField = 1       
+            listNames.append("phone")            
         if 'date' in requestJson:
             dateField = 1
+            listNames.append("date")
         if 'org' in requestJson:
             orgField = 1
+            listNames.append("org")
         if 'misc' in requestJson:
             miscField = 1
+            listNames.append("misc")
+            
+        lstsBisetsJson = getLstsBisets(listNames)
         
-        newVis = Vis(user = theUser, project = theProject, personIn = personField, locationIn = locationField, phoneIn = phoneField, dateIn = dateField, orgIn = orgField, miscIn = miscField)
+        newVis = Vis(user = theUser, project = theProject, personIn = personField, locationIn = locationField, phoneIn = phoneField, dateIn = dateField, orgIn = orgField, miscIn = miscField, create_time = timezone.now())
             
         newVis.save()
+        
+        thisVis = {}
+        thisVis['id'] = newVis.id
+        thisVis['create_time'] = str(newVis.create_time)
+        
+        lstsBisetsJson['vis'] = thisVis
+        
         responseJson = {"status": "success"}
     except Exception as e:
-        print e
         responseJson = {"status": "error"}    
         
-    return HttpResponse(json.dumps(responseJson))
+    return HttpResponse(json.dumps(lstsBisetsJson))
     
 @login_required 
 def saveVis(request):
@@ -111,10 +128,10 @@ def saveVis(request):
     @param request: the Django HttpRequest object
     '''
     # Loading front end data
-    requestJson = {} #json.loads(request.body)
+    requestJson = json.loads(request.body)
     
     theUser = request.user
-    project_id = 1 #requestJson['project_id']
+    project_id = requestJson['project_id']
     theProject = get_object_or_404(Project, pk = project_id)
     
     # Only the project creator, super user can delete the project
@@ -123,8 +140,17 @@ def saveVis(request):
     if not has_permission:
         raise Http404
     
-    visID = 2;
-    toUpdate = [{"nodeType": "person", "nodeId": 1},{"nodeType": "person", "nodeId": 2},{"nodeType": "location", "nodeId": 3}]
+    visID = requestJson['vis_id']
+    
+    rawNodes = requestJson['highlight_ent']
+    
+    toUpdate = []
+    for item in rawNodes:
+        nodeArr = item.split('_')
+        tmp = {}
+        tmp['nodeType'] = nodeArr[0]
+        tmp['nodeId'] = nodeArr[1]
+        toUpdate.append(tmp)
         
     print toUpdate
         
@@ -165,10 +191,10 @@ def deleteVis(request):
     '''
     try:
         # Loading front end data
-        requestJson = {} #json.loads(request.body)
+        requestJson = json.loads(request.body)
         
         theUser = request.user
-        project_id = 1 #requestJson['project_id']
+        project_id = requestJson['project_id']
         theProject = get_object_or_404(Project, pk = project_id)
         
         print theProject
@@ -179,7 +205,7 @@ def deleteVis(request):
         if not has_permission:
             raise Http404
             
-        visID = 1
+        visID = requestJson['vis_id']
         
         # Deleting all highlighted nodes
         nodesToDelete = VisNodes.objects.filter(vis = visID)
@@ -194,7 +220,7 @@ def deleteVis(request):
         responseJson = {"status": "success"}
         
     except Exception as e:
-        responseJson = {"status": "error", "error":e}
+        responseJson = {"status": "error"}
     
     return HttpResponse(json.dumps(responseJson))
     
@@ -204,12 +230,11 @@ def loadVis(request):
     Loading a saved vis. Returning a json object.
     @param request: the Django HttpRequest object
     '''
-    visID = 1
     # Loading front end data
-    requestJson = {} #json.loads(request.body)
+    requestJson = json.loads(request.body)
     
     theUser = request.user
-    project_id = 1 #requestJson['project_id']
+    project_id = requestJson['project_id']
     theProject = get_object_or_404(Project, pk = project_id)
     
     print theProject
@@ -219,7 +244,8 @@ def loadVis(request):
     
     if not has_permission:
         raise Http404
-    # get the lists names of the vis
+    # get the lists names of the vis    
+    visID = requestJson['vis_id']
     listNames = []
     theVis = Vis.objects.get(id = visID)
     if theVis.personIn:
@@ -235,18 +261,19 @@ def loadVis(request):
     if theVis.miscIn:
         listNames.append("misc")
     
-    print listNames
     
     lstsBisetsJson = getLstsBisets(listNames)
     
+    
+    
     selectedNodes = VisNodes.objects.filter(vis = visID)
     
-    lstsBisetsJson["selectedNodes"] = {}
+    lstsBisetsJson["highlight_ent"] = {}
     
     for item in selectedNodes:
         identity = str(item.nodeType) + "_" + str(item.nodeId)
-        lstsBisetsJson["selectedNodes"][identity] = \
-            {"listType": item.nodeType, "nodeID": item.nodeId}
+        lstsBisetsJson["highlight_ent"][identity] = \
+            {"nodeType": item.nodeType, "nodeID": item.nodeId}   
     
     
     return HttpResponse(json.dumps(lstsBisetsJson))
