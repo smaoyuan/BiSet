@@ -23,14 +23,16 @@
 
 			<div>
 				<label>Visualization List</label>
-	            <select class="selectpicker" data-live-search="true" data-width="80%" id="vis_list">
-                    <option>vis1</option>
+	            <select class="selectpicker" data-live-search="true" data-width="80%" id="vis_list" disabled>
+                    <option value=""></option>
+                    <!-- <option>vis1</option> -->
 	            </select>				
 			</div>
 			<hr>
 
 			<div>
-				<input id="btn_new_vis" class="btn btn-info btn-xs" type="button" value="Create New Visualiation" >
+				<input id="btn_new_vis" class="btn btn-info btn-xs" type="button" value="New Vis Config" disabled>
+                <input id="btn_save_config" class="btn btn-info btn-xs" type="button" value="Save Config" disabled>
 			</div>
 			<hr>
 
@@ -38,11 +40,16 @@
                 <label>Dimension List</label>
                 <fieldset id="dataDimensionList"></fieldset>
                 <hr>
-            	<input id="btn_add_list" class="btn btn-info btn-xs" type="button" value="Add List" >
+            </div>
+
+            <div id="vis_ctrl">
+				<label>Visualization Control</label><br />
+				<input id="btn_vis_save" class="btn btn-info btn-xs" type="button" value="Save" >
+            	<input id="btn_vis_del" class="btn btn-info btn-xs" type="button" value="Delete" >
             	<hr>
             </div>
 
-			<div id="vis_wiki_summary" class="ui-widget-content hide_this shade-container">
+			<div id="vis_wiki_summary" class="ui-widget-content shade-container">
 				<h5>Wiki Summary</h5>
 			</div>
 		</div>

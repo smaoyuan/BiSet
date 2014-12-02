@@ -26,7 +26,8 @@ var color = {
 // an array to store all links
 var connections = [],
 	biclusters = [],
-	entLists = [];
+	entLists = [],
+	selectedEnts = [];
 
 // a hash table to maintain the displayed bics
 //var bicDisplayed = [];
@@ -75,67 +76,68 @@ $("#dataDimensionList").append(
     "<input type='checkbox' name='dimensions' value='org' id='d_org'> Organization<br />"
 );    
 
-d3.json(window.SERVER_PATH + 'vis/loadbisets/', function(error, json) {
-// d3.json("http://localhost:8000/static/vis/data/data.json", function(error, json) {	
-	var dumData = json,
-		bicData = dumData.bics;
+// d3.json(window.SERVER_PATH + 'vis/loadbisets/', function(error, json) {
+// for testing purpose
+// // d3.json("http://localhost:8000/static/vis/data/data.json", function(error, json) {	
+// 	var dumData = json,
+// 		bicData = dumData.bics;
 
-	// set all bics has not been displayed
-	for (var i = 0; i < bicData.length; i++)
-		bicDisplayed.put(bicData[i].bicID, 0);
+// 	// set all bics has not been displayed
+// 	for (var i = 0; i < bicData.length; i++)
+// 		bicDisplayed.put(bicData[i].bicID, 0);
 
-	// var svg = $("svg#vis_canvas")[0];
-	// var bbox = svg.getBBox();
-	//svg.setAttribute("viewBox", [bbox.x, bbox.y, bbox.width, bbox.height]);
+// 	// var svg = $("svg#vis_canvas")[0];
+// 	// var bbox = svg.getBBox();
+// 	//svg.setAttribute("viewBox", [bbox.x, bbox.y, bbox.width, bbox.height]);
 
-	// testing for adding a new list
-	$('#btn_add_list').click(function(){
+// 	// testing for adding a new list
+// 	$('#btn_add_list').click(function(){
 
-		datasetRequest();
+// 		datasetRequest();
 
-		// get selected dimensions
-		var selDims = $("input:checkbox:checked");
+// 		// get selected dimensions
+// 		var selDims = $("input:checkbox:checked");
 		
-		// add all lists
-		for (var i = 0; i < selDims.length; i++) {
+// 		// add all lists
+// 		for (var i = 0; i < selDims.length; i++) {
 
-			var lkey = $(selDims[i]).val();
+// 			var lkey = $(selDims[i]).val();
 
-			entList.count += 1;
-			entList.startPos += (entList.width + entList.gap) * 2 * i;
+// 			entList.count += 1;
+// 			entList.startPos += (entList.width + entList.gap) * 2 * i;
 
-			var aList = canvas.append('g')
-				.attr('id', 'list_' + entList.count)
-				.attr('width', entList.width)
-				.attr('height', entList.height)
-				.attr("transform", function(d, i) { return "translate(" + entList.startPos + "," + 0 + ")"; });
-			entLists.push(aList);
+// 			var aList = canvas.append('g')
+// 				.attr('id', 'list_' + entList.count)
+// 				.attr('width', entList.width)
+// 				.attr('height', entList.height)
+// 				.attr("transform", function(d, i) { return "translate(" + entList.startPos + "," + 0 + ")"; });
+// 			entLists.push(aList);
 
-			var aListData = dumData.lists[lkey];		
+// 			var aListData = dumData.lists[lkey];		
 
-			// add a list to the vis canvas
-			var aListView = addList(aList, aListData, bicData, entList.startPos);
-			addSortCtrl(aListView);		 
-		}
+// 			// add a list to the vis canvas
+// 			var aListView = addList(aList, aListData, bicData, entList.startPos);
+// 			addSortCtrl(aListView);		 
+// 		}
 
-		// add all bics with lines
-		for (var i = 0; i < selDims.length; i++) {
-			if (i % 2 == 0) {
-				var bicStartPos = (entList.width + entList.gap) * 2 * (i / 2 + 1) - ((entList.width + entList.gap) * 2 * (i / 2 + 1) - entList.width - bic.frameWidth) / 2 - bic.frameWidth;
+// 		// add all bics with lines
+// 		for (var i = 0; i < selDims.length; i++) {
+// 			if (i % 2 == 0) {
+// 				var bicStartPos = (entList.width + entList.gap) * 2 * (i / 2 + 1) - ((entList.width + entList.gap) * 2 * (i / 2 + 1) - entList.width - bic.frameWidth) / 2 - bic.frameWidth;
 
-				var aBicList = canvas.append('g')
-					.attr('id', 'bic_list_' + entList.count)
-					.attr('width', bicList.width)
-					.attr('height', bicList.height)
-					.attr("transform", function(d, i) { return "translate(" + bicStartPos + "," + 0 + ")"; });;
+// 				var aBicList = canvas.append('g')
+// 					.attr('id', 'bic_list_' + entList.count)
+// 					.attr('width', bicList.width)
+// 					.attr('height', bicList.height)
+// 					.attr("transform", function(d, i) { return "translate(" + bicStartPos + "," + 0 + ")"; });;
 
-				var rowField = $(selDims[i]).val(),
-					colField = $(selDims[i + 1]).val();
-				addBics(entLists[i], aBicList, aListData, bicData, bicStartPos, rowField, colField);				
-			}
-		}
-	});	
-});
+// 				var rowField = $(selDims[i]).val(),
+// 					colField = $(selDims[i + 1]).val();
+// 				addBics(entLists[i], aBicList, aListData, bicData, bicStartPos, rowField, colField);				
+// 			}
+// 		}
+// 	});	
+// });
 
 var drag = d3.behavior.drag()
     // .origin(function() {
@@ -429,26 +431,48 @@ function addList(canvas, listData, bicList, startPos) {
 				"query": requestVal
 			}
 
+			// retrieve information from Wiki
 			$.ajax({
-			        url: window.SERVER_PATH + 'wiki/wikisummary/',
-			        type: "POST",
-			        data: JSON.stringify(requestJSON),
-			        contentType: "application/json",
-			        success: function(data){
-			        	console.log(data);
-			        },
-			        beforeSend: function(xhr, settings) {
-			            if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
-			                xhr.setRequestHeader("X-CSRFToken", csrftoken);
-			            }
-			        }
-			    });
+		        url: window.SERVER_PATH + 'wiki/wikisummary/',
+		        type: "POST",
+		        data: JSON.stringify(requestJSON),
+		        contentType: "application/json",
+		        success: function(data){
+		        	var sumtxt = data.sumtxt,
+		        		optiontxt = data.option,
+		        		empTxt = data.empty;
+
+	        		console.log(data);
+
+	        		$("#vis_wiki_title").html(requestVal);
+
+	        		if (sumtxt.length != 0)
+	        			$("#vis_wiki_text").html(sumtxt);
+	        		else {
+	        			if (optiontxt.length != 0) {
+	        				var text = "Do you mean: " + optiontxt[0] + ", or "  + optiontxt[1] + "?";
+		        			$("#vis_wiki_text").html(text);
+	        			}
+	        			else {
+	        				$("#vis_wiki_text").html(empTxt);
+	        			}
+	        		}
+		        },
+		        beforeSend: function(xhr, settings) {
+		            if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+		                xhr.setRequestHeader("X-CSRFToken", csrftoken);
+		            }
+		        }
+		    });
 
 
     		// change color when highlight
     		if (d3.select(this).attr("class") != "entSelected") {
     			d3.select("#" + frameID + "_frame").attr("fill", color.entHighlight);
     			d3.select(this).attr("class", "entSelected");
+
+    			var thisEntID = d3.select(this).attr("id");
+    			selectedEnts.push(thisEntID);
 
 				// 1st list
 				if (thisListID == 1) {
@@ -1002,7 +1026,3 @@ function csrfSafeMethod(method) {
 //     'container': 'body',
 //     'placement': 'bottom'
 // });
-
-$(function() {
-	$( "#wiki_summary" ).draggable();
-});

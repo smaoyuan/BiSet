@@ -195,14 +195,21 @@ div.shade-container{
 /*size of the list control group*/
 #biset_control {
     height: 70px;
-    width: 1200px;
+    width: 1600px;
 }
 
 div.listControlGroup {
-    width: 440px;
+    width: 680px;
     float: left;
 }
 
 #biset_canvas{
     position: absolute;
+}
+
+#vis_wiki_summary {
+    /*border: 1px solid;*/
+    width: 160px;
+    height: 250px;
+    overflow: scroll;
 }
