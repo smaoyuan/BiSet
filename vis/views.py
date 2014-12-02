@@ -246,7 +246,6 @@ def getLstsBisets(lstNames):
     The json contains lists and bicsets objects.
     @param lstNames: the names of lists
     '''
-    print lstNames
     length = len(lstNames)
     biclusDict = {}
     entryLists = {}
