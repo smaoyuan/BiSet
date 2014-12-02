@@ -1,0 +1,140 @@
+{
+	"lists": [
+		{
+			"listID": 1,
+			"listType": "person",
+			"leftType": "",
+			"rightType": "location",
+			"entities": [
+				{ 
+					"entityID": 1, 
+					"entValue": "Bob", 
+					"entFreq": 12, 
+					"bicSetsLeft": [],
+					"bicSetsRight": [0],
+					"entSelected": 0
+				},
+				{ 
+					"entityID": 2, 
+					"entValue": "Alex", 
+					"entFreq": 3,
+					"bicSetsLeft": [],
+					"bicSetsRight": [0, 1],
+					"entSelected": 0					
+				},
+				{ 
+					"entityID": 3, 
+					"entValue": "Lily", 
+					"entFreq": 20,
+					"bicSetsLeft": [],
+					"bicSetsRight": [1],
+					"entSelected": 0					
+				},
+				{ 
+					"entityID": 4, 
+					"entValue": "David", 
+					"entFreq": 7,
+					"bicSetsLeft": [],
+					"bicSetsRight": [0, 1],
+					"entSelected": 0					
+				}
+			]
+		},
+		{
+			"listID": 2,
+			"listType": "location",
+			"leftType": "person",
+			"rightType": "",			
+			"entities": [
+				{ 
+					"entityID": 1, 
+					"entValue": "New York", 
+					"entFreq": 3,
+					"bicSetsLeft": [0, 1],
+					"bicSetsRight": [],
+					"entSelected": 0										
+				},
+				{ 
+					"entityID": 2, 
+					"entValue": "Boston", 
+					"entFreq": 12,
+					"bicSetsLeft": [0],
+					"bicSetsRight": [],
+					"entSelected": 0					
+				},
+				{ 
+					"entityID": 3, 
+					"entValue": "Washington, DC", 
+					"entFreq": 5,
+					"bicSetsLeft": [0, 1],
+					"bicSetsRight": [],
+					"entSelected": 0					
+				},
+				{ 
+					"entityID": 4, 
+					"entValue": "Charlottesville", 
+					"entFreq": 18,
+					"bicSetsLeft": [0, 1],
+					"bicSetsRight": [],
+					"entSelected": 0					
+				}
+			]
+		}
+	],
+
+	"bics": [ 
+		{
+			"bicID": 0,
+			"rowField": "person",
+			"colField": "location",
+			"entNumInRow": 3,
+			"entNumInCol": 3,
+			"row": [1, 2, 4],
+			"col": [1, 3, 4],
+			"bicSelected": 0
+		},
+		{ 
+			"bicID": 1,
+			"rowField": "person",
+			"colField": "location",
+			"entNumInRow": 3,
+			"entNumInCol": 4,
+			"row": [2, 3, 4],
+			"col": [1, 2, 3, 4],
+			"bicSelected": 0
+		}
+	],
+
+	"edgeGroups": [
+		{
+			"edgeGroupID": 1,
+			"startTypeID": 1,
+			"endTypeID": 1,
+			"startType": "person",
+			"endType": "clusters",
+			"edges": [
+				{"edgeID": 1, "start": 1, "end": 1},
+				{"edgeID": 2, "start": 2, "end": 1},
+				{"edgeID": 3, "start": 4, "end": 1},
+				{"edgeID": 4, "start": 2, "end": 2},
+				{"edgeID": 5, "start": 3, "end": 2},
+				{"edgeID": 6, "start": 4, "end": 2}
+			]
+		},
+		{
+			"edgeGroupID": 2,
+			"startTypeID": 1,
+			"endTypeID": 2,
+			"startType": "clusters",
+			"endType": "location",
+			"edges": [
+				{"edgeID": 7, "start": 1, "end": 1},
+				{"edgeID": 8, "start": 1, "end": 3},
+				{"edgeID": 9, "start": 1, "end": 4},
+				{"edgeID": 10, "start": 2, "end": 1},
+				{"edgeID": 11, "start": 2, "end": 2},
+				{"edgeID": 12, "start": 2, "end": 3}
+			]
+		}
+	]
+}

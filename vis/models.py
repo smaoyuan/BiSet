@@ -13,7 +13,8 @@ class Vis(models.Model):
     phoneIn = models.BooleanField(default = 0)
     dateIn = models.BooleanField(default = 0)
     orgIn = models.BooleanField(default = 0)
-    miscIn = models.BooleanField(default = 0)
+    miscIn = models.BooleanField(default = 0)    
+    create_time = models.DateTimeField('date published')
     
 class VisNodes(models.Model):
     '''

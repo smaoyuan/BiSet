@@ -89,6 +89,9 @@ function colUpdateRequest(type, colName) {
             if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
                 xhr.setRequestHeader("X-CSRFToken", csrftoken);
             }
+        },
+        error: function(){
+            alert("The user name does not exist.");
         }
     });    
 }

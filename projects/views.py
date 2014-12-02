@@ -245,7 +245,6 @@ def plist(request):
                     
         except Exception as e:
             return HttpResponse(e)
-            print e
         
         
     context = { 'active_tag': 'projects', 'user' : request.user, 'BASE_URL':settings.BASE_URL, 

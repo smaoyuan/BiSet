@@ -15,8 +15,39 @@ def analytics(request):
     This is visualization page. 
     @param request: the Django HttpRequest object
     '''
-    context = { 'active_tag': 'analytics', 'BASE_URL':settings.BASE_URL}
+    theUser = request.user    
+    projects =  Project.objects.filter(user = theUser)
+    
+    privateProjects = []
+    pCount = 0
+    for item in projects:
+        thisProject = {}
+        thisProject['id'] = item.id
+        thisProject['name'] = item.name
+        thisProject['dataset'] = item.dataset        
+        privateProjects.append(thisProject)
+        pCount += 1
+    
+    context = { 'active_tag': 'analytics', 'BASE_URL':settings.BASE_URL, 'projects':privateProjects, 'pCount': pCount}
     return TemplateResponse(request, 'vis/index.html', context)
+
+@login_required
+def loadVisList(request):
+    '''
+    Loading private projects. Returns the private projects for the loggin user.
+    @param request: Django http request
+    '''
+    theUser = request.user    
+    projects =  Project.objects.filter(user = theUser)
+    
+    privateProjects = []
+    for item in projects:
+        thisProject = {}
+        thisProject['id'] = item.id
+        thisProject['name'] = item.name
+        thisProject['dataset'] = item.dataset        
+        privateProjects.append(thisProject)
+    
     
 @login_required     
 def addVis(request):
