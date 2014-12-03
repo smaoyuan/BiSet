@@ -54,6 +54,7 @@
                         </li>
                         {% endfor %}
                     </ul>
+                    {% if collaborate_permisson == 2 %}
                     <div class="well">
                         <div class="input-group">
                             <input id = 'collaborator_name' type="text" class="form-control">
@@ -65,6 +66,7 @@
                             </span>
                         </div>                            
                     </div>
+                    {%endif%}
                 </div>
             </div>            
             {% endif %}
@@ -77,8 +79,8 @@
                     <h3 class="panel-title">Recent Comments</h3>
                     <!-- <span class="label label-info" id="comlist_num">{{comments|length}}</span> -->
                     
-                    <a class="label label-info" href = "{{BASE_URL}}projects/sort_comment_asc/{{project.id}}/" id='sort_comment_asc'> Sort Ascend</a>
-                    <a class="label label-info" href = "{{BASE_URL}}projects/sort_comment_desc/{{project.id}}/" id='sort_comment_desc'> Sort Descend</a>
+                    <a class="label label-info" href = "{{BASE_URL}}projects/sort_comment_asc/{{project.id}}/" id='sort_comment_asc'><span class="glyphicon glyphicon-arrow-up"></span></a>
+                    <a class="label label-info" href = "{{BASE_URL}}projects/sort_comment_desc/{{project.id}}/" id='sort_comment_desc'><span class="glyphicon glyphicon-arrow-down"></a>
                 </div>
                 <!-- a list of comment -->
                 <div class="panel-body">
@@ -91,7 +93,7 @@
                                             <img src="{% static 'common/imgs/default1.png' %}" class="img-circle img-responsive" alt="" />
                                         </div>
 
-                                        <div class="col-xs-7 col-md-10">
+                                        <div class="col-xs-7 col-md-10 col-lg-10">
                                             <div class="col-md-10">
                                                 <div class="mic-info">
                                                     By: <a href="{% url 'userprofile:view_profile' comment.user.id %}"> {{ comment.user }} </a> on {{ comment.create_time }}
@@ -108,22 +110,22 @@
 
                                             <div class="col-md-2 col-md-offset-0">
                                                 {% if comment.edit_enable %}
-                                                <div class="col-md-1">
-                                                    <button type="button" class="btn btn-primary btn-xs btn_comment_edit" title="Edit" value="{{ comment.id }}">
+                                                <!-- <div class="col-md-1"> -->
+                                                    <button type="button" class="btn btn-info btn-xs btn_comment_edit" title="Edit" value="{{ comment.id }}">
                                                     <span class="glyphicon glyphicon-pencil"></span>
                                                     </button>
-                                                    <button type="button" class="btn btn-primary btn-xs btn_comment_edit_save" title="Save" value="test" style="display: none;">
+                                                    <button type="button" class="btn btn-info btn-xs btn_comment_edit_save" title="Save" value="test" style="display: none;">
                                                     <span class="glyphicon glyphicon-save"></span>
                                                     </button>                                               
-                                                </div>
+                                                <!-- </div> -->
                                                 {% endif %}
 
                                                 {% if comment.delete_enable %}
-                                                <div class="col-md-1">
+                                                <!-- <div class="col-md-1"> -->
                                                     <button type="button" class="btn btn-danger btn-xs btn_comment_delete" title="Delete" value="{{ comment.id }}">
                                                     <span class="glyphicon glyphicon-remove"></span>
                                                     </button>     
-                                                </div>
+                                                <!-- </div> -->
                                                 {% endif %}
                                                 
                                             </div>
@@ -180,7 +182,7 @@
         </div>
     </div>
     
-    <div class="col-md-3 col-md-offset-0">
+    <div class="col-md-3 col-md-offset-0 {%if collaborate_permisson = 0%}hide_this{%endif%}">
             <!-- collaborator of a project -->
             <div class="panel panel-default widget shade-container">
                 <div class="panel-heading">
@@ -199,20 +201,20 @@
                                 	<div class="col-xs-7 col-md-9">
                                 		<p>
                                         <a href="{% url 'userprofile:view_profile' item.action_user.id %}">{{ item.action_user }}</a>
-                                		{{ item.logAction }} 
+                                		{{ item.logAction }} comment
                                         {% if item.logContentType == 'comment' %}
-                                            {% if item.logObject.is_deleted %}
+                                            {% if item.logObject.is_deleted and collaborate_permisson = 2%}
                                                 '{{ item.logObject }}' <a href = '{% url 'projects:undo_comment_delete' item.logObject.pk %}'>(Undo?)</a>
                                             {% else %}
                                                 '{{ item.logObject }}'
                                             {% endif %}  
                                                
-                                            To project 
+                                            <!-- To project 
                                             {% if item.logObject.project.is_deleted %}
                                                     '{{ item.logObject.project }}'
                                                 {% else %}
                                                     <a href = '{% url 'projects:detail' item.logObject.project.pk %}'>{{ item.logObject.project }}</a> 
-                                                {% endif %} 
+                                                {% endif %} -->
                                         {% elif  item.logContentType == 'collaborationship'%}
                                             a collaborator                                        
                                             {% if item.logObject != None %}

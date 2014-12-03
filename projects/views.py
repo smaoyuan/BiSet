@@ -534,7 +534,7 @@ def delete_comment(request):
             if theProject.is_deleted or theComment.is_deleted:
                 raise Http404
             # Only the project creator, super user and collaborators can delete comment of the project
-            has_permission = theProject.is_creator(theUser) # or theProject.is_collaborator(theUser) or theUser.is_superuser or theComment.is_creator(theUser)
+            has_permission = theProject.is_creator(theUser) or theUser.is_superuser or theComment.is_creator(theUser)
 
             if not has_permission:
                 raise Http404
@@ -581,9 +581,15 @@ def save_comment(request):
             # Reload the comments from the database
             comments_json = load_project_comment_list(request, project_id) 
             
+            # Log the change
+            change_msg = theComment.construct_change_message()
+            print change_msg
+            log_change(request, theComment, change_msg)
+            
             responseData = {'status':'success', 'comments': comments_json}
             return HttpResponse(json.dumps(responseData), content_type = "application/json")
         except Exception as e:  
+            print e
             raise Http404    
     else:
         raise Http404

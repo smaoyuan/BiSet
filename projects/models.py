@@ -83,6 +83,32 @@ class Collaborationship(models.Model):
         unique_together = (('project', 'user'),)
         
 class Comment(models.Model):
+    def __init__(self, *args, **kwargs):
+        super(Comment, self).__init__(*args, **kwargs)
+        self.unsaved = {}
+        for field in self._meta.fields:
+            self.unsaved[field.name] = getattr(self, field.name, None)
+
+    def construct_change_message(self, force_insert=False, force_update=False, using=None):
+        oldArr = {}
+        newArr = {}
+        change_message = []
+        changed_fields = []
+        old_values = ''
+        new_values = ''
+        for name, value in self.unsaved.iteritems():
+            if not value == getattr(self, name, None):
+                changed_fields.append(name)
+                old_values = old_values + str(value) + ' SEP '
+                new_values = new_values + str(getattr(self, name, None)) + ' SEP '
+                
+        change_message.append(_('Changed %(list)s.')
+                % {'list': get_text_list(changed_fields, _('and'))})        
+                
+        
+        change_message = ' '.join(change_message)
+        return change_message or _('No fields changed.')
+        
     project = models.ForeignKey(Project)
     user = models.ForeignKey(User)
     content = models.CharField(max_length=500)    

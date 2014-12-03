@@ -69,19 +69,20 @@ def loadVisList(request):
     theUser = request.user    
     requestJson = json.loads(request.body)
     project_id = requestJson['project_id']
-    theVisList =  Vis.objects.filter(project = project_id)
+    theVisList =  Vis.objects.filter(project = project_id).order_by('create_time')
     
     visList = []
     for item in theVisList:
         thisVis = {}
-        thisVis['id'] = item.id
+        thisVis['id'] = item.id        
+        thisVis['vis_name'] = item.name
         thisVis['create_time'] = str(item.create_time)     
         visList.append(thisVis)
         
     return HttpResponse(json.dumps(visList))
     
 @login_required     
-def addVis(request):
+def addVisConfig(request):
     '''
     Creating a visualization for "POST" request.
     Returning list and bisets json.
@@ -93,6 +94,7 @@ def addVis(request):
         
         theUser = request.user
         project_id = requestJson['project_id']
+        visconfigName = requestJson['vis_name']
         theProject = get_object_or_404(Project, pk = project_id)
         
         print theProject
@@ -133,12 +135,13 @@ def addVis(request):
             
         lstsBisetsJson = getLstsBisets(listNames)
         
-        newVis = Vis(user = theUser, project = theProject, personIn = personField, locationIn = locationField, phoneIn = phoneField, dateIn = dateField, orgIn = orgField, miscIn = miscField, create_time = timezone.now())
+        newVis = Vis(user = theUser, project = theProject, name = visconfigName, personIn = personField, locationIn = locationField, phoneIn = phoneField, dateIn = dateField, orgIn = orgField, miscIn = miscField, create_time = timezone.now())
             
         newVis.save()
         
         thisVis = {}
-        thisVis['id'] = newVis.id
+        thisVis['id'] = newVis.id        
+        thisVis['vis_name'] = newVis.name
         thisVis['create_time'] = str(newVis.create_time)
         
         lstsBisetsJson['vis'] = thisVis

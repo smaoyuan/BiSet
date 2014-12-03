@@ -20,7 +20,8 @@ var color = {
 	entHighlight: "rgba(228, 122, 30, 0.4)", //"rgba(78, 131, 232, 0.7)",
 	entFreColor: "rgba(22, 113, 229, 0.3)",
 	bicFrameColor: "rgba(0, 20, 20, 0.2)",
-	lineNormalColor: "rgba(0, 0, 0, 0.3)"
+	lineNormalColor: "rgba(0, 0, 0, 0.3)",
+	lsortColor: "rgba(0,0,0,0)"
 };
 
 // an array to store all links
@@ -31,7 +32,8 @@ var connections = [],
 
 // a hash table to maintain the displayed bics
 //var bicDisplayed = [];
-var bicDisplayed = new Hashtable();
+var bicDisplayed = new Hashtable(),
+	bicOnShow = [];
 
 // canvas for visualizations
 var canvas = d3.select("#biset_canvas")
@@ -192,10 +194,12 @@ function addList(canvas, listData, bicList, startPos) {
 
 	// values of each entity
 	var dataValues = [],
-		dataFrequency = [];
+		dataFrequency = [],
+		dataIndex = [];
 	for (var i = 0; i < entSet.length; i++) {
 		dataValues.push(entSet[i].entValue);
 		dataFrequency.push(entSet[i].entFreq);
+		dataIndex.push(entSet[i].index);
 	}
 
 	dataValues.sort();
@@ -210,20 +214,20 @@ function addList(canvas, listData, bicList, startPos) {
 	    .range([3, entity.freqWidth - 1]);	    
 
     // add control group of a list
-    if (listNum == 1)
-	    $("#biset_control").append("<div class='listControlGroup'>" + 
-	    	"<h5 class='listTitle' id='listTitle_" + listNum + "'>" + type + "</h5>" + 
-	    	"<select class='orderCtrl' id='list_" + listNum + "_sortCtrl'>" + 
-	    		"<option value='alph'>alphabeic</option>" + 
-	    		"<option value='freq' disabled>frequency</option>" + 
-			"</select>" + 
-		"</div>");
-	else
+ //    if (listNum == 1)
+	//     $("#biset_control").append("<div class='listControlGroup'>" + 
+	//     	"<h5 class='listTitle' id='listTitle_" + listNum + "'>" + type + "</h5>" + 
+	//     	"<select class='orderCtrl' id='list_" + listNum + "_sortCtrl'>" + 
+	//     		"<option value='alph'>alphabeic</option>" + 
+	//     		"<option value='freq'>frequency</option>" + 
+	// 		"</select>" + 
+	// 	"</div>");
+	// else
 	    $("#biset_control").append("<div class='listControlGroup'>" +
 	    	"<h5 class='listTitle' id='listTitle_" + listNum + "'>" + type + "</h5>" +
 	    	"<select class='orderCtrl' id='list_" + listNum + "_sortCtrl'>" + 
 	    		"<option value='alph'>alphabeic</option>" +
-	    		"<option value='freq' disabled>frequency</option>" + 
+	    		"<option value='freq'>frequency</option>" + 
 			"</select>" + 
 		"</div>");
 
@@ -523,7 +527,7 @@ function addList(canvas, listData, bicList, startPos) {
 		    					colListIDs = bicList[leftRelBicIDs[i]].col,
 		    					rowField = bicList[leftRelBicIDs[i]].rowField,
 		    					colField = bicList[leftRelBicIDs[i]].colField,
-		    					thisBicID = "bic_" + leftRelBicIDs[i];
+		    					thisBicID = "bic_" + leftRelBicIDs[i];	    					
 
 							d3.select("#" + thisBicID)
 								.attr("class", "bicSelected")
@@ -546,6 +550,8 @@ function addList(canvas, listData, bicList, startPos) {
 						}
 					}
 				}
+
+				console.log(bicOnShow);
     		}
     		else {
 
@@ -832,6 +838,15 @@ function addBics(preListCanvas, bicListCanvas, listData, bicList, bicStartPos, r
 }
 
 
+// when all d3 transition finish, and then do the callback
+function endall(transition, callback) { 
+	var n = 0; 
+	transition 
+	    .each(function() { ++n; }) 
+	    .each("end", function() { if (!--n) callback.apply(this, arguments); }); 
+}
+
+
 /*
 * sort a list visually
 * @param aList, svg objects in a list selected by d3 with associated data
@@ -843,26 +858,50 @@ function sortList(aList, sortType) {
 
 	// values of each entity
 	var dataValues = [],
-		dataFrequency = [];
+		// dataFrequency = [],
+		dataIndex = [];
 	for (var i = 0; i < entSet.length; i++) {
 		dataValues.push(entSet[i].entValue);
-		dataFrequency.push(entSet[i].entFreq);
+		// dataFrequency.push(entSet[i].entFreq);
+		dataIndex.push(entSet[i].index);
 	}
+
+	// hide the selected line
+	d3.selectAll(".linkSelected").transition()
+		.delay(150)
+		.style("stroke", color.lsortColor);
 
 	// sort by frequency
 	if (sortType == "freq") {
-		dataFrequency.sort(function(a, b) { return b - a; });
+		dataIndex.sort(function(a, b) { return a - b; });
+
+		aList.yAxis.domain(dataIndex);
+		// dataFrequency.sort(function(a, b) { return b - a; });
 		// new positions for each entity
-		aList.yAxis.domain(dataFrequency);
+		// aList.yAxis.domain(dataFrequency);
 
 		// move entities to their new position
+
 		aList.entGroups.transition()
 			.duration(750)
-			.delay(function(d, i) { return i * 50; })
+			.delay(function(d, i) { return i * 15; })
 			.attr("transform", function(d, i) {
-				return "translate(" + aList.startPos + "," + aList.yAxis(d.entFreq) + ")"; 
-			});		
+				// return "translate(" + aList.startPos + "," + aList.yAxis(d.index) + ")";
+				return "translate(0," + aList.yAxis(d.index) + ")";
+			})
+
+			.call(endall, function() { 
+			    for (var l = connections.length; l--;) {
+			        addLink(connections[l]);
+			    }
+
+				// hide the selected line
+				d3.selectAll(".linkSelected").transition()
+					.delay(150)
+					.style("stroke", color.lineNormalColor);
+			});
 	}
+
 	// sort by alphabeic order
 	if (sortType == "alph") {
 		dataValues.sort();
@@ -872,11 +911,28 @@ function sortList(aList, sortType) {
 		// move entities to their new position
 		aList.entGroups.transition()
 			.duration(750)
-			.delay(function(d, i) { return i * 50; })
+			.delay(function(d, i) { return i * 15; })
 			.attr("transform", function(d, i) {
-				return "translate(" + aList.startPos + "," + aList.yAxis(d.entValue) + ")"; 
+				return "translate(0," + aList.yAxis(d.entValue) + ")";
+				// return "translate(" + aList.startPos + "," + aList.yAxis(d.entValue) + ")";				 
+			})
+			.call(endall, function() { 
+			    for (var l = connections.length; l--;) {
+			        addLink(connections[l]);
+			    }
+
+				// hide the selected line
+				d3.selectAll(".linkSelected").transition()
+					.delay(10)
+					.style("stroke", color.lineNormalColor);
 			});
 	}
+
+    // for (var l = connections.length; l--;) {
+    //     addLink(connections[l]);
+    //     console.log("here");
+    // }
+
 }
 
 

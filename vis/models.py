@@ -8,6 +8,7 @@ class Vis(models.Model):
     '''
     project = models.ForeignKey(Project)
     user = models.ForeignKey(User)
+    name = models.CharField(max_length=50)
     personIn = models.BooleanField(default = 0)
     locationIn = models.BooleanField(default = 0)
     phoneIn = models.BooleanField(default = 0)

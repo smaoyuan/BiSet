@@ -28,7 +28,7 @@ $("#vis_sel_project").change(function(){
         	$("#vis_list").children().remove();
         	$("#vis_list").prop('disabled',false);
         	for (var i = 0; i < visList.length; i++){
-        		$('#vis_list').prepend("<option value='" + visList[i].id + "'>" + visList[i].create_time + "</option>");
+        		$('#vis_list').prepend("<option value='" + visList[i].id + "'>" + visList[i].vis_name + "</option>");
         	}
         	$("#vis_list").prepend("<option value=''></option>");        	        	
         	$('#vis_list').selectpicker('refresh');
@@ -46,16 +46,20 @@ $("#vis_sel_project").change(function(){
 
 // save visualization config
 $("#btn_save_config").click(function(){
-	var projectID = $("#vis_sel_project").selectpicker('val');
+	var projectID = $("#vis_sel_project").selectpicker('val'),
+		visName = $("#vis_name").val();
+
+	console.log(visName);
+	// return;
 
 	var selDims = $("input:checkbox:checked");
 	var requestJSON = {
-		"project_id": projectID,	
-	}	
+		"project_id": projectID,
+		"vis_name": visName	
+	}
 
 	// add all lists
 	for (var i = 0; i < selDims.length; i++) {
-
 		var lkey = $(selDims[i]).val();
 		requestJSON[lkey] = 1;
 	}
@@ -71,7 +75,9 @@ $("#btn_save_config").click(function(){
 
         	var jsonData = JSON.parse(data),
         		visID = jsonData.vis.id,
-        		visName = jsonData.vis.create_time;
+        		visName = jsonData.vis.vis_name;
+
+    		console.log(jsonData);
 
         	// console.log(jsonData);
 
@@ -268,10 +274,7 @@ $("#vis_list").change(function(){
 
 			// get selected dimensions
 			var selDims = [];
-			for (key in listData) { 
-				console.log(listData[key].listType);
-				selDims.push(listData[key].listType); 
-			}
+			for (key in listData) { selDims.push(listData[key].listType); }
 
 			// add all lists
 			for (var i = 0; i < selDims.length; i++) {
@@ -317,18 +320,10 @@ $("#vis_list").change(function(){
 				}
 			}
 
-			console.log(entHighlightData);
-
 			for (key in entHighlightData){
 				var frameID = key //d3.select(this).attr("id"),
     			thisEntType = frameID.split("_")[0],
     			thisListID = getListDataByKey(listData, thisEntType).listID; // listData[thisEntType].listID;
-
-    			console.log(thisListID);
-    			console.log("key::::" + key);
-    			console.log(frameID);
-    			console.log(d3.select("#" + key));
-
 
 	    		var entData = d3.select("#" + key).data()[0],
 	    			// d3.select(this).data()[0],
@@ -336,16 +331,12 @@ $("#vis_list").change(function(){
 	    			leftRelBicIDs = [],
 	    			rightRelBicIDs = [];
 
-    			console.log(entData);
-
 				var requestVal = d3.select("#" + key).data()[0].entValue;
 				// d3.select(this).data()[0].entValue;
 				
 				var csrftoken = $('#csrf_token').val();
 
-				var requestJSON = {
-					"query": requestVal
-				}
+				var requestJSON = { "query": requestVal }
 
 	    		// change color when highlight
 	    		if (d3.select("#" + key).attr("class") != "entSelected") { //d3.select(this)
