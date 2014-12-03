@@ -18,6 +18,17 @@ $("#vis_sel_project").change(function(){
 		requestJSON = { "project_id": projectID }
 	// load vis list
 	visCtrlRequest(requestJSON, "loadVisList");
+
+	console.log($("#vis_ctrl").hasClass('hide_this'));
+
+	// hide the visualization control buttons
+	if (!$("#vis_ctrl").hasClass('hide_this'))
+		$("#vis_ctrl").addClass('hide_this');
+
+	// show the vis config buttons
+	if ($("#vis_config_ctrl").hasClass('hide_this'))
+		$("#vis_config_ctrl").removeClass('hide_this');
+
 	// clear current canvas
 	removeVis(canvas);	
 });
@@ -43,7 +54,7 @@ $("#btn_save_config").click(function(){
 	// hide the vis name config
 	$("#vis_name_config").addClass('hide_this');
 	// show visualization control
-	$("#vis_ctrl").removeClass('hide_this');	
+	$("#vis_ctrl").removeClass('hide_this');
 
 	visCtrlRequest(requestJSON, "addVis");
 });
@@ -121,7 +132,12 @@ function csrfSafeMethod(method) {
 */
 function visCtrlRequest(rJson, rType) {
     var csrftoken = $('#csrf_token').val(),
-		requestJSON = rJson,
+		requestJSON = rJson
+		rURL = "";
+
+	if (rType == "wikisummary")
+		rURL = window.SERVER_PATH + "wiki/wikisummary/"
+	else
 		rURL = window.SERVER_PATH + 'vis/' + rType + "/"; 
 
     $.ajax({
@@ -141,6 +157,12 @@ function visCtrlRequest(rJson, rType) {
         			break;
         		}
         		case "loadVis": loadVisHelper(repData); break;
+        		case "wikisummary": {
+        			var rTerm = requestJSON.requestVal;
+        			console.log(rTerm);
+        			wikiSumHelper(repData, rTerm); 
+        			break;
+        		}
         	}
         },
         beforeSend: function(xhr, settings) {
@@ -284,7 +306,11 @@ function loadVisHelper(resData) {
 		}
 	}
 
+	// load highlight entities
+	// this code block will not run, 
+	// if there is no highlight entities
 	for (key in entHighlightData){
+
 		var frameID = key,
 			thisEntType = frameID.split("_")[0],
 			thisListID = getListDataByKey(listData, thisEntType).listID;
@@ -374,6 +400,34 @@ function loadVisHelper(resData) {
 					}
 				}
 			}
+		}
+	}
+}
+
+/*
+* helper function to get info from wiki
+* @param resData, server response data for vis list
+* @param term, requsted term for wiki
+*/
+function wikiSumHelper(resData, term) {
+	var sumtxt = resData.sumtxt,
+		optiontxt = resData.option,
+		empTxt = resData.empty;
+
+	console.log(term);
+
+	// set the title
+	$("#vis_wiki_title").html(term);
+
+	if (sumtxt.length != 0)
+		$("#vis_wiki_text").html(sumtxt);
+	else {
+		if (optiontxt.length != 0) {
+			var text = "Do you mean: " + optiontxt[0] + ", or "  + optiontxt[1] + "?";
+			$("#vis_wiki_text").html(text);
+		}
+		else {
+			$("#vis_wiki_text").html(empTxt);
 		}
 	}
 }

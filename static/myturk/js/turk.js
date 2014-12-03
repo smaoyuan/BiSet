@@ -37,6 +37,8 @@ function requestDataset(datasetId){
                 // delete the previous table
                 $('#myturk_doc_list').dataTable().fnDestroy();
                 $('#myturk_doc_list').empty();
+
+                $("#myturk_create_data_header").removeClass('hide_this');
                 
                 // initialize the table
                 table = $('#myturk_doc_list').dataTable({
@@ -44,7 +46,7 @@ function requestDataset(datasetId){
                     "bLengthChange": false,
                     "paging": true,
                     "info": true,
-                    "bFilter": false, //Disable search function
+                    // "bFilter": false, //Disable search function
                     "columns": [
                         { "data": "doc_id", "width": "8%" },
                         { "data": "doc_text", "orderable": false }

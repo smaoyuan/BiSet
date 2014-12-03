@@ -14,15 +14,17 @@
                     <span class="glyphicon glyphicon-paperclip"></span>
                     <h3 class="panel-title">Basic Information</h3>
                 </div>
-                <div class="panel-body">
-                    <label>Project name:</label>
+                <div class="panel-body" id="pbasic_info">
+                    <label id="pbasic_info_first">Project name:</label>
                     <p>{{ project.name }}</p>
-
+                    <hr>
+    
                     <label>Project owner:</label>
                     <p>{{ project.user }}</p>
+                    <hr>
 
                     <label>Project description:</label>
-                    <p>{{ project.description }}</p>
+                    <p id="pbasic_info_last">{{ project.description }}</p>
                 </div>
             </div>
             <!-- collaborator of a project -->
@@ -79,12 +81,12 @@
                     <h3 class="panel-title">Recent Comments</h3>
                     <!-- <span class="label label-info" id="comlist_num">{{comments|length}}</span> -->
                     
-                    <a class="label label-info" href = "{{BASE_URL}}projects/sort_comment_asc/{{project.id}}/" id='sort_comment_asc'><span class="glyphicon glyphicon-arrow-up"></span></a>
-                    <a class="label label-info" href = "{{BASE_URL}}projects/sort_comment_desc/{{project.id}}/" id='sort_comment_desc'><span class="glyphicon glyphicon-arrow-down"></a>
+                    <a class="label label-info" href = "{{BASE_URL}}projects/sort_comment_asc/{{project.id}}/" id='sort_comment_asc'><span class="glyphicon glyphicon-circle-arrow-up"></span></a>
+                    <a class="label label-info" href = "{{BASE_URL}}projects/sort_comment_desc/{{project.id}}/" id='sort_comment_desc' ><span class="glyphicon glyphicon-circle-arrow-down"></a>
                 </div>
                 <!-- a list of comment -->
                 <div class="panel-body">
-                    <ul class="list-group" id="comment_list">
+                    <ul class="list-group" id="pdetail_comment_list">
                         {% for comment in comments %}                                
                             {% if not comment.is_deleted %}                                    
                                 <li class="list-group-item" id="comment_list_{{ comment.id }}">
@@ -190,7 +192,7 @@
                     <h3 class="panel-title">Related Activities</h3>
                     <span class="label label-info">{{history_actions|length}}</span>
                 </div>
-                <div class="panel-body">
+                <div class="panel-body" id="pdetail_activity">
                     <ul class="list-group">
 				        {% for item in history_actions%}
 				        	<li class="list-group-item">
@@ -203,8 +205,8 @@
                                         <a href="{% url 'userprofile:view_profile' item.action_user.id %}">{{ item.action_user }}</a>
                                 		{{ item.logAction }} comment
                                         {% if item.logContentType == 'comment' %}
-                                            {% if item.logObject.is_deleted and collaborate_permisson = 2%}
-                                                '{{ item.logObject }}' <a href = '{% url 'projects:undo_comment_delete' item.logObject.pk %}'>(Undo?)</a>
+                                            {% if item.logObject.is_deleted and collaborate_permisson = 2 and item.logAction = 'delete'%}
+                                                '{{ item.logObject }}' <a href = '{{BASE_URL}}projects/undo_comment_delete/{{item.logObject.pk}}/{{item.id}}/'>(Undo?)</a>
                                             {% else %}
                                                 '{{ item.logObject }}'
                                             {% endif %}  

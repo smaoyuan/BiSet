@@ -11,16 +11,20 @@ var entList = { width: 260, height: 2650, gap: 80, topGap: 10, startPos: 0, coun
 // in-between bar settings
 var bic = { frameWidth: 60, frameHeight: 30, frameRdCorner: 12, innerRdCorner: 12, count: 0 };
 
+// bic list settigns
 var bicList = { width: 60, height: 2650 }
+
+// line settings
+var ln = { nwidth: 1.5 }
 
 // color settings
 var color = {
 	entNormal: "rgba(78, 131, 232, 0.3)",
 	entHover: "rgba(78, 131, 232, 0.5)",
-	entHighlight: "rgba(228, 122, 30, 0.4)", //"rgba(78, 131, 232, 0.7)",
+	entHighlight: "rgba(228, 122, 30, 0.4)",
 	entFreColor: "rgba(22, 113, 229, 0.3)",
 	bicFrameColor: "rgba(0, 20, 20, 0.2)",
-	lineNormalColor: "rgba(0, 0, 0, 0.3)",
+	lineNormalColor: "rgba(0, 0, 0, 0.2)",
 	lsortColor: "rgba(0,0,0,0)"
 };
 
@@ -30,8 +34,10 @@ var connections = [],
 	entLists = [],
 	selectedEnts = [];
 
+// indicate dragging 
+var draged = 0;
+
 // a hash table to maintain the displayed bics
-//var bicDisplayed = [];
 var bicDisplayed = new Hashtable(),
 	bicOnShow = [];
 
@@ -78,71 +84,10 @@ $("#dataDimensionList").append(
     "<input type='checkbox' name='dimensions' value='date' id='d_date'> Date<br />" +    
     "<input type='checkbox' name='dimensions' value='org' id='d_org'> Organization<br />" +
     "<input type='checkbox' name='dimensions' value='misc' id='d_misc'> Misc<br />"     
-);    
+);
 
-// d3.json(window.SERVER_PATH + 'vis/loadbisets/', function(error, json) {
-// for testing purpose
-// // d3.json("http://localhost:8000/static/vis/data/data.json", function(error, json) {	
-// 	var dumData = json,
-// 		bicData = dumData.bics;
 
-// 	// set all bics has not been displayed
-// 	for (var i = 0; i < bicData.length; i++)
-// 		bicDisplayed.put(bicData[i].bicID, 0);
-
-// 	// var svg = $("svg#vis_canvas")[0];
-// 	// var bbox = svg.getBBox();
-// 	//svg.setAttribute("viewBox", [bbox.x, bbox.y, bbox.width, bbox.height]);
-
-// 	// testing for adding a new list
-// 	$('#btn_add_list').click(function(){
-
-// 		datasetRequest();
-
-// 		// get selected dimensions
-// 		var selDims = $("input:checkbox:checked");
-		
-// 		// add all lists
-// 		for (var i = 0; i < selDims.length; i++) {
-
-// 			var lkey = $(selDims[i]).val();
-
-// 			entList.count += 1;
-// 			entList.startPos += (entList.width + entList.gap) * 2 * i;
-
-// 			var aList = canvas.append('g')
-// 				.attr('id', 'list_' + entList.count)
-// 				.attr('width', entList.width)
-// 				.attr('height', entList.height)
-// 				.attr("transform", function(d, i) { return "translate(" + entList.startPos + "," + 0 + ")"; });
-// 			entLists.push(aList);
-
-// 			var aListData = dumData.lists[lkey];		
-
-// 			// add a list to the vis canvas
-// 			var aListView = addList(aList, aListData, bicData, entList.startPos);
-// 			addSortCtrl(aListView);		 
-// 		}
-
-// 		// add all bics with lines
-// 		for (var i = 0; i < selDims.length; i++) {
-// 			if (i % 2 == 0) {
-// 				var bicStartPos = (entList.width + entList.gap) * 2 * (i / 2 + 1) - ((entList.width + entList.gap) * 2 * (i / 2 + 1) - entList.width - bic.frameWidth) / 2 - bic.frameWidth;
-
-// 				var aBicList = canvas.append('g')
-// 					.attr('id', 'bic_list_' + entList.count)
-// 					.attr('width', bicList.width)
-// 					.attr('height', bicList.height)
-// 					.attr("transform", function(d, i) { return "translate(" + bicStartPos + "," + 0 + ")"; });;
-
-// 				var rowField = $(selDims[i]).val(),
-// 					colField = $(selDims[i + 1]).val();
-// 				addBics(entLists[i], aBicList, aListData, bicData, bicStartPos, rowField, colField);				
-// 			}
-// 		}
-// 	});	
-// });
-
+// drag function for a d3 object
 var drag = d3.behavior.drag()
     .origin(function() {
     	// position of current selected item
@@ -152,26 +97,28 @@ var drag = d3.behavior.drag()
     	return { x: thisOffset.left - parentOffset.left, y: thisOffset.top};
     })
     .on("dragstart", function (d) {
+    	draged = 1;
         d3.event.sourceEvent.stopPropagation();
         d3.select(this).classed("dragging", true);
     })
     .on("drag", function (d) {
-
     	var dragX = d3.event.x,
     		dragY = d3.event.y;
 
+    	// boundary check
 		if (dragY < 0)
 			dragY = 0;
 		if (dragX >= entList.gap * 2)
 			dragX = entList.gap * 2;
 		if (dragX + entList.gap * 2 <= 0)
 			dragX = -entList.gap * 2;
-
+		// move the element
 		d3.select(this).attr("transform", "translate(" + dragX + "," + dragY + ")");
-
+		// update related lines
 		updateLink(connections);
     })
     .on("dragend", function (d) {
+    	draged = 0;
     	updateLink(connections);			            	
         d3.select(this).classed("dragging", false);			                
 	});	
@@ -215,22 +162,13 @@ function addList(canvas, listData, bicList, startPos) {
 	    .range([3, entity.freqWidth - 1]);	    
 
     // add control group of a list
- //    if (listNum == 1)
-	//     $("#biset_control").append("<div class='listControlGroup'>" + 
-	//     	"<h5 class='listTitle' id='listTitle_" + listNum + "'>" + type + "</h5>" + 
-	//     	"<select class='orderCtrl' id='list_" + listNum + "_sortCtrl'>" + 
-	//     		"<option value='alph'>alphabeic</option>" + 
-	//     		"<option value='freq'>frequency</option>" + 
-	// 		"</select>" + 
-	// 	"</div>");
-	// else
-	    $("#biset_control").append("<div class='listControlGroup'>" +
-	    	"<h5 class='listTitle' id='listTitle_" + listNum + "'>" + type + "</h5>" +
-	    	"<select class='orderCtrl' id='list_" + listNum + "_sortCtrl'>" + 
-	    		"<option value='alph'>alphabeic</option>" +
-	    		"<option value='freq'>frequency</option>" + 
-			"</select>" + 
-		"</div>");
+    $("#biset_control").append("<div class='listControlGroup'>" +
+    	"<h5 class='listTitle' id='listTitle_" + listNum + "'>" + type + "</h5>" +
+    	"<select class='orderCtrl' id='list_" + listNum + "_sortCtrl'>" + 
+    		"<option value='alph'>alphabeic</option>" +
+    		"<option value='freq'>frequency</option>" + 
+		"</select>" + 
+	"</div>");
 
 	// add group to the svg
 	var bar = canvas.selectAll("." + type)
@@ -242,90 +180,95 @@ function addList(canvas, listData, bicList, startPos) {
   		// mouseover event
     	.on("mouseover", function(d, i) {
 
-    		var frameID = d3.select(this).attr("id"),
-    			thisEntType = frameID.split("_")[0],
-    			thisListID = listData.listID;
+    		// when dragging stops
+    		if (draged == 0) {
+	    		var frameID = d3.select(this).attr("id"),
+	    			thisEntType = frameID.split("_")[0],
+	    			thisListID = listData.listID;
 
-    		var entData = d3.select(this).data()[0],
-    			// all associated bic ids
-    			leftRelBicIDs = [],
-    			rightRelBicIDs = [];
+	    		var entData = d3.select(this).data()[0],
+	    			// all associated bic ids
+	    			leftRelBicIDs = [],
+	    			rightRelBicIDs = [];
 
-    		// change color when highlight
-    		if (d3.select(this).attr("class") != "entSelected") {
-    			d3.select("#" + frameID + "_frame").attr("fill", color.entHover);
-    			d3.select(this).attr("class", "entHover");
+	    		// change color when highlight
+	    		if (d3.select(this).attr("class") != "entSelected") {
+	    			d3.select("#" + frameID + "_frame").attr("fill", color.entHover);
+	    			d3.select(this).attr("class", "entHover");
 
-				// 1st list
-				if (thisListID == 1) {
-					if (entData.bicSetsRight != null) {
-						for (var i = 0; i < entData.bicSetsRight.length; i++){
-							rightRelBicIDs.push(entData.bicSetsRight[i]);
-						}
+					// 1st list
+					if (thisListID == 1) {
+						if (entData.bicSetsRight != null) {
+							for (var i = 0; i < entData.bicSetsRight.length; i++){
+								rightRelBicIDs.push(entData.bicSetsRight[i]);
+							}
 
-						for (var i = 0; i < rightRelBicIDs.length; i++) {
-		    				var rowListIDs = bicList[rightRelBicIDs[i]].row,
-		    					colListIDs = bicList[rightRelBicIDs[i]].col,
-		    					rowField = bicList[rightRelBicIDs[i]].rowField,
-		    					colField = bicList[rightRelBicIDs[i]].colField,
-		    					thisBicID = "bic_" + rightRelBicIDs[i];
+							for (var i = 0; i < rightRelBicIDs.length; i++) {
+			    				var rowListIDs = bicList[rightRelBicIDs[i]].row,
+			    					colListIDs = bicList[rightRelBicIDs[i]].col,
+			    					rowField = bicList[rightRelBicIDs[i]].rowField,
+			    					colField = bicList[rightRelBicIDs[i]].colField,
+			    					thisBicID = "bic_" + rightRelBicIDs[i];
 
-							d3.select("#" + thisBicID)
-								.style("display", "block");
-								//.style("opacity", 100)//
+								d3.select("#" + thisBicID)
+									.style("display", "block");
+									//.style("opacity", 100)//
 
-							updateLink(connections);
+								updateLink(connections);
 
-		    				for (var j = 0; j < rowListIDs.length; j++) {
-		    					d3.select("#" + rowField + "_" + rowListIDs[j] + "__" + thisBicID)
-		    						// .style("opacity", 100)
-		    						.style("display", "block");
-		    				}
+			    				for (var j = 0; j < rowListIDs.length; j++) {
+			    					d3.select("#" + rowField + "_" + rowListIDs[j] + "__" + thisBicID)
+			    						// .style("opacity", 100)
+			    						.style("display", "block");
+			    				}
 
-		    				for (var k = 0; k < colListIDs.length; k++) {
-		    					d3.select("#" + thisBicID + "__" + colField + "_" + colListIDs[k])
-		    						// .style("opacity", 100)
-		    						.style("display", "block");    					
-		    				}
-						}
-					}
-				}
-				// 2nd list
-				else {
-					if (entData.bicSetsLeft != null) {
-						for (var i = 0; i < entData.bicSetsLeft.length; i++){
-							leftRelBicIDs.push(entData.bicSetsLeft[i]);
-						}
-
-						for (var i = 0; i < leftRelBicIDs.length; i++) {
-		    				var rowListIDs = bicList[leftRelBicIDs[i]].row,
-		    					colListIDs = bicList[leftRelBicIDs[i]].col,
-		    					rowField = bicList[leftRelBicIDs[i]].rowField,
-		    					colField = bicList[leftRelBicIDs[i]].colField,
-		    					thisBicID = "bic_" + leftRelBicIDs[i];
-
-							d3.select("#" + thisBicID)
-								// .style("opacity", 100)
-								.style("display", "block");
-
-					        updateLink(connections);
-
-		    				for (var j = 0; j < rowListIDs.length; j++) {
-		    					d3.select("#" + rowField + "_" + rowListIDs[j] + "__" + thisBicID)
-		    						// .style("opacity", 100)
-		    						.style("display", "block");
-		    				}
-
-		    				for (var k = 0; k < colListIDs.length; k++) {
-		    					d3.select("#" + thisBicID + "__" + colField + "_" + colListIDs[k])
-		    						// .style("opacity", 100)
-		    						.style("display", "block");    					
-		    				}
+			    				for (var k = 0; k < colListIDs.length; k++) {
+			    					d3.select("#" + thisBicID + "__" + colField + "_" + colListIDs[k])
+			    						// .style("opacity", 100)
+			    						.style("display", "block");    					
+			    				}
+							}
 						}
 					}
-				}
+					// 2nd list
+					else {
+						if (entData.bicSetsLeft != null) {
+							for (var i = 0; i < entData.bicSetsLeft.length; i++){
+								leftRelBicIDs.push(entData.bicSetsLeft[i]);
+							}
+
+							for (var i = 0; i < leftRelBicIDs.length; i++) {
+			    				var rowListIDs = bicList[leftRelBicIDs[i]].row,
+			    					colListIDs = bicList[leftRelBicIDs[i]].col,
+			    					rowField = bicList[leftRelBicIDs[i]].rowField,
+			    					colField = bicList[leftRelBicIDs[i]].colField,
+			    					thisBicID = "bic_" + leftRelBicIDs[i];
+
+								d3.select("#" + thisBicID)
+									// .style("opacity", 100)
+									.style("display", "block");
+
+						        updateLink(connections);
+
+			    				for (var j = 0; j < rowListIDs.length; j++) {
+			    					d3.select("#" + rowField + "_" + rowListIDs[j] + "__" + thisBicID)
+			    						// .style("opacity", 100)
+			    						.style("display", "block");
+			    				}
+
+			    				for (var k = 0; k < colListIDs.length; k++) {
+			    					d3.select("#" + thisBicID + "__" + colField + "_" + colListIDs[k])
+			    						// .style("opacity", 100)
+			    						.style("display", "block");    					
+			    				}
+							}
+						}
+					}
+	    		}
     		}
+
     	})
+		// mouseout event handler
     	.on("mouseout", function() {
 
     		var frameID = d3.select(this).attr("id"),
@@ -414,8 +357,7 @@ function addList(canvas, listData, bicList, startPos) {
 				}
 			}
     	})
-
-  		// .attr("transform", function(d, i) { return "translate(" + startPos + "," + y(d.entValue) + ")"; })
+		// click event handler for entities
 		.on("click", function() {
 
     		var frameID = d3.select(this).attr("id"),
@@ -427,14 +369,13 @@ function addList(canvas, listData, bicList, startPos) {
     			leftRelBicIDs = [],
     			rightRelBicIDs = [];
 
-			// console.log(d3.select(this).data()[0].entValue);
-			var requestVal = d3.select(this).data()[0].entValue;
+			var requestVal = d3.select(this).data()[0].entValue,
+				requestJSON = { "query": requestVal }
+
+			// search entity from wiki and retrieve results
+			// visCtrlRequest(requestJSON, "wikisummary");
 			
 			var csrftoken = $('#csrf_token').val();
-
-			var requestJSON = {
-				"query": requestVal
-			}
 
 			// retrieve information from Wiki
 			$.ajax({
@@ -547,13 +488,10 @@ function addList(canvas, listData, bicList, startPos) {
 						}
 					}
 				}
-
-				console.log(bicOnShow);
     		}
     		else {
 
     		}
-
 
     		// var tmpID = d3.select(this).attr("id"),
     		// 	entType = tmpID.split("_")[0],
@@ -777,8 +715,6 @@ function addBics(preListCanvas, bicListCanvas, listData, bicList, bicStartPos, r
   			return "translate(" + 0 + "," + (i + 1) * bic.frameHeight + ")"; 
   		});
 
-  		// .style("display", "none");
-
 	// proportion of row
 	bics.append("rect")
   		.attr("id", function(d, i) { return "bic_left_" + d.bicID; })
@@ -951,7 +887,7 @@ var addLink = function (obj1, obj2, line, d3obj, bg) {
         d3obj = line.d3Canvas;
     }
 
-    var svgPos = d3obj[0][0].getBoundingClientRect();
+    // var svgPos = d3obj[0][0].getBoundingClientRect();
 
     // var bb1 = obj1[0][0].getBoundingClientRect(),
     //     bb2 = obj2[0][0].getBoundingClientRect(),
@@ -964,8 +900,9 @@ var addLink = function (obj1, obj2, line, d3obj, bg) {
     //     {x: bb2.left + bb2.width / 2 - svgPos.left, y: bb2.top + bb2.height + 1 - svgPos.top},
     //     {x: bb2.left - 1 - svgPos.left, y: bb2.top + bb2.height / 2 - svgPos.top},
     //     {x: bb2.left + bb2.width + 1 - svgPos.left, y: bb2.top + bb2.height / 2 - svgPos.top}],
-	var bb1 = getOffset(obj1), //[0][0].getBoundingClientRect(),
-        bb2 = getOffset(obj2), //[0][0].getBoundingClientRect(),
+
+	var bb1 = getOffset(obj1),
+        bb2 = getOffset(obj2),
 
         p = [{x: bb1.left + bb1.width / 2, y: bb1.top - 1},
         {x: bb1.left + bb1.width / 2, y: bb1.top + bb1.height + 1},
@@ -1016,7 +953,11 @@ var addLink = function (obj1, obj2, line, d3obj, bg) {
             line: d3obj.append("path")
             		.attr("d", path)
             		.attr("id", function() { return obj1.attr("id") + "__" + obj2.attr("id")})
-            		.style({stroke: color.lineNormalColor, fill: "none", display:"none" }), // opacity: 0
+            		.style("stroke", color.lineNormalColor)
+            		.style("stroke-width", ln.nwidth)
+            		.style("fill", "none")
+            		.style("display", "none"),
+            		// .style({stroke: color.lineNormalColor, fill: "none", display:"none" }), // opacity: 0
             from: obj1,
             to: obj2,
             d3Canvas: d3obj            

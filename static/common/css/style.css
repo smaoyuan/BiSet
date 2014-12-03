@@ -6,7 +6,7 @@
 body {
     margin-top: 10px;
     margin-bottom: 10px;
-    margin-left: 50px;
+    margin-left: 150px;
     margin-right: 50px;
 }
 
@@ -36,6 +36,7 @@ body.db_after_login {
 #pheader {
     margin-top: 10px;
     margin-bottom: 10px;
+    margin-left: 15px;
 }
 
 /* change the color of the branding (after login) of the website */
@@ -142,7 +143,7 @@ div.shade-container{
 }
 .widget .list-group { margin-bottom: 0; }
 .widget .panel-title { display:inline }
-.widget .label-info { float: right; }
+.widget .label-info { float: right; margin-left: 5px;}
 .widget li.list-group-item {border-radius: 0;border: 0;border-top: 1px solid #ddd; margin-left: 0px !important;}
 .widget li.list-group-item div.left_15_gap {margin-left: 15px;}
 .widget li.list-group-item:hover { background-color: rgba(86,61,124,.1); }
@@ -209,7 +210,71 @@ div.listControlGroup {
 
 #vis_wiki_summary {
     /*border: 1px solid;*/
-    width: 160px;
+    width: 180px;
     height: 250px;
-    overflow: scroll;
+    overflow-y: scroll;
+}
+
+
+#pbasic_info {
+    margin-left: 20px;
+}
+
+#pbasic_info_first {
+    margin-top: 15px;
+}
+
+#pbasic_info_last {
+    margin-bottom: 15px;
+}
+
+#pdetail_activity{
+    height: 460px;
+    overflow-y: auto; 
+}
+
+#pdetail_comment_list {
+    height: 360px;
+    overflow-y: auto;     
+}
+
+#uprofile_info {
+    margin-top: 25px;
+}
+
+#uprofile_img {
+    margin-left: 20px;
+}
+
+#uprofile_activity {
+    height: 390px;
+    overflow-y: auto;    
+}
+
+#myturk_create_detail {
+    margin: 30px; 
+}
+
+#myturnk_create_title {
+    margin-right: 20px;
+}
+
+#myturnk_create_dataset {
+    margin-right: 20px;    
+}
+
+.myturnk_create_margin {
+    margin-right: 20px;
+}
+
+#myturk_hit_result {
+    margin: 30px;
+}
+
+#myturk_result_detail {
+    height: 400px;
+}
+
+#myturk_result_form {
+    margin-top: 30px;
 }

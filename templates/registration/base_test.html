@@ -2,7 +2,7 @@
 <html lang="en">
     <head>
         <meta charset="utf-8"> 
-        <title>Bixplorer</title>
+        <title>BiSet</title>
         {% load staticfiles %}
         <link rel="stylesheet" type="text/css" href="{% static 'common/css/lib/bootstrap.min.css' %}">
         <link rel="stylesheet" type="text/css" href="{% static 'common/css/lib/bootstrap-theme.min.css' %}">    
@@ -13,12 +13,12 @@
 
     <body>
         <div id="pheader">
-            <h1>Bixplorer</h1>
+            <h1>BiSet</h1>
             <h4>Visual Analytics for Intelligence Analysis with Biclusters</h4>
         </div>
 
-        <div id="pbody" class="row">
-            <div id="pslider" class="col-lg-9">
+        <div id="pbody">
+            <div id="pslider" class="col-md-9">
                 <!-- slider for feature demonstration -->
                 <div id="slider">
                     <div id="myCarousel" class="carousel slide" data-interval="3000" data-ride="carousel">
@@ -67,9 +67,9 @@
                 </div>
             </div>
 
-            <div class="col-lg-3" id="pregister">
+            <div class="col-md-3" id="pregister">
                 <div id="rtab">
-                   <div class="well well-lg">                        
+                   <div class="well well-md">                        
                            <!-- register tab -->                           
                             {% block content %}
                             <div class="tab-pane active in" id="create">

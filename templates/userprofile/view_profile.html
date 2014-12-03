@@ -19,23 +19,23 @@ first name: {{ user.firstname }}
 {% block content %}
 		<h1>{% if perm == True %} My {% else %} {{ this_user.first_name }} {{ this_user.last_name }}'s {% endif %} profile</h1>
 		<hr>
-		<div class="col-md-7">
+		<div class="col-md-8">
             <div class="panel panel-default widget shade-container">
                 <div class="panel-heading">
                     <span class="glyphicon glyphicon-user"></span>
                     <h3 class="panel-title">{% if perm == True %} My {% else %} {{ this_user.first_name }} {{ this_user.last_name }}'s {% endif %} profile</h3>
                 </div>
 
-                <div class="panel-body">
+                <div class="panel-body" id="uprofile_info">
 					<!-- left column -->
-			        <div class="col-md-3 col-sm-6 col-xs-12">
-			            <div class="text-center">
+			        <div class="col-md-4 col-sm-6 col-xs-12">
+			            <div class="text-center" id="uprofile_img">
 			                <img src="{% static 'common/imgs/default.jpg' %}" class="avatar img-circle img-thumbnail" alt="avatar">
 			            </div>
 			        </div>
 
 			        <!-- edit form column -->
-			        <div class="col-md-8 col-md-offset-1 col-sm-6 col-xs-12">
+			        <div class="col-md-8 col-md-offset-0 col-sm-6 col-xs-12">
 			            <div class="form-horizontal">
                         <input id="csrf_token" type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
 			                <div class="form-group">
@@ -78,13 +78,20 @@ first name: {{ user.firstname }}
 
 			                <div class="form-group">
 			                    <label class="col-lg-3 control-label">Career:</label>
-			                    <div class="col-lg-8">                                    
+			                    <div class="col-lg-8" id="uprofile_career">
+									<p class="p_aligh_lable active_this">
+	                                    {% for item in profile.CAREER_CHOICES %}
+	                                        {% if profile.career = item.0 %} {{item.1}} {% endif%} 
+	                                    {% endfor %}
+									</p>
+			                    </div>
+
+			                    <div class="col-lg-8 hide_this" id="uprofile_career_sel">
 			                        <select id="id_career" name="career" style = "margin-top:5px">
-                                    {% for item in profile.CAREER_CHOICES %}                                        
+                                    {% for item in profile.CAREER_CHOICES %}   
                                         <option value="{{item.0}}" {% if profile.career = item.0 %} selected{% endif%}>{{item.1}}</option>
                                     {% endfor %}
                                     </select>
-                                    
 			                    </div>
 			                </div>
 
@@ -124,7 +131,7 @@ first name: {{ user.firstname }}
             </div>			
 		</div>       
 		
-		<div class="col-md-4 col-md-offset-1 {% if perm == False %} hide_this {% endif %}">
+		<div class="col-md-4 col-md-offset-0 {% if perm == False %} hide_this {% endif %}">
             <!-- collaborator of a project -->
             <div class="panel panel-default widget shade-container">
                 <div class="panel-heading">
@@ -132,7 +139,7 @@ first name: {{ user.firstname }}
                     <h3 class="panel-title">My Recent Activities</h3>
                     <span class="label label-info">{{history_actions|length}}</span>
                 </div>
-                <div class="panel-body">
+                <div class="panel-body" id="uprofile_activity">
                     <ul class="list-group">
 				        {% for item in history_actions%}
 				        	<li class="list-group-item">

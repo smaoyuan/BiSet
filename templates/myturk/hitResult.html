@@ -2,22 +2,36 @@
 {% load staticfiles %}
 {% block content %}
 <div class="container-fluid">
-    <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
         <div class="panel panel-default widget shade-container">
             <div class="panel-heading">
                 <span class="glyphicon glyphicon-paperclip"></span>
-                <button id = 'hit_result_fetch'>Hit Result</button>
+                <h3 class="panel-title">Hit Result</h3>
             </div>
-            
-            <div style = 'margin-left:10px'>
-                	<label>AWSAccessKeyId:</label><br />
-                	<input type="text" id="myturk_accesskeyid" value = "">
-            </div>
-            <hr>
+            <div class="panel-body" id="myturk_hit_result">
+                <div class="col-md-8">
+                    <fieldset class="field-border" id="myturk_result_detail">
+                    </fieldset>
+                </div>
 
-            <div style = 'margin-left:10px; margin-bottom:10px'>
-              	<label>AWSSecretKey:</label><br />
-              	<input type="text" id="myturk_secretkey" value = "">
+                <div class="col-md-4" id="myturk_result_form">
+                    <div>
+                        <label>AWSAccessKeyId:</label>
+                        <input class="pull-right" type="text" id="myturk_accesskeyid" value = "">
+                    </div>
+                    <hr>
+
+                    <div>
+                        <label>AWSSecretKey:</label>
+                        <input class="pull-right" type="text" id="myturk_secretkey" value = "">
+                    </div>
+                    <hr>
+
+                    <div>
+                        <button id="hit_result_fetch" class="btn btn-success pull-right" type="button">Submit</button>
+                    </div>
+                    
+                </div>
             </div>
             
             <div>
@@ -27,12 +41,12 @@
             
         </div>
         
-        <div id = "turk_result" class="panel panel-default widget shade-container" >
+<!--         <div id = "turk_result" class="panel panel-default widget shade-container" >
             <div class="panel-heading">
                 <span class="glyphicon glyphicon-paperclip"></span>
                 Hit Results
             </div>
-        </div>
+        </div> -->
     </div>
 </div>
 <script type="text/javascript" src="{% static 'common/js/lib/jquery.dataTables.min.js' %}"></script> 

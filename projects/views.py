@@ -10,6 +10,7 @@ from django.utils import timezone
 from django.contrib.auth.models import User
 import json
 from home.utils import * 
+from django.contrib.admin.models import LogEntry
     
 from django.contrib.auth.decorators import login_required 
 
@@ -384,7 +385,8 @@ def load_project_activity_feed(request, project_id):
         
         logAction = action_dict[str(logAction)]
         
-        new_logging_list.append({
+        new_logging_list.append({        
+            'id':item.id,
             'action_user':action_user,
             'action_time':item.action_time, 
             'change_message':item.change_message, 
@@ -731,7 +733,7 @@ def undo_delete(request, project_id):
     return HttpResponseRedirect("/projects/" + project_id + "/")
  
 @login_required 
-def undo_comment_delete(request, comment_id):
+def undo_comment_delete(request, comment_id, log_id):
     '''
     Deleting a comment by flipping a flag in database table.
     @param request: Django http request
@@ -740,6 +742,9 @@ def undo_comment_delete(request, comment_id):
     theComment = Comment.objects.get(id = comment_id)
     theComment.is_deleted = False
     theComment.save()
+    
+    logToDelete = LogEntry.objects.get(id = log_id)
+    logToDelete.delete()
     
     project_id = theComment.project.id
     
