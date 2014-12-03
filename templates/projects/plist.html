@@ -8,7 +8,7 @@
 		<div class="panel-heading">
             <span class="glyphicon glyphicon-th-list"></span>
             <h3 class="panel-title">My Own Project</h3>
-            <span class="label label-info">78</span>
+            <span class="label label-info">{{my_projects|length}}</span>
         </div>
 
 		<div class="panel-body">
@@ -71,7 +71,7 @@
 		<div class="panel-heading">
             <span class="glyphicon glyphicon-list"></span>
             <h3 class="panel-title">Project Shared with Me</h3>
-            <span class="label label-info">23</span>
+            <span class="label label-info">{{shared_projects|length}}</span>
         </div>
 
         <div class="panel-body">
@@ -108,7 +108,7 @@
 		<div class="panel-heading">
             <span class="glyphicon glyphicon-list"></span>
             <h3 class="panel-title">Public Project</h3>
-            <span class="label label-info">231</span>
+            <span class="label label-info">{{public_projects|length}}</span>
 
 <!--<div style="display:inline">
 	<form action="" class="navbar-form navbar-right">
