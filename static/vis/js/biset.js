@@ -1035,50 +1035,13 @@ function updateLink(links) {
 	}
 }
 
-
-/*
-*
-*/
-function datasetRequest() {
-    var csrftoken = $('#csrf_token').val();
-
-    var requestJSON = {
-
-    }    
-
-    $.ajax({
-        url: window.SERVER_PATH + 'vis/loadbisets/',
-        type: "POST",
-        data: JSON.stringify(requestJSON),
-        contentType: "application/json",
-        success: function(data){
-        	// console.log(data);
-        	// var dataJson = eval(data);
-        	// console.log(dataJson);
-            // if(data['status'] == 'success') {
-
-                // refreshColList('#list_collaborator', data['collaborators']);
-            // }
-        },
-        beforeSend: function(xhr, settings) {
-            if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
-                xhr.setRequestHeader("X-CSRFToken", csrftoken);
-            }
-        }
-    });    
+// empty all global parameters
+function glbParamClear() {
+	connections = [];
+	biclusters = [];
+	entLists = [];
+	selectedEnts = [];
+	entList.count = 0;
+	entList.startPos = 0;
+	bic.count = 0;
 }
-
-// these HTTP methods do not require CSRF protection
-function csrfSafeMethod(method) {
-    return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
-}
-
-
-// $(document).ready(function() {
-// 	datasetRequest();
-// });
-
-// $(".location").tooltip({
-//     'container': 'body',
-//     'placement': 'bottom'
-// });
