@@ -1,7 +1,12 @@
 $('#btn_new_vis').click(function(){
-	$("#vis_dim_select").removeClass('hide_this');
+	$("#vis_name_config").removeClass('hide_this');	
+	$("#vis_dim_select").removeClass('hide_this');	
+	// enable save button
+	$("#btn_save_config").prop('disabled',false);
 });
 
+
+// add draggable for wiki with jQuery UI
 $(function() {
 	$( "#vis_wiki_summary" ).draggable();
 });
@@ -11,8 +16,10 @@ $(function() {
 $("#vis_sel_project").change(function(){
 	var projectID = $(this).selectpicker('val'),
 		requestJSON = { "project_id": projectID }
-
-	visCtrlRequest(requestJSON, "loadVisList");	
+	// load vis list
+	visCtrlRequest(requestJSON, "loadVisList");
+	// clear current canvas
+	removeVis(canvas);	
 });
 
 
@@ -32,6 +39,11 @@ $("#btn_save_config").click(function(){
 		var lkey = $(selDims[i]).val();
 		requestJSON[lkey] = 1;
 	}
+
+	// hide the vis name config
+	$("#vis_name_config").addClass('hide_this');
+	// show visualization control
+	$("#vis_ctrl").removeClass('hide_this');	
 
 	visCtrlRequest(requestJSON, "addVis");
 });
@@ -154,7 +166,6 @@ function loadVisListHelper(resData) {
 	$('#vis_list').selectpicker('refresh');
 
 	$("#btn_new_vis").prop('disabled',false);
-	$("#btn_save_config").prop('disabled',false);
 }
 
 /*
@@ -190,10 +201,8 @@ function deleteVisHelper(resData, visID) {
 		$('#vis_list').find('[value='+ visID +']').remove();
 		$('#vis_list').selectpicker('val', "");
 		$('#vis_list').selectpicker('refresh');
-		// remove sort control
-		$('.listControlGroup').remove();
-		// delete visualizations
-		canvas.selectAll("*").remove();
+		// delete visualizations and sorting control
+		removeVis(canvas);
 
 		// empty all global parameters
 		glbParamClear();
@@ -207,19 +216,21 @@ function deleteVisHelper(resData, visID) {
 */
 function loadVisHelper(resData) {
 
-	$('.listControlGroup').remove();
 	// delete visualizations
-	canvas.selectAll("*").remove();
+	removeVis(canvas);
 
-	connections = [];
-	biclusters = [];
-	entLists = [];
-	selectedEnts = [];
-	entList.count = 0;
-	entList.startPos = 0;
-	bic.count = 0;      	
+	// clear global paramters
+	glbParamClear();
 
-	// if (jsonData.status == "success") {
+	if (!$("#vis_config_ctrl").hasClass("hide_this"))
+		$("#vis_config_ctrl").addClass('hide_this');		
+
+	// show visualization control buttons	
+	if ($("#vis_ctrl").hasClass("hide_this"))
+		$("#vis_ctrl").removeClass('hide_this');
+
+	// if ($("#vis_dim_select").hasClass("hide_this"))
+	// 	$("#vis_dim_select").removeClass('hide_this');
 
 	// load visualizations
 	var listData = resData.lists,
@@ -250,11 +261,6 @@ function loadVisHelper(resData) {
 		entLists.push(aList);
 
 		var aListData = getListDataByKey(listData, lkey);
-
-		// for (key in listData) {
-		// 	if (listData[key].listType == lkey)
-		// 		aListData = listData[key];
-		// }	
 
 		// add a list to the vis canvas
 		var aListView = addList(aList, aListData, bicList, entList.startPos);

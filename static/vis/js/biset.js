@@ -9,7 +9,7 @@ var entity = { width: 260, height: 25, rdCorner: 5, freqWidth: 30 };
 var entList = { width: 260, height: 2650, gap: 80, topGap: 10, startPos: 0, count: 0 };
 
 // in-between bar settings
-var bic = { frameWidth: 60, frameHeight: 30, frameRdCorner: 0, innerRdCorner: 0, count: 0 };
+var bic = { frameWidth: 60, frameHeight: 30, frameRdCorner: 12, innerRdCorner: 12, count: 0 };
 
 var bicList = { width: 60, height: 2650 }
 
@@ -1044,4 +1044,14 @@ function glbParamClear() {
 	entList.count = 0;
 	entList.startPos = 0;
 	bic.count = 0;
+}
+
+/* 
+* remove all elements in current d3 canvas
+* @param thisCanvas, current d3 canvas
+*/
+function removeVis(thisCanvas) {
+	thisCanvas.selectAll("*").remove();
+	// remove sort control
+	$('.listControlGroup').remove();
 }
