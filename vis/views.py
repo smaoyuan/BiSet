@@ -16,7 +16,12 @@ def analytics(request):
     This is visualization page. 
     @param request: the Django HttpRequest object
     '''
-    theUser = request.user    
+    theUser = request.user
+    previousVisList = []
+    if 'selected_project_id' in request.session:
+        pid =  request.session['selected_project_id']
+        # Load visList
+        previousVisList = getVisListFromDB(pid)
     
     '''
     myProjects =  Project.objects.filter(user = theUser)
@@ -57,18 +62,26 @@ def analytics(request):
     except Exception as e:
         return HttpResponse(e)
     
-    context = { 'active_tag': 'analytics', 'BASE_URL':settings.BASE_URL, 'projects':my_projects_queryset,'shareProjects':shared_projects, 'pCount': count}
-    return TemplateResponse(request, 'vis/index.html', context)
+    context = {'active_tag': 'analytics', 'BASE_URL':settings.BASE_URL, 'projects':my_projects_queryset,'shareProjects':shared_projects, 'pCount': count, 'preVisList':previousVisList}
+    #return TemplateResponse(request, 'vis/index.html', context)
+    return render(request, 'vis/index.html', context)
 
 @login_required
 def loadVisList(request):
     '''
     Loading private projects. Returns the private projects for the loggin user.
     @param request: Django http request
-    '''
+    '''        
+    
     theUser = request.user    
     requestJson = json.loads(request.body)
     project_id = requestJson['project_id']
+    # Remember user's selection
+    request.session['selected_project_id'] = project_id
+    return HttpResponse(json.dumps(getVisListFromDB(project_id)))
+ 
+def getVisListFromDB(project_id):  
+    
     theVisList =  Vis.objects.filter(project = project_id).order_by('create_time')
     
     visList = []
@@ -78,9 +91,9 @@ def loadVisList(request):
         thisVis['vis_name'] = item.name
         thisVis['create_time'] = str(item.create_time)     
         visList.append(thisVis)
-        
-    return HttpResponse(json.dumps(visList))
+    return visList
     
+ 
 @login_required     
 def addVisConfig(request):
     '''
@@ -97,7 +110,7 @@ def addVisConfig(request):
         visconfigName = requestJson['vis_name']
         theProject = get_object_or_404(Project, pk = project_id)
         
-        print theProject
+       
         
         # Only the project creator, super user can delete the project
         has_permission = theProject.is_creator(theUser) or theProject.is_collaborator(theUser) or theUser.is_superuser
@@ -183,7 +196,7 @@ def saveVis(request):
         tmp['nodeId'] = nodeArr[1]
         toUpdate.append(tmp)
         
-    print toUpdate
+   
         
     # get the lists names of the vis
     listNames = []
@@ -193,7 +206,7 @@ def saveVis(request):
     
     # Checking which records should be added and removed
     for oldItem in oldSelectedNodes:
-        print oldItem.nodeType, oldItem.nodeId
+        
         isExist = False
         for newItem in toUpdate:
             if oldItem.nodeType == newItem['nodeType'] and oldItem.nodeId == newItem['nodeId'] and oldItem.modifyBy == theUser:
@@ -228,7 +241,7 @@ def deleteVis(request):
         project_id = requestJson['project_id']
         theProject = get_object_or_404(Project, pk = project_id)
         
-        print theProject
+        
         
         # Only the project creator, super user can delete the project
         has_permission = theProject.is_creator(theUser) or theProject.is_collaborator(theUser) or theUser.is_superuser
@@ -266,10 +279,10 @@ def loadVis(request):
     
     theUser = request.user
     project_id = requestJson['project_id']
-    print project_id
+   
     theProject = get_object_or_404(Project, pk = project_id)
     
-    print theProject
+    
     
     # Only the project creator, super user can delete the project
     has_permission = theProject.is_creator(theUser) or theProject.is_collaborator(theUser) or theUser.is_superuser
@@ -369,7 +382,7 @@ def getListDict(tableLeft, table, tableRight, leftClusCols, biclusDict):
     if not table == "EMPTY":
         cursor = connection.cursor()
         sql_str = "SELECT * FROM datamng_" + table
-        print sql_str
+       
         cursor.execute(sql_str)
         table1_rows = cursor.fetchall()
         
