@@ -1,5 +1,8 @@
 $('#btn_new_vis').click(function(){
-	$("#vis_dim_select").removeClass('hide_this');
+	$("#vis_name_config").removeClass('hide_this');	
+	$("#vis_dim_select").removeClass('hide_this');	
+	// enable save button
+	$("#btn_save_config").prop('disabled',false);
 });
 
 
@@ -36,6 +39,11 @@ $("#btn_save_config").click(function(){
 		var lkey = $(selDims[i]).val();
 		requestJSON[lkey] = 1;
 	}
+
+	// hide the vis name config
+	$("#vis_name_config").addClass('hide_this');
+	// show visualization control
+	$("#vis_ctrl").removeClass('hide_this');	
 
 	visCtrlRequest(requestJSON, "addVis");
 });
@@ -158,7 +166,6 @@ function loadVisListHelper(resData) {
 	$('#vis_list').selectpicker('refresh');
 
 	$("#btn_new_vis").prop('disabled',false);
-	$("#btn_save_config").prop('disabled',false);
 }
 
 /*
@@ -214,6 +221,16 @@ function loadVisHelper(resData) {
 
 	// clear global paramters
 	glbParamClear();
+
+	if (!$("#vis_config_ctrl").hasClass("hide_this"))
+		$("#vis_config_ctrl").addClass('hide_this');		
+
+	// show visualization control buttons	
+	if ($("#vis_ctrl").hasClass("hide_this"))
+		$("#vis_ctrl").removeClass('hide_this');
+
+	// if ($("#vis_dim_select").hasClass("hide_this"))
+	// 	$("#vis_dim_select").removeClass('hide_this');
 
 	// load visualizations
 	var listData = resData.lists,
