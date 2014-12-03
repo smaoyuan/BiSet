@@ -22,6 +22,9 @@ class VisNodes(models.Model):
     '''
     vis = models.ForeignKey(Vis)
     nodeType = models.CharField(max_length=50)
-    nodeId =  models.IntegerField() 
+    nodeId =  models.IntegerField()
+    svgX = models.FloatField(default=0)
+    svgY = models.FloatField(default=0)
+    modifyBy = models.ForeignKey(User, default=1)
     
     

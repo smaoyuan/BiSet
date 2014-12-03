@@ -6,7 +6,7 @@ import json
 from django.db import connection
 from django.conf import settings
 from vis.models import Vis, VisNodes
-from projects.models import Project
+from projects.models import Project, Collaborationship
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 
@@ -17,6 +17,8 @@ def analytics(request):
     @param request: the Django HttpRequest object
     '''
     theUser = request.user    
+    
+    '''
     myProjects =  Project.objects.filter(user = theUser)
     
     privateProjects = []
@@ -28,7 +30,34 @@ def analytics(request):
         thisProject['dataset'] = item.dataset        
         privateProjects.append(item)
         pCount += 1
-    context = { 'active_tag': 'analytics', 'BASE_URL':settings.BASE_URL, 'projects':privateProjects, 'pCount': pCount}
+    '''
+        
+    # Load the total number of projects for the user
+    collaborationShip = Collaborationship.objects.filter(user = theUser, is_deleted = '0')
+    my_projects_queryset = Project.objects.filter(user = theUser, is_deleted = '0')
+    
+    # Calculate the number of projects for the user
+    project_set = set()
+    shared_projects = []
+    count = 0 
+    
+    try:
+        for item in my_projects_queryset:
+            if not item.id in project_set:
+                project_set.add(item.id)
+                count += 1
+        
+        for item in collaborationShip:
+            if not item.project.id  in project_set:
+                if not item.project.is_deleted:
+                    project_set.add(item.project.id)
+                    shared_projects.append(item.project)
+                    count += 1
+                
+    except Exception as e:
+        return HttpResponse(e)
+    
+    context = { 'active_tag': 'analytics', 'BASE_URL':settings.BASE_URL, 'projects':my_projects_queryset,'shareProjects':shared_projects, 'pCount': count}
     return TemplateResponse(request, 'vis/index.html', context)
 
 @login_required
@@ -40,7 +69,6 @@ def loadVisList(request):
     theUser = request.user    
     requestJson = json.loads(request.body)
     project_id = requestJson['project_id']
-    
     theVisList =  Vis.objects.filter(project = project_id)
     
     visList = []
@@ -165,7 +193,7 @@ def saveVis(request):
         print oldItem.nodeType, oldItem.nodeId
         isExist = False
         for newItem in toUpdate:
-            if oldItem.nodeType == newItem['nodeType'] and oldItem.nodeId == newItem['nodeId']:
+            if oldItem.nodeType == newItem['nodeType'] and oldItem.nodeId == newItem['nodeId'] and oldItem.modifyBy == theUser:
                 newItem['nodeType'] = "exist"
                 isExist = True
                 break;
@@ -176,7 +204,7 @@ def saveVis(request):
     # Adding new highlighted nodes
     for newItem in toUpdate:
         if not newItem['nodeType'] == "exist":
-            newVisNode = VisNodes(vis = theVis, nodeType = newItem['nodeType'], nodeId = newItem['nodeId'])
+            newVisNode = VisNodes(vis = theVis, nodeType = newItem['nodeType'], nodeId = newItem['nodeId'], modifyBy = theUser)
             newVisNode.save()
     
     responseJson = {"status": "success"}
@@ -235,6 +263,7 @@ def loadVis(request):
     
     theUser = request.user
     project_id = requestJson['project_id']
+    print project_id
     theProject = get_object_or_404(Project, pk = project_id)
     
     print theProject
@@ -308,19 +337,19 @@ def getLstsBisets(lstNames):
     '''
     length = len(lstNames)
     biclusDict = {}
-    entryLists = {}
+    entryLists = []
     preCols = None    
     
     for i in range(0, length):
         if i == 0:
             theList, preCols = getListDict(None, lstNames[i], lstNames[i+1], preCols, biclusDict)
-            entryLists[lstNames[i]] = {"listID": i + 1, "leftType": "", "listType": lstNames[i], "rightType": lstNames[i+1], "entities": theList}
+            entryLists.append({"listID": i + 1, "leftType": "", "listType": lstNames[i], "rightType": lstNames[i+1], "entities": theList})
         elif i == length - 1:
             theList, preCols = getListDict(lstNames[i-1], lstNames[i], None, preCols, biclusDict)
-            entryLists[lstNames[i]] = {"listID": i + 1, "leftType": lstNames[i-1], "listType": lstNames[i], "rightType": "","entities": theList}
+            entryLists.append({"listID": i + 1, "leftType": lstNames[i-1], "listType": lstNames[i], "rightType": "","entities": theList})
         else:           
             theList, preCols = getListDict(lstNames[i-1], lstNames[i], lstNames[i+1], preCols, biclusDict)
-            entryLists[lstNames[i]] = {"listID": i + 1, "leftType": lstNames[i-1], "listType": lstNames[i], "rightType": lstNames[i+1], "entities": theList}
+            entryLists.append({"listID": i + 1, "leftType": lstNames[i-1], "listType": lstNames[i], "rightType": lstNames[i+1], "entities": theList})
    
     return {"lists":entryLists, "bics":biclusDict}
     
@@ -419,7 +448,15 @@ def getListDict(tableLeft, table, tableRight, leftClusCols, biclusDict):
             for key, val in table1_item_dict.iteritems():
                 removedKeyList.append(val)
                 
-            return removedKeyList, t1_t2_ClusCols
+            
+            newlist = sorted(removedKeyList, key=lambda k: k['entFreq'], reverse=True)
+            
+            index = 0
+            for item in newlist:
+                #print index, item
+                item['index'] = index
+                index += 1
+            return newlist, t1_t2_ClusCols
     else:
         # adding col list to list items.
         for col in leftClusCols:
@@ -432,6 +469,14 @@ def getListDict(tableLeft, table, tableRight, leftClusCols, biclusDict):
         removedKeyList = []
         for key, val in table1_item_dict.iteritems():
             removedKeyList.append(val)
-        return removedKeyList, None 
+            
+        newlist = sorted(removedKeyList, key=lambda k: k['entFreq'], reverse=True)
+            
+        index = 0
+        for item in newlist:
+            #print index, item
+            item['index'] = index
+            index += 1    
+        return newlist, None 
         
     return None, None

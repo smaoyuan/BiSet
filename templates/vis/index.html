@@ -12,18 +12,26 @@
 		<div class="col-md-2">
 			<div>
 				<label>Project List</label>
-	            <select class="selectpicker" data-live-search="true" data-width="80%" id="vis_sel_project">
+	            <select class="selectpicker" data-live-search="true" data-width="100%" id="vis_sel_project">
                     <option value=""></option>
-                {% for project in projects %}
-                    <option value="{{project.id}}">{{project.name}}</option>
+                    <optgroup label="My Own Project" id="vis_own_project">
+                {% for project in projects %}	                
+	                    <option value="{{project.id}}">{{project.name}}</option>
+                    
                 {% endfor %}
+                </optgroup>
+	            <optgroup label="Shared with Me" id="vis_shared_project">
+                    {% for project in shareProjects %}	                
+	                    <option value="{{project.id}}">{{project.name}}</option>
+                    {% endfor %}
+                    </optgroup>
 	            </select>
 			</div>
         	<hr>
 
 			<div>
 				<label>Visualization List</label>
-	            <select class="selectpicker" data-live-search="true" data-width="80%" id="vis_list" disabled>
+	            <select class="selectpicker" data-live-search="true" data-width="100%" id="vis_list" disabled>
                     <option value=""></option>
                     <!-- <option>vis1</option> -->
 	            </select>				
