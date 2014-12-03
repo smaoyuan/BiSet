@@ -1045,3 +1045,13 @@ function glbParamClear() {
 	entList.startPos = 0;
 	bic.count = 0;
 }
+
+/* 
+* remove all elements in current d3 canvas
+* @param thisCanvas, current d3 canvas
+*/
+function removeVis(thisCanvas) {
+	thisCanvas.selectAll("*").remove();
+	// remove sort control
+	$('.listControlGroup').remove();
+}
