@@ -145,14 +145,11 @@ $("#dataDimensionList").append(
 
 var drag = d3.behavior.drag()
     .origin(function() {
-
+    	// position of current selected item
     	thisOffset = getOffset(d3.select(this));
+    	// position of the parent
     	parentOffset = getOffset(d3.select(this.parentNode));
-
-    	return { x: thisOffset.left - parentOffset.left, y: thisOffset.top };
-
-    	// var t = d3.select(this);
-     //    return {x: t.attr("x"), y: t.attr("y")};
+    	return { x: thisOffset.left - parentOffset.left, y: thisOffset.top};
     })
     .on("dragstart", function (d) {
         d3.event.sourceEvent.stopPropagation();
@@ -160,21 +157,25 @@ var drag = d3.behavior.drag()
     })
     .on("drag", function (d) {
 
-    	d3.select(this).attr("transform", "translate(" + d3.event.x + "," + d3.event.y + ")");
-    	// idNum = d3.select(this).attr("id").split("_")[2];	            	
+    	var dragX = d3.event.x,
+    		dragY = d3.event.y;
 
-     //    d3.select(this).attr("x", d3.event.x).attr("y", d3.event.y);
-     //    d3.select("#bic_left_" + idNum).attr("x", d3.event.x).attr("y", d3.event.y);
-        for (var i = connections.length; i--;) {
-            addLink(connections[i]);
-        }
+		if (dragY < 0)
+			dragY = 0;
+		if (dragX >= entList.gap * 2)
+			dragX = entList.gap * 2;
+		if (dragX + entList.gap * 2 <= 0)
+			dragX = -entList.gap * 2;
+
+		d3.select(this).attr("transform", "translate(" + dragX + "," + dragY + ")");
+
+		updateLink(connections);
     })
     .on("dragend", function (d) {
-        for (var i = connections.length; i--;) {
-            addLink(connections[i]);
-        }			            	
+    	updateLink(connections);			            	
         d3.select(this).classed("dragging", false);			                
 	});	
+
 
 /*
 * Add a list in a canvas and return this list
@@ -273,9 +274,7 @@ function addList(canvas, listData, bicList, startPos) {
 								.style("display", "block");
 								//.style("opacity", 100)//
 
-					        for (var l = connections.length; l--;) {
-					            addLink(connections[l]);
-					        }
+							updateLink(connections);
 
 		    				for (var j = 0; j < rowListIDs.length; j++) {
 		    					d3.select("#" + rowField + "_" + rowListIDs[j] + "__" + thisBicID)
@@ -309,9 +308,7 @@ function addList(canvas, listData, bicList, startPos) {
 								// .style("opacity", 100)
 								.style("display", "block");
 
-					        for (var l = connections.length; l--;) {
-					            addLink(connections[l]);
-					        }
+					        updateLink(connections);
 
 		    				for (var j = 0; j < rowListIDs.length; j++) {
 		    					d3.select("#" + rowField + "_" + rowListIDs[j] + "__" + thisBicID)
@@ -890,10 +887,8 @@ function sortList(aList, sortType) {
 				return "translate(0," + aList.yAxis(d.index) + ")";
 			})
 
-			.call(endall, function() { 
-			    for (var l = connections.length; l--;) {
-			        addLink(connections[l]);
-			    }
+			.call(endall, function() {
+				updateLink(connections);
 
 				// hide the selected line
 				d3.selectAll(".linkSelected").transition()
@@ -917,9 +912,7 @@ function sortList(aList, sortType) {
 				// return "translate(" + aList.startPos + "," + aList.yAxis(d.entValue) + ")";				 
 			})
 			.call(endall, function() { 
-			    for (var l = connections.length; l--;) {
-			        addLink(connections[l]);
-			    }
+			    updateLink(connections);
 
 				// hide the selected line
 				d3.selectAll(".linkSelected").transition()
@@ -927,12 +920,6 @@ function sortList(aList, sortType) {
 					.style("stroke", color.lineNormalColor);
 			});
 	}
-
-    // for (var l = connections.length; l--;) {
-    //     addLink(connections[l]);
-    //     console.log("here");
-    // }
-
 }
 
 
@@ -1036,6 +1023,17 @@ var addLink = function (obj1, obj2, line, d3obj, bg) {
         };
     }
 };
+
+
+/*
+* update a set of links
+* @param links, an array of links
+*/
+function updateLink(links) {
+	for (lk in links) {
+		addLink(links[lk]);
+	}
+}
 
 
 /*
