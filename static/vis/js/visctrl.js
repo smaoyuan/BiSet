@@ -25,10 +25,12 @@ $("#vis_sel_project").change(function(){
         success: function(data){
         	var visList = JSON.parse(data);
 
+        	$("#vis_list").children().remove();
         	$("#vis_list").prop('disabled',false);
         	for (var i = 0; i < visList.length; i++){
-        		$('#vis_list').append("<option value='" + visList[i].id + "'>" + visList[i].create_time + "</option>");
-        	}        	
+        		$('#vis_list').prepend("<option value='" + visList[i].id + "'>" + visList[i].create_time + "</option>");
+        	}
+        	$("#vis_list").prepend("<option value=''></option>");        	        	
         	$('#vis_list').selectpicker('refresh');
 
         	$("#btn_new_vis").prop('disabled',false);
@@ -239,6 +241,8 @@ $("#vis_list").change(function(){
         success: function(data){
         	var jsonData = JSON.parse(data);
 
+    		console.log(jsonData);
+
     		$('.listControlGroup').remove();
     		// delete visualizations
     		canvas.selectAll("*").remove();
@@ -264,7 +268,10 @@ $("#vis_list").change(function(){
 
 			// get selected dimensions
 			var selDims = [];
-			for (key in listData) { selDims.push(key); }
+			for (key in listData) { 
+				console.log(listData[key].listType);
+				selDims.push(listData[key].listType); 
+			}
 
 			// add all lists
 			for (var i = 0; i < selDims.length; i++) {
@@ -281,11 +288,16 @@ $("#vis_list").change(function(){
 					.attr("transform", function(d, i) { return "translate(" + entList.startPos + "," + 0 + ")"; });
 				entLists.push(aList);
 
-				var aListData = listData[lkey];		
+				var aListData = getListDataByKey(listData, lkey);
+
+				// for (key in listData) {
+				// 	if (listData[key].listType == lkey)
+				// 		aListData = listData[key];
+				// }	
 
 				// add a list to the vis canvas
 				var aListView = addList(aList, aListData, bicList, entList.startPos);
-				addSortCtrl(aListView);		 
+				addSortCtrl(aListView); 
 			}
 
 			// add all bics with lines
@@ -305,16 +317,26 @@ $("#vis_list").change(function(){
 				}
 			}
 
+			console.log(entHighlightData);
+
 			for (key in entHighlightData){
 				var frameID = key //d3.select(this).attr("id"),
     			thisEntType = frameID.split("_")[0],
-    			thisListID = listData.listID;
+    			thisListID = getListDataByKey(listData, thisEntType).listID; // listData[thisEntType].listID;
+
+    			console.log(thisListID);
+    			console.log("key::::" + key);
+    			console.log(frameID);
+    			console.log(d3.select("#" + key));
+
 
 	    		var entData = d3.select("#" + key).data()[0],
 	    			// d3.select(this).data()[0],
 	    			// all associated bic ids
 	    			leftRelBicIDs = [],
 	    			rightRelBicIDs = [];
+
+    			console.log(entData);
 
 				var requestVal = d3.select("#" + key).data()[0].entValue;
 				// d3.select(this).data()[0].entValue;
@@ -324,42 +346,6 @@ $("#vis_list").change(function(){
 				var requestJSON = {
 					"query": requestVal
 				}
-
-				// retrieve information from Wiki
-				// $.ajax({
-			 //        url: window.SERVER_PATH + 'wiki/wikisummary/',
-			 //        type: "POST",
-			 //        data: JSON.stringify(requestJSON),
-			 //        contentType: "application/json",
-			 //        success: function(data){
-			 //        	var sumtxt = data.sumtxt,
-			 //        		optiontxt = data.option,
-			 //        		empTxt = data.empty;
-
-		  //       		console.log("herer");
-		  //       		console.log(data);
-
-		  //       		$("#vis_wiki_title").html(requestVal);
-
-		  //       		if (sumtxt.length != 0)
-		  //       			$("#vis_wiki_text").html(sumtxt);
-		  //       		else {
-		  //       			if (optiontxt.length != 0) {
-		  //       				var text = "Do you mean: " + optiontxt[0] + ", or "  + optiontxt[1] + "?";
-			 //        			$("#vis_wiki_text").html(text);
-		  //       			}
-		  //       			else {
-		  //       				$("#vis_wiki_text").html(empTxt);
-		  //       			}
-		  //       		}
-			 //        },
-			 //        beforeSend: function(xhr, settings) {
-			 //            if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
-			 //                xhr.setRequestHeader("X-CSRFToken", csrftoken);
-			 //            }
-			 //        }
-			 //    });
-
 
 	    		// change color when highlight
 	    		if (d3.select("#" + key).attr("class") != "entSelected") { //d3.select(this)
@@ -418,6 +404,8 @@ $("#vis_list").change(function(){
 			    					colField = bicList[leftRelBicIDs[i]].colField,
 			    					thisBicID = "bic_" + leftRelBicIDs[i];
 
+		    					console.log(thisBicID);			    					
+
 								d3.select("#" + thisBicID)
 									.attr("class", "bicSelected")
 									// .style("opacity", 100);
@@ -454,3 +442,12 @@ $("#vis_list").change(function(){
         }
     });
 });
+
+
+function getListDataByKey(ldata, searchKey) {
+	for (el in ldata) {
+		if (ldata[el].listType == searchKey)
+			return ldata[el];
+	}
+	return null;
+}

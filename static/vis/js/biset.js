@@ -72,8 +72,10 @@ var selData = $('#selDataSet').val();
 $("#dataDimensionList").append(
 	"<input type='checkbox' name='dimensions' value='person' id='d_person'> Person<br />" + 
 	"<input type='checkbox' name='dimensions' value='location' id='d_location'> Location<br />" +
-    // "<input type='checkbox' name='dimensions' value='date' id='d_date'> Date<br />" +
-    "<input type='checkbox' name='dimensions' value='org' id='d_org'> Organization<br />"
+    "<input type='checkbox' name='dimensions' value='phone' id='d_phone'> Phone<br />" +
+    "<input type='checkbox' name='dimensions' value='date' id='d_date'> Date<br />" +    
+    "<input type='checkbox' name='dimensions' value='org' id='d_org'> Organization<br />" +
+    "<input type='checkbox' name='dimensions' value='misc' id='d_misc'> Misc<br />"     
 );    
 
 // d3.json(window.SERVER_PATH + 'vis/loadbisets/', function(error, json) {
@@ -140,14 +142,16 @@ $("#dataDimensionList").append(
 // });
 
 var drag = d3.behavior.drag()
-    // .origin(function() {
+    .origin(function() {
 
-    // 	thisOffset = getOffset(d3.select(this));
-    // 	return { x: thisOffset.left, y: thisOffset.top };
+    	thisOffset = getOffset(d3.select(this));
+    	parentOffset = getOffset(d3.select(this.parentNode));
 
-    // 	// var t = d3.select(this);
-    //     // return {x: t.attr("x"), y: t.attr("y")};
-    // })
+    	return { x: thisOffset.left - parentOffset.left, y: thisOffset.top };
+
+    	// var t = d3.select(this);
+     //    return {x: t.attr("x"), y: t.attr("y")};
+    })
     .on("dragstart", function (d) {
         d3.event.sourceEvent.stopPropagation();
         d3.select(this).classed("dragging", true);
