@@ -54,7 +54,9 @@ def view_profile(request, user_id):
                 
                 logAction = action_dict[str(logAction)]
                 
-                new_logging_list.append({'action_time':item.action_time, 
+                new_logging_list.append({      
+                    'id':item.id,
+                    'action_time':item.action_time, 
                     'change_message':item.change_message, 
                     'logObject':logObject, 
                     'logAction' : logAction,

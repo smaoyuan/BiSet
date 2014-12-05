@@ -169,9 +169,10 @@ first name: {{ user.firstname }}
                                                 {% endif %}    
                                             {% endif %}
                                         {% elif item.logContentType == 'project'%}    
-                                           project                                           
-                                           {% if item.logObject.is_deleted == True%}
-                                                '{{ item.logObject.name}}' <a href = '{% url 'projects:undo_delete' item.logObject.pk %}'>Undo?</a>
+                                           project                
+                                           {% if item.logObject.is_deleted and item.logAction = 'delete'%}
+                                                <!-- '{{ item.logObject.name}}' <a href = '{% url 'projects:undo_delete' item.logObject.pk %}'>Undo?</a>-->
+                                                '{{ item.logObject.name}}' <a href = '{{BASE_URL}}projects/undo_project_delete/{{item.logObject.pk}}/{{item.id}}/'>(Undo?)</a>
                                            {% else %}
                                                 <a href = '{% url 'projects:detail' item.logObject.pk %}'>{{ item.logObject.name}}</a>
                                            {% endif %}

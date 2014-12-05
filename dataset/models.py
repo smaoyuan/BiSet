@@ -16,4 +16,4 @@ class Doc(models.Model):
     phone = models.CharField(max_length=200)
     organization = models.CharField(max_length=200)
     misc = models.CharField(max_length=200)
-    text = models.TextField()        
+    text = models.TextField()

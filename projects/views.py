@@ -731,6 +731,22 @@ def undo_delete(request, project_id):
     theProject.is_deleted = False
     theProject.save()
     return HttpResponseRedirect("/projects/" + project_id + "/")
+    
+@login_required        
+def undo_project_delete(request, project_id, log_id): 
+    '''
+    Deleting a project by flipping a flag in database table.
+    @param request: Django http request
+    @param project_id: the id of project to be deleted.
+    '''
+    theProject = Project.objects.get(id = project_id)
+    theProject.is_deleted = False
+    theProject.save()
+    
+    logToDelete = LogEntry.objects.get(id = log_id)
+    logToDelete.delete()
+    
+    return HttpResponseRedirect("/projects/" + project_id + "/")
  
 @login_required 
 def undo_comment_delete(request, comment_id, log_id):

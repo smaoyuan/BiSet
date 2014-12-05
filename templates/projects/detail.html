@@ -203,8 +203,9 @@
                                 	<div class="col-xs-7 col-md-9">
                                 		<p>
                                         <a href="{% url 'userprofile:view_profile' item.action_user.id %}">{{ item.action_user }}</a>
-                                		{{ item.logAction }} comment
+                                		{{ item.logAction }} 
                                         {% if item.logContentType == 'comment' %}
+                                            comment
                                             {% if item.logObject.is_deleted and collaborate_permisson = 2 and item.logAction = 'delete'%}
                                                 '{{ item.logObject }}' <a href = '{{BASE_URL}}projects/undo_comment_delete/{{item.logObject.pk}}/{{item.id}}/'>(Undo?)</a>
                                             {% else %}
