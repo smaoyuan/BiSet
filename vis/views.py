@@ -18,6 +18,7 @@ def analytics(request):
     '''
     theUser = request.user
     previousVisList = []
+    pid = 0
     if 'selected_project_id' in request.session:
         pid =  request.session['selected_project_id']
         # Load visList
@@ -61,7 +62,7 @@ def analytics(request):
                 
     except Exception as e:
         return HttpResponse(e)
-    
+    print previousVisList
     context = {'active_tag': 'analytics', 'BASE_URL':settings.BASE_URL, 'projects':my_projects_queryset,'shareProjects':shared_projects, 'pCount': count ,'prePid':pid ,'preVisList':previousVisList}
     #return TemplateResponse(request, 'vis/index.html', context)
     return render(request, 'vis/index.html', context)
