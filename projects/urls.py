@@ -23,4 +23,5 @@ urlpatterns = patterns('',
     url(r'^collaborator/add/$', views.add_collaborator, name='add_collaborator'), 
     url(r'^collaborator/delete/$', views.delete_collaborator, name='delete_collaborator'), 
     url(r'^test/$', views.load_project_activity_feed, name='test'),   
+    url(r'^userlist/$', views.get_user_list, name='userlist'),   
 )

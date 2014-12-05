@@ -614,6 +614,19 @@ def sort_comment_desc(request, project_id):
     '''
     return detail(request, project_id, sort_order = 'desc')
     
+def get_user_list(request):
+    users = User.objects.filter(is_superuser = 0)
+    
+    uList = []
+    for user in users:
+        tmp = {}
+        tmp['id'] = user.id
+        tmp['name'] = user.username
+        uList.append(tmp)
+        
+    return HttpResponse(json.dumps(uList))
+    
+    
 @login_required         
 def add_collaborator(request):
     '''
