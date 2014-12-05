@@ -25,7 +25,7 @@ except ImportError:
 
 SHA1_RE = re.compile('^[a-f0-9]{40}$')
 
-
+'''
 class RegistrationManager(models.Manager):
     """
     Custom manager for the ``RegistrationProfile`` model.
@@ -164,8 +164,8 @@ class RegistrationManager(models.Manager):
             except UserModel().DoesNotExist:
                 profile.delete()
 
-
-@python_2_unicode_compatible
+'''
+'''@python_2_unicode_compatible
 class RegistrationProfile(models.Model):
     """
     A simple profile which stores an activation key for use during
@@ -300,4 +300,4 @@ class RegistrationProfile(models.Model):
         if message_html:
             email_message.attach_alternative(message_html, 'text/html')
 
-        email_message.send()
+        email_message.send()'''

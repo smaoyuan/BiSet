@@ -278,3 +278,11 @@ div.listControlGroup {
 #myturk_result_form {
     margin-top: 30px;
 }
+
+.plist_th_20 {
+    width: 20%;
+}
+
+.plist_th_30 {
+    width: 30%;
+}

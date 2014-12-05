@@ -259,9 +259,13 @@ function loadVisHelper(resData) {
 		bicList = resData.bics,
 		entHighlightData = resData.highlight_ent;
 
-	// set all bics has not been displayed
-	for (var i = 0; i < bicList.length; i++)
-		bicDisplayed.put(bicList[i].bicID, 0);
+	// get the total number of bics
+	var bicNum = 0;
+	for (key in bicList) {
+		bicNum += 1;
+		// set all bics has not been displayed
+		bicDisplayed[key] = 0;
+	}
 
 	// get selected dimensions
 	var selDims = [];
@@ -342,12 +346,16 @@ function loadVisHelper(resData) {
 	    					colListIDs = bicList[rightRelBicIDs[i]].col,
 	    					rowField = bicList[rightRelBicIDs[i]].rowField,
 	    					colField = bicList[rightRelBicIDs[i]].colField,
+	    					bicIDVal = rightRelBicIDs[i],
 	    					thisBicID = "bic_" + rightRelBicIDs[i];
 
 						d3.select("#" + thisBicID)
 							.attr("class", "bicSelected")
 							// .style("opacity", 100);
 							.style("display", "block");
+
+						// record the bic has been clicked
+						bicDisplayed[bicIDVal] += 1;
 
 	    				for (var j = 0; j < rowListIDs.length; j++) {
 	    					d3.select("#" + rowField + "_" + rowListIDs[j] + "__" + thisBicID)
@@ -377,12 +385,16 @@ function loadVisHelper(resData) {
 	    					colListIDs = bicList[leftRelBicIDs[i]].col,
 	    					rowField = bicList[leftRelBicIDs[i]].rowField,
 	    					colField = bicList[leftRelBicIDs[i]].colField,
+	    					bicIDVal = leftRelBicIDs[i],
 	    					thisBicID = "bic_" + leftRelBicIDs[i];		    					
 
 						d3.select("#" + thisBicID)
 							.attr("class", "bicSelected")
 							// .style("opacity", 100);
 							.style("display", "block");
+
+						// record the bic has been clicked
+						bicDisplayed[bicIDVal] += 1;
 
 	    				for (var j = 0; j < rowListIDs.length; j++) {
 	    					d3.select("#" + rowField + "_" + rowListIDs[j] + "__" + thisBicID)

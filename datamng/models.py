@@ -1,12 +1,13 @@
 from django.db import models
+from dataset.models import Doc, DataSet
 
 
 # Create your models here.
 
 
 class DocName(models.Model):
-	doc_name = models.CharField(max_length=30, unique= True)
-
+    doc_name = models.CharField(max_length=30, unique= True)
+    dataset = models.ForeignKey(DataSet)
 
 class Person(models.Model):
 	person_name = models.CharField(max_length=50, unique= True)

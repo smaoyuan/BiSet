@@ -38,7 +38,8 @@ var connections = [],
 var draged = 0;
 
 // a hash table to maintain the displayed bics
-var bicDisplayed = new Hashtable(),
+var bicDisplayed = [],
+	// bicDisplayed = new Hashtable(),
 	bicOnShow = [];
 
 // canvas for visualizations
@@ -430,12 +431,16 @@ function addList(canvas, listData, bicList, startPos) {
 		    					colListIDs = bicList[rightRelBicIDs[i]].col,
 		    					rowField = bicList[rightRelBicIDs[i]].rowField,
 		    					colField = bicList[rightRelBicIDs[i]].colField,
+		    					bicIDVal = rightRelBicIDs[i],
 		    					thisBicID = "bic_" + rightRelBicIDs[i];
 
 							d3.select("#" + thisBicID)
 								.attr("class", "bicSelected")
 								// .style("opacity", 100);
 								.style("display", "block");
+
+							// record the bic has been clicked
+							bicDisplayed[bicIDVal] += 1;						
 
 		    				for (var j = 0; j < rowListIDs.length; j++) {
 		    					d3.select("#" + rowField + "_" + rowListIDs[j] + "__" + thisBicID)
@@ -465,12 +470,16 @@ function addList(canvas, listData, bicList, startPos) {
 		    					colListIDs = bicList[leftRelBicIDs[i]].col,
 		    					rowField = bicList[leftRelBicIDs[i]].rowField,
 		    					colField = bicList[leftRelBicIDs[i]].colField,
-		    					thisBicID = "bic_" + leftRelBicIDs[i];	    					
+		    					bicIDVal = leftRelBicIDs[i],
+		    					thisBicID = "bic_" + leftRelBicIDs[i];
 
 							d3.select("#" + thisBicID)
 								.attr("class", "bicSelected")
 								// .style("opacity", 100);
 								.style("display", "block");
+
+							// record the bic has been clicked
+							bicDisplayed[bicIDVal] += 1;
 
 		    				for (var j = 0; j < rowListIDs.length; j++) {
 		    					d3.select("#" + rowField + "_" + rowListIDs[j] + "__" + thisBicID)
@@ -490,6 +499,101 @@ function addList(canvas, listData, bicList, startPos) {
 				}
     		}
     		else {
+    			// unhighlight the element
+    			d3.select("#" + frameID + "_frame").attr("fill", color.entNormal);
+    			d3.select(this).classed("entSelected", false);
+
+    			// remove the element from the selected list
+    			var bicIndex = selectedEnts.indexOf(frameID);
+    			if (bicIndex > -1) {
+				    selectedEnts.splice(bicIndex, 1);
+				}
+
+				// 1st list
+				if (thisListID == 1) {
+					if (entData.bicSetsRight != null) {
+						for (var i = 0; i < entData.bicSetsRight.length; i++){
+							rightRelBicIDs.push(entData.bicSetsRight[i]);
+						}
+
+						for (var i = 0; i < rightRelBicIDs.length; i++) {
+		    				var rowListIDs = bicList[rightRelBicIDs[i]].row,
+		    					colListIDs = bicList[rightRelBicIDs[i]].col,
+		    					rowField = bicList[rightRelBicIDs[i]].rowField,
+		    					colField = bicList[rightRelBicIDs[i]].colField,
+		    					bicIDVal = rightRelBicIDs[i],
+		    					thisBicID = "bic_" + rightRelBicIDs[i];
+
+
+	    					if (bicDisplayed[bicIDVal] == 1) {
+								d3.select("#" + thisBicID)
+									.classed("bicSelected", false)
+									// .style("opacity", 100);
+									.style("display", "none");
+
+			    				for (var j = 0; j < rowListIDs.length; j++) {
+			    					d3.select("#" + rowField + "_" + rowListIDs[j] + "__" + thisBicID)
+										.classed("linkSelected", false)
+										// .style("opacity", 100);
+			    						.style("display", "none");
+			    				}
+
+			    				for (var k = 0; k < colListIDs.length; k++) {
+			    					d3.select("#" + thisBicID + "__" + colField + "_" + colListIDs[k])
+			    						.classed("linkSelected", false)
+			    						// .style("opacity", 100);
+			    						.style("display", "none");
+			    				}
+	    					}
+
+							// record the bic has been unselected
+							bicDisplayed[bicIDVal] -= 1;
+						}
+					}
+				}
+				// 2nd list
+				else {
+					if (entData.bicSetsLeft != null) {
+						for (var i = 0; i < entData.bicSetsLeft.length; i++){
+							leftRelBicIDs.push(entData.bicSetsLeft[i]);
+						}
+
+						for (var i = 0; i < leftRelBicIDs.length; i++) {
+		    				var rowListIDs = bicList[leftRelBicIDs[i]].row,
+		    					colListIDs = bicList[leftRelBicIDs[i]].col,
+		    					rowField = bicList[leftRelBicIDs[i]].rowField,
+		    					colField = bicList[leftRelBicIDs[i]].colField,
+		    					bicIDVal = leftRelBicIDs[i],
+		    					thisBicID = "bic_" + leftRelBicIDs[i];
+
+	    					if (bicDisplayed[bicIDVal] == 1) {
+								d3.select("#" + thisBicID)
+									.classed("bicSelected", false)
+									// .style("opacity", 100);
+									.style("display", "none");
+
+								// record the bic has been clicked
+								bicDisplayed[bicIDVal] += 1;
+
+			    				for (var j = 0; j < rowListIDs.length; j++) {
+			    					d3.select("#" + rowField + "_" + rowListIDs[j] + "__" + thisBicID)
+			    						.classed("linkSelected", false)
+			    						// .style("opacity", 100);
+			    						.style("display", "none");
+			    				}
+
+			    				for (var k = 0; k < colListIDs.length; k++) {
+			    					d3.select("#" + thisBicID + "__" + colField + "_" + colListIDs[k])
+			    						.classed("linkSelected", false)
+			    						// .style("opacity", 100);
+			    						.style("display", "none");
+			    				}	    						
+	    					}
+							// record the bic has been unselected
+							bicDisplayed[bicIDVal] -= 1;
+						}
+					}
+				}
 
     		}
 

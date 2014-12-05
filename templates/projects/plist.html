@@ -4,7 +4,7 @@
 {% block content %}
 <div class="row">
 	<!-- container of project list -->
-	<div class="panel panel-default widget shade-container">
+	<div class="panel panel-success widget shade-container">
 		<div class="panel-heading">
             <span class="glyphicon glyphicon-th-list"></span>
             <h3 class="panel-title">My Own Project</h3>
@@ -16,23 +16,23 @@
 				<!-- head of the table -->
 				<!-- TO DO: dynamically generate table head -->
 				<thead>
-					<th>Project name</th>
-					<th>Dataset</th>
-					<th>Project description</th>
-					<th>Last modifed time</th>
+					<th class="plist_th_20">Project name</th>
+					<th class="plist_th_20">Dataset</th>
+					<th class="plist_th_20">Project description</th>
+					<th class="plist_th_30">Last modifed time</th>
 					<th>Edit</th>
 					<th>Delete</th>
 				</thead>
 				<tbody>
 					{% for project in my_projects %}
-							<tr value="{{ project.id }}">
-								<td><a href = "{% url 'projects:detail' project.id %}">{{ project.name }}</a></td>
-								<td>{{ project.dataset }}</td>
-								<td>{{ project.description }}</td>
-								<td>{{ project.create_time }}</td>
-							    <td><p><button class="btn btn-primary btn-xs plist_update" data-title="Edit" data-toggle="modal" data-target="#edit" value="{{ project.id }}"><span class="glyphicon glyphicon-pencil"></span></button></p></td>
-    							<td><p><button class="btn btn-danger btn-xs p_delete_icon" data-title="Delete" data-toggle="modal" data-target="#delete" value="{{ project.id }}"><span class="glyphicon glyphicon-trash" ></span></button></p></td>
-							</tr>
+						<tr value="{{ project.id }}">
+							<td><a href = "{% url 'projects:detail' project.id %}">{{ project.name }}</a></td>
+							<td>{{ project.dataset }}</td>
+							<td>{{ project.description }}</td>
+							<td>{{ project.create_time }}</td>
+						    <td><p><button class="btn btn-primary btn-xs plist_update" data-title="Edit" data-toggle="modal" data-target="#edit" value="{{ project.id }}"><span class="glyphicon glyphicon-pencil"></span></button></p></td>
+							<td><p><button class="btn btn-danger btn-xs p_delete_icon" data-title="Delete" data-toggle="modal" data-target="#delete" value="{{ project.id }}"><span class="glyphicon glyphicon-trash" ></span></button></p></td>
+						</tr>
 					{% endfor %}		
 				</tbody>
 			</table>
@@ -67,7 +67,7 @@
 </div>
 
 <div class="row">
-	<div class="panel panel-default widget shade-container">
+	<div class="panel panel-info widget shade-container">
 		<div class="panel-heading">
             <span class="glyphicon glyphicon-list"></span>
             <h3 class="panel-title">Project Shared with Me</h3>
@@ -79,23 +79,21 @@
 				<!-- head of the table -->
 				<!-- TO DO: dynamically generate table head -->
 				<thead>
-					<th>Project name</th>
-					<th>Dataset</th>
-					<th>Project description</th>
-					<th>Last modifed time</th>
+					<th class="plist_th_20">Project name</th>
+					<th class="plist_th_20">Dataset</th>
+					<th class="plist_th_20">Project description</th>
+					<th class="plist_th_30">Last modifed time</th>
 					<th>Edit</th>
-					<th>Delete</th>
 				</thead>
 				<tbody>
 					{% for project in shared_projects %}
-							<tr value="{{ project.id }}">
-								<td><a href = "{% url 'projects:detail' project.id %}">{{ project.name }}</a></td>
-								<td>{{ project.dataset }}</td>
-								<td>{{ project.description }}</td>
-								<td>{{ project.create_time }}</td>
-							    <td><p><button class="btn btn-primary btn-xs plist_update" data-title="Edit" data-toggle="modal" data-target="#edit" value="{{ project.id }}"><span class="glyphicon glyphicon-pencil"></span></button></p></td>
-    							<td><p><button class="btn btn-danger btn-xs p_delete_icon" data-title="Delete" data-toggle="modal" data-target="#delete" value="{{ project.id }}"><span class="glyphicon glyphicon-trash" ></span></button></p></td>
-							</tr>
+						<tr value="{{ project.id }}">
+							<td><a href = "{% url 'projects:detail' project.id %}">{{ project.name }}</a></td>
+							<td>{{ project.dataset }}</td>
+							<td>{{ project.description }}</td>
+							<td>{{ project.create_time }}</td>
+						    <td><p><button class="btn btn-primary btn-xs plist_update" data-title="Edit" data-toggle="modal" data-target="#edit" value="{{ project.id }}"><span class="glyphicon glyphicon-pencil"></span></button></p></td>
+						</tr>
 					{% endfor %}		
 				</tbody>
 			</table>
@@ -130,23 +128,21 @@
 				<!-- head of the table -->
 				<!-- TO DO: dynamically generate table head -->
 				<thead>
-					<th>Project name</th>
-					<th>Dataset</th>
-					<th>Project description</th>
-					<th>Last modifed time</th>
-					<th>Edit</th>
-					<th>Delete</th>
+					<th class="plist_th_20">Project name</th>
+					<th class="plist_th_20">Dataset</th>
+					<th class="plist_th_20">Project description</th>
+					<th class="plist_th_30">Last modifed time</th>
+					<th></th>
 				</thead>
 				<tbody>
 					{% for project in public_projects %}
-							<tr value="{{ project.id }}">
-								<td><a href = "{% url 'projects:detail' project.id %}">{{ project.name }}</a></td>
-								<td>{{ project.dataset }}</td>
-								<td>{{ project.description }}</td>
-								<td>{{ project.create_time }}</td>
-							    <td><p><button class="btn btn-primary btn-xs plist_update" data-title="Edit" data-toggle="modal" data-target="#edit" value="{{ project.id }}"><span class="glyphicon glyphicon-pencil"></span></button></p></td>
-    							<td><p><button class="btn btn-danger btn-xs p_delete_icon" data-title="Delete" data-toggle="modal" data-target="#delete" value="{{ project.id }}"><span class="glyphicon glyphicon-trash" ></span></button></p></td>
-							</tr>
+						<tr value="{{ project.id }}">
+							<td><a href = "{% url 'projects:detail' project.id %}">{{ project.name }}</a></td>
+							<td>{{ project.dataset }}</td>
+							<td>{{ project.description }}</td>
+							<td>{{ project.create_time }}</td>
+							<td></td>
+						</tr>
 					{% endfor %}		
 				</tbody>
 			</table>
