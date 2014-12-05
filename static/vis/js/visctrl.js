@@ -75,8 +75,12 @@ $("#btn_vis_save").click(function() {
 });
 
 
-// delete current visualization
+// delete confirmation dialog window
 $("#btn_vis_del").click(function(){
+	$('#vis_delete_alert').modal('toggle');
+});
+// delete current visualization
+$('#btn_vis_delete').click(function() {
 	var projectID = $("#vis_sel_project").selectpicker('val'),
 		curVisID = $("#vis_list").selectpicker('val');
 
@@ -86,7 +90,10 @@ $("#btn_vis_del").click(function(){
 	}
 
 	visCtrlRequest(requestJSON, "deleteVis");
-});
+	
+	// reload the page after deletion
+	location.reload();
+})
 
 
 // load visualization

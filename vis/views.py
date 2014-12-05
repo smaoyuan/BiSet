@@ -62,7 +62,7 @@ def analytics(request):
     except Exception as e:
         return HttpResponse(e)
     
-    context = {'active_tag': 'analytics', 'BASE_URL':settings.BASE_URL, 'projects':my_projects_queryset,'shareProjects':shared_projects, 'pCount': count, 'preVisList':previousVisList}
+    context = {'active_tag': 'analytics', 'BASE_URL':settings.BASE_URL, 'projects':my_projects_queryset,'shareProjects':shared_projects, 'pCount': count ,'prePid':pid ,'preVisList':previousVisList}
     #return TemplateResponse(request, 'vis/index.html', context)
     return render(request, 'vis/index.html', context)
 
