@@ -456,3 +456,63 @@ function wikiSumHelper(resData, term) {
 		}
 	}
 }
+
+// add tooltip for product name
+$('#vis_name').tooltip({
+    html: "true",
+    trigger: "focus",
+    title: "<span id='vis_name_msg' class='glyphicon glyphicon-remove' style=color:#FF0004;'></span> No empty name",
+	animation: false,
+	placement: "bottom"
+});
+
+// show instance message
+instantMsg('#vis_name', '#vis_name_msg');
+
+/*
+* Show wrong icon when validating fails
+* @param msgID, the tooltip id 
+*/
+function valWrong(msgID) {
+    $(msgID).removeClass("glyphicon-ok");
+    $(msgID).addClass("glyphicon-remove");
+    $(msgID).css("color","#FF0004");
+}
+
+/*
+* Show success icon when validating fails
+* @param msgID, the tooltip id 
+*/
+function valCorrect(msgID) {
+    $(msgID).removeClass("glyphicon-remove");
+    $(msgID).addClass("glyphicon-ok");
+    $(msgID).css("color","#00A41E");
+
+    // hide the alert
+    if (!$('#alert_msg').hasClass('hide_div'))
+    	$('#alert_msg').addClass('hide_div');
+}
+
+/*
+* Show instance message for text input box
+* @param inputTextID, the text input box id
+* @param msgID, the tooltiop id 
+*/
+function instantMsg(inputTextID, msgID) {
+	$(inputTextID).on('shown.bs.tooltip', function(){
+		// check when the input value changes
+		$(inputTextID).keyup(function(){
+			if ($(inputTextID).val().length > 0)
+				valCorrect(msgID);
+			else
+				valWrong(msgID);		
+		});
+		// check when user clicking the input box
+		$(inputTextID).click(function(){
+			if ($(inputTextID).val().length > 0)
+				valCorrect(msgID);
+			else
+				valWrong(msgID);		
+		});
+	});	
+}
