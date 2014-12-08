@@ -1,6 +1,6 @@
 
 // initial canvas settings
-var visCanvas = { width: 1280, height: 2650 };
+var visCanvas = { width: 1280, height: 2650, inUse: 0 };
 
 // entity settings
 var entity = { width: 260, height: 25, rdCorner: 5, freqWidth: 30 };
@@ -16,6 +16,7 @@ var bicList = { width: 60, height: 2650 }
 
 // line settings
 var ln = { nwidth: 1.5 }
+
 
 // color settings
 var color = {
@@ -1097,6 +1098,7 @@ function glbParamClear() {
 */
 function removeVis(thisCanvas) {
 	thisCanvas.selectAll("*").remove();
+	visCanvas.inUse = 0;
 	// remove sort control
 	$('.listControlGroup').remove();
 }

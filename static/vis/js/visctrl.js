@@ -20,8 +20,6 @@ $("#vis_sel_project").change(function(){
 	// load vis list
 	visCtrlRequest(requestJSON, "loadVisList");
 
-	console.log($("#vis_ctrl").hasClass('hide_this'));
-
 	// hide the visualization control buttons
 	if (!$("#vis_ctrl").hasClass('hide_this'))
 		$("#vis_ctrl").addClass('hide_this');
@@ -30,8 +28,9 @@ $("#vis_sel_project").change(function(){
 	if ($("#vis_config_ctrl").hasClass('hide_this'))
 		$("#vis_config_ctrl").removeClass('hide_this');
 
-	// clear current canvas
-	removeVis(canvas);	
+	if (visCanvas.inUse == 1)
+		// clear current canvas
+		removeVis(canvas);
 });
 
 
@@ -195,6 +194,7 @@ function loadVisListHelper(resData) {
 	$("#vis_list").prepend("<option value=''></option>");
 	$('#vis_list').selectpicker('refresh');
 
+	// enable the new vis button
 	$("#btn_new_vis").prop('disabled',false);
 }
 
@@ -227,6 +227,9 @@ function saveVisHelper(resData) {
 */
 function deleteVisHelper(resData, visID) {
 	if (resData.status == "success") {
+
+		console.log(visID);
+
 		// remove the name of current vis in the list
 		$('#vis_list').find('[value='+ visID +']').remove();
 		$('#vis_list').selectpicker('val', "");
@@ -298,6 +301,8 @@ function loadVisHelper(resData) {
 
 		// add a list to the vis canvas
 		var aListView = addList(aList, aListData, bicList, entList.startPos);
+		// flag the canvas has been used
+		visCanvas.inUse = 1;
 		addSortCtrl(aListView); 
 	}
 
