@@ -37,7 +37,10 @@ $("#vis_sel_project").change(function(){
 $("#btn_save_config").click(function(){
 	var projectID = $("#vis_sel_project").selectpicker('val'),
 		visName = $("#vis_name").val();
-
+    if(visName.trim() == ""){
+        alert("Please enter the name for the new visualization.");
+        return;
+    }
 	var requestJSON = {
 		"project_id": projectID,
 		"vis_name": visName	
@@ -47,8 +50,10 @@ $("#btn_save_config").click(function(){
 
 	console.log(selDims.length);
 
-	if (selDims.length > 2 || selDims.length == 1 || selDims.length == 0)
+	if (selDims.length > 2 || selDims.length == 1 || selDims.length == 0){
 		alert("Please select two dimensions.");
+        return;
+    }
 	else {
 		// add all lists
 		for (var i = 0; i < selDims.length; i++) {
