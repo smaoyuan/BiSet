@@ -15,14 +15,13 @@
 	            <select class="selectpicker" data-live-search="true" data-width="100%" id="vis_sel_project">
                     <option value=""></option>
                     <optgroup label="My Own Project" id="vis_own_project">
-                {% for project in projects %}	                
-	                    <option value="{{project.id}}">{{project.name}}</option>
-                    
+                {% for project in projects %}	            
+                        <option value="{{project.id}}" {%if project.id|add:'0' = prePid|add:'0' %} selected{%endif%}>{{project.name}}</option>
                 {% endfor %}
                 </optgroup>
 	            <optgroup label="Shared with Me" id="vis_shared_project">
                     {% for project in shareProjects %}	                
-	                    <option value="{{project.id}}">{{project.name}}</option>
+	                    <option value="{{project.id}}" {%if project.id|add:'0' = prePid|add:'0' %} selected{%endif%}>{{project.name}}</option>
                     {% endfor %}
                     </optgroup>
 	            </select>
@@ -31,9 +30,11 @@
 
 			<div>
 				<label>Visualization List</label>
-	            <select class="selectpicker" data-live-search="true" data-width="100%" id="vis_list" disabled>
+	             <select class="selectpicker" data-live-search="true" data-width="100%" id="vis_list" {% if preVisList|length = 0 %}disabled{%endif%}>
                     <option value=""></option>
-                    <!-- <option>vis1</option> -->
+                    {%for vis in preVisList%}
+                        <option value="{{vis.id}}">{{vis.vis_name}}</option>
+                    {%endfor%}
 	            </select>				
 			</div>
 			<hr>
