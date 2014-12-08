@@ -1,4 +1,3 @@
-
 $('#btn_new_vis').click(function(){
 	$("#vis_name_config").removeClass('hide_this');	
 	$("#vis_dim_select").removeClass('hide_this');	
