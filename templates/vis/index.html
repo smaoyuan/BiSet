@@ -52,7 +52,7 @@
             </div>
 
 			<div id="vis_config_ctrl">
-				<input id="btn_new_vis" class="btn btn-info btn-xs" type="button" value="New Vis Config" disabled>
+				<input id="btn_new_vis" class="btn btn-info btn-xs" type="button" value="New Vis Config" {%if not prePid %} disabled {% endif %}>
                 <input id="btn_save_config" class="btn btn-info btn-xs" type="button" value="Save Config" disabled>
     			<hr>
 			</div>
