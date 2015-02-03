@@ -9,25 +9,41 @@ var entity = { width: 260, height: 25, rdCorner: 5, freqWidth: 30 };
 var entList = { width: 260, height: 2650, gap: 80, topGap: 10, startPos: 0, count: 0 };
 
 // in-between bar settings
-var bic = { frameWidth: 60, frameHeight: 30, frameRdCorner: 12, innerRdCorner: 12, count: 0 };
+var bic = { 
+	frameWidth: 60, 
+	frameHStrokeWidth: 5,
+	frameNStrokeWidth: 0, 
+	frameHeight: 30, 
+	frameRdCorner: 12, 
+	innerRdCorner: 12, 
+	count: 0 
+};
 
 // bic list settigns
 var bicList = { width: 60, height: 2650 }
 
 // line settings
-var ln = { nwidth: 1.5 }
-
+var ln = { nwidth: 0.8, hwidth: 2 }
 
 // color settings
 var color = {
 	entNormal: "rgba(78, 131, 232, 0.3)",
 	entHover: "rgba(78, 131, 232, 0.5)",
+	entColRel: "rgba(228, 122, 30, 0.2)",
 	entHighlight: "rgba(228, 122, 30, 0.4)",
 	entFreColor: "rgba(22, 113, 229, 0.3)",
 	bicFrameColor: "rgba(0, 20, 20, 0.2)",
-	lineNormalColor: "rgba(0, 0, 0, 0.2)",
+	bicFrameHColor: "rgba(252, 30, 36, 0.6)",
+	lineNormalColor: "rgba(0, 0, 0, 0.1)",
+	linePreHColor: "rgba(252, 30, 36, 0.6)",
 	lsortColor: "rgba(0,0,0,0)"
 };
+
+var durations = {
+	bicFrameTrans: 500,
+	lnTrans: 250,
+	colEntTrans: 0
+}
 
 // an array to store all links
 var connections = [],
@@ -205,31 +221,8 @@ function addList(canvas, listData, bicList, startPos) {
 								rightRelBicIDs.push(entData.bicSetsRight[i]);
 							}
 
-							for (var i = 0; i < rightRelBicIDs.length; i++) {
-			    				var rowListIDs = bicList[rightRelBicIDs[i]].row,
-			    					colListIDs = bicList[rightRelBicIDs[i]].col,
-			    					rowField = bicList[rightRelBicIDs[i]].rowField,
-			    					colField = bicList[rightRelBicIDs[i]].colField,
-			    					thisBicID = "bic_" + rightRelBicIDs[i];
-
-								d3.select("#" + thisBicID)
-									.style("display", "block");
-									//.style("opacity", 100)//
-
-								updateLink(connections);
-
-			    				for (var j = 0; j < rowListIDs.length; j++) {
-			    					d3.select("#" + rowField + "_" + rowListIDs[j] + "__" + thisBicID)
-			    						// .style("opacity", 100)
-			    						.style("display", "block");
-			    				}
-
-			    				for (var k = 0; k < colListIDs.length; k++) {
-			    					d3.select("#" + thisBicID + "__" + colField + "_" + colListIDs[k])
-			    						// .style("opacity", 100)
-			    						.style("display", "block");    					
-			    				}
-							}
+							// update when hovering
+							hoverUpdateAll(bicList, rightRelBicIDs, frameID, "hoverHighLight");
 						}
 					}
 					// 2nd list
@@ -239,31 +232,8 @@ function addList(canvas, listData, bicList, startPos) {
 								leftRelBicIDs.push(entData.bicSetsLeft[i]);
 							}
 
-							for (var i = 0; i < leftRelBicIDs.length; i++) {
-			    				var rowListIDs = bicList[leftRelBicIDs[i]].row,
-			    					colListIDs = bicList[leftRelBicIDs[i]].col,
-			    					rowField = bicList[leftRelBicIDs[i]].rowField,
-			    					colField = bicList[leftRelBicIDs[i]].colField,
-			    					thisBicID = "bic_" + leftRelBicIDs[i];
-
-								d3.select("#" + thisBicID)
-									// .style("opacity", 100)
-									.style("display", "block");
-
-						        updateLink(connections);
-
-			    				for (var j = 0; j < rowListIDs.length; j++) {
-			    					d3.select("#" + rowField + "_" + rowListIDs[j] + "__" + thisBicID)
-			    						// .style("opacity", 100)
-			    						.style("display", "block");
-			    				}
-
-			    				for (var k = 0; k < colListIDs.length; k++) {
-			    					d3.select("#" + thisBicID + "__" + colField + "_" + colListIDs[k])
-			    						// .style("opacity", 100)
-			    						.style("display", "block");    					
-			    				}
-							}
+							// update when hovering
+							hoverUpdateAll(bicList, leftRelBicIDs, frameID, "hoverHighLight");
 						}
 					}
 	    		}
@@ -294,32 +264,8 @@ function addList(canvas, listData, bicList, startPos) {
 							rightRelBicIDs.push(entData.bicSetsRight[i]);
 						}
 
-						for (var i = 0; i < rightRelBicIDs.length; i++) {
-		    				var rowListIDs = bicList[rightRelBicIDs[i]].row,
-		    					colListIDs = bicList[rightRelBicIDs[i]].col,
-		    					rowField = bicList[rightRelBicIDs[i]].rowField,
-		    					colField = bicList[rightRelBicIDs[i]].colField,
-		    					thisBicID = "bic_" + rightRelBicIDs[i];
-
-							if (d3.select("#" + thisBicID).attr("class") != "bicSelected")
-								d3.select("#" + thisBicID)
-									// .style("opacity", 0)
-									.style("display", "none");
-
-		    				for (var j = 0; j < rowListIDs.length; j++) {
-		    					if (d3.select("#" + rowField + "_" + rowListIDs[j] + "__" + thisBicID).attr("class") != "linkSelected")
-		    						d3.select("#" + rowField + "_" + rowListIDs[j] + "__" + thisBicID)
-		    							// .style("opacity", 0)
-		    							.style("display", "none");
-		    				}
-
-		    				for (var k = 0; k < colListIDs.length; k++) {
-		    					if (d3.select("#" + thisBicID + "__" + colField + "_" + colListIDs[k]).attr("class") != "linkSelected")
-		    						d3.select("#" + thisBicID + "__" + colField + "_" + colListIDs[k])
-		    							// .style("opacity", 0)
-		    							.style("display", "none");    					
-		    				}
-						}
+						// update when hovering out
+						hoverUpdateAll(bicList, rightRelBicIDs, frameID, "hoverNormal");
 					}
 				}
 				// 2nd list
@@ -329,32 +275,8 @@ function addList(canvas, listData, bicList, startPos) {
 							leftRelBicIDs.push(entData.bicSetsLeft[i]);
 						}
 
-						for (var i = 0; i < leftRelBicIDs.length; i++) {
-		    				var rowListIDs = bicList[leftRelBicIDs[i]].row,
-		    					colListIDs = bicList[leftRelBicIDs[i]].col,
-		    					rowField = bicList[leftRelBicIDs[i]].rowField,
-		    					colField = bicList[leftRelBicIDs[i]].colField,
-		    					thisBicID = "bic_" + leftRelBicIDs[i];
-
-							if (d3.select("#" + thisBicID).attr("class") != "bicSelected")
-								d3.select("#" + thisBicID)
-									// .style("opacity", 0)
-									.style("display", "none");
-
-		    				for (var j = 0; j < rowListIDs.length; j++) {
-		    					if (d3.select("#" + rowField + "_" + rowListIDs[j] + "__" + thisBicID).attr("class") != "linkSelected")
-		    						d3.select("#" + rowField + "_" + rowListIDs[j] + "__" + thisBicID)
-		    							// .style("opacity", 0)
-		    							.style("display", "none");
-		    				}
-
-		    				for (var k = 0; k < colListIDs.length; k++) {
-		    					if (d3.select("#" + thisBicID + "__" + colField + "_" + colListIDs[k]).attr("class") != "linkSelected")
-		    						d3.select("#" + thisBicID + "__" + colField + "_" + colListIDs[k])
-		    							// .style("opacity", 0)
-		    							.style("display", "none");    					
-		    				}
-						}
+						// update when hovering out
+						hoverUpdateAll(bicList, leftRelBicIDs, frameID, "hoverNormal");
 					}
 				}
 			}
@@ -791,6 +713,124 @@ function addList(canvas, listData, bicList, startPos) {
 }
 
 
+/*
+* function to update the color of a bic frame
+* @param frameID, the ID of the bic frame
+* @param newColor, the new color of the frame
+* @param newStrokeWidth, the new stroke width of the frame
+* @param timer, the duration for the update
+*/
+function bicFrameUpdate(frameID, newColor, newStrokeWidth, durTimer) {
+	d3.select(frameID)
+		.transition()
+		.style("stroke", newColor)
+		.style("stroke-width", newStrokeWidth)
+		.duration(durTimer);
+}
+
+
+/*
+* function to update the color of links
+* @param linkID, the ID of the link
+* @param newColor, the new color of the link
+* @param newWidth, the new width of the link
+* @param newClass, the new class of the link
+* @param timer, the duration for the update
+*/
+function linkStateUpdate(linkID, newColor, newWidth, newClass, durTimer) {
+	d3.select(linkID)
+		.transition()
+		.style("stroke", newColor)
+		.style("stroke-width", newWidth)
+		.attr("class", newClass)
+		.duration(durTimer);
+}
+
+
+/*
+* function to update the color of correlated entities
+* @param entID, the ID of correlated entities
+* @param newColor, the new color of the link
+* @param timer, the duration for the update
+*/
+function colEntUpdate(entID, newColor, durTimer) {
+	d3.select(entID)
+		.transition()
+		.attr("fill", newColor)
+		.duration(durTimer);
+}
+
+
+/*
+* function to update bics and links when hovering and out
+* @param aBicList, a list of bic
+* @param aBicIDList, a list of bicID
+* @param theBicFrameID, the frameID of hovered bic
+* @param updateStatus, the status to be updated
+*/
+function hoverUpdateAll(aBicList, aBicIDList, theBicFrameID, updateStatus) {
+	for (var i = 0; i < aBicIDList.length; i++) {
+		var rowListIDs = aBicList[aBicIDList[i]].row,
+			colListIDs = aBicList[aBicIDList[i]].col,
+			rowField = aBicList[aBicIDList[i]].rowField,
+			colField = aBicList[aBicIDList[i]].colField,
+			thisBicID = "bic_" + aBicIDList[i],
+			thisBicFrameID = "bic_frame_" + aBicIDList[i];
+
+		// highlight
+		if (updateStatus == "hoverHighLight") {
+			bicFrameUpdate("#" + thisBicFrameID, color.bicFrameHColor, 
+				bic.frameHStrokeWidth, durations.bicFrameTrans);
+
+			// update the row
+			for (var j = 0; j < rowListIDs.length; j++) {
+				linkStateUpdate("#" + rowField + "_" + rowListIDs[j] + "__" + thisBicID, 
+					color.linePreHColor, ln.hwidth, "lineMHight", durations.lnTrans);
+
+				if (rowField + "_" + rowListIDs[j] != theBicFrameID)
+					colEntUpdate("#" + rowField + "_" + rowListIDs[j] + "_frame", 
+						color.entColRel, durations.colEntTrans);
+			}
+
+			// update the column
+			for (var k = 0; k < colListIDs.length; k++) {
+				linkStateUpdate("#" + thisBicID + "__" + colField + "_" + colListIDs[k], 
+					color.linePreHColor, ln.hwidth, "lineMHight", durations.lnTrans);
+
+				if (colField + "_" + colListIDs[k] != theBicFrameID)
+					colEntUpdate("#" + colField + "_" + colListIDs[k] + "_frame", 
+						color.entColRel, durations.colEntTrans);
+			}
+		}
+		// unhighlight
+		else if (updateStatus == "hoverNormal") {
+			bicFrameUpdate("#" + thisBicFrameID, color.bicFrameColor, 
+				bic.frameNStrokeWidth, durations.bicFrameTrans);
+
+			for (var j = 0; j < rowListIDs.length; j++) {
+				if (d3.select("#" + rowField + "_" + rowListIDs[j] + "__" + thisBicID).attr("class") != "linkSelected")
+					linkStateUpdate("#" + rowField + "_" + rowListIDs[j] + "__" + thisBicID, 
+						color.lineNormalColor, ln.nwidth, "lineNormal", durations.lnTrans);
+
+				if (rowField + "_" + rowListIDs[j] != theBicFrameID)
+					colEntUpdate("#" + rowField + "_" + rowListIDs[j] + "_frame", 
+						color.entNormal, durations.colEntTrans);
+			}
+
+			for (var k = 0; k < colListIDs.length; k++) {
+				if (d3.select("#" + thisBicID + "__" + colField + "_" + colListIDs[k]).attr("class") != "linkSelected")
+					linkStateUpdate("#" + thisBicID + "__" + colField + "_" + colListIDs[k], 
+						color.lineNormalColor, ln.nwidth, "lineNormal", durations.lnTrans);
+
+				if (colField + "_" + colListIDs[k] != theBicFrameID)
+					colEntUpdate("#" + colField + "_" + colListIDs[k] + "_frame", 
+						color.entNormal, durations.colEntTrans);
+			}
+		}
+	}	
+}
+
+
 function addBics(preListCanvas, bicListCanvas, listData, bicList, bicStartPos, row, col) {    		
 	// ratio between row and column
 	var bicRowPercent = [];
@@ -870,9 +910,9 @@ function addBics(preListCanvas, bicListCanvas, listData, bicList, bicStartPos, r
     // hide bics for mouse over
     // we should hide bics after adding the line, 
     // since the pos of line is determined by that of bics
-    d3.selectAll(".bics")
+    d3.selectAll(".bics");
     	// .style("opacity", 0);
-		.style("display", "none");
+		// .style("display", "none");
 }
 
 
@@ -1058,10 +1098,13 @@ var addLink = function (obj1, obj2, line, d3obj, bg) {
             line: d3obj.append("path")
             		.attr("d", path)
             		.attr("id", function() { return obj1.attr("id") + "__" + obj2.attr("id")})
+            		.attr("class", "lineNormal")
             		.style("stroke", color.lineNormalColor)
             		.style("stroke-width", ln.nwidth)
-            		.style("fill", "none")
-            		.style("display", "none"),
+            		.style("fill", "none"),
+
+            		// .style("display", "none"),
+
             		// .style({stroke: color.lineNormalColor, fill: "none", display:"none" }), // opacity: 0
             from: obj1,
             to: obj2,
