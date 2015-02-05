@@ -27,9 +27,9 @@ $("#vis_sel_project").change(function(){
 	if ($("#vis_config_ctrl").hasClass('hide_this'))
 		$("#vis_config_ctrl").removeClass('hide_this');
 
-	if (visCanvas.inUse == 1)
+	if (biset.visCanvas.inUse == 1)
 		// clear current canvas
-		removeVis(canvas);
+		biset.removeVis(canvas);
 });
 
 
@@ -246,10 +246,10 @@ function deleteVisHelper(resData, visID) {
 		$('#vis_list').selectpicker('val', "");
 		$('#vis_list').selectpicker('refresh');
 		// delete visualizations and sorting control
-		removeVis(canvas);
+		biset.removeVis(canvas);
 
 		// empty all global parameters
-		glbParamClear();
+		biset.globalParamClear();
 	}
 }
 
@@ -261,10 +261,10 @@ function deleteVisHelper(resData, visID) {
 function loadVisHelper(resData) {
 
 	// delete visualizations
-	removeVis(canvas);
+	biset.removeVis(canvas);
 
 	// clear global paramters
-	glbParamClear();
+	biset.globalParamClear();
 
 	if (!$("#vis_config_ctrl").hasClass("hide_this"))
 		$("#vis_config_ctrl").addClass('hide_this');		
@@ -298,34 +298,34 @@ function loadVisHelper(resData) {
 
 		var lkey = selDims[i];
 
-		entList.count += 1;
-		entList.startPos += (entList.width + entList.gap) * 2 * i;
+		biset.entList.count += 1;
+		biset.entList.startPos += (biset.entList.width + biset.entList.gap) * 2 * i + 1;
 
 		var aList = canvas.append('g')
-			.attr('id', 'list_' + entList.count)
-			.attr('width', entList.width)
-			.attr('height', entList.height)
-			.attr("transform", function(d, i) { return "translate(" + entList.startPos + "," + 0 + ")"; });
+			.attr('id', 'list_' + biset.entList.count)
+			.attr('width', biset.entList.width)
+			.attr('height', biset.entList.height)
+			.attr("transform", function(d, i) { return "translate(" + biset.entList.startPos + "," + 0 + ")"; });
 		entLists.push(aList);
 
 		var aListData = getListDataByKey(listData, lkey);
 
 		// add a list to the vis canvas
-		var aListView = addList(aList, aListData, bicList, entList.startPos);
+		var aListView = addList(aList, aListData, bicList, biset.entList.startPos);
 		// flag the canvas has been used
-		visCanvas.inUse = 1;
+		biset.visCanvas.inUse = 1;
 		addSortCtrl(aListView); 
 	}
 
 	// add all bics with lines
 	for (var i = 0; i < selDims.length; i++) {
 		if (i % 2 == 0) {
-			var bicStartPos = (entList.width + entList.gap) * 2 * (i / 2 + 1) - ((entList.width + entList.gap) * 2 * (i / 2 + 1) - entList.width - bic.frameWidth) / 2 - bic.frameWidth;
+			var bicStartPos = (biset.entList.width + biset.entList.gap) * 2 * (i / 2 + 1) - ((biset.entList.width + biset.entList.gap) * 2 * (i / 2 + 1) - biset.entList.width - biset.bic.frameWidth) / 2 - biset.bic.frameWidth;
 
 			var aBicList = canvas.append('g')
-				.attr('id', 'bic_list_' + entList.count)
-				.attr('width', bicList.width)
-				.attr('height', bicList.height)
+				.attr('id', 'bic_list_' + biset.entList.count)
+				.attr('width', biset.bicList.width)
+				.attr('height', biset.bicList.height)
 				.attr("transform", function(d, i) { return "translate(" + bicStartPos + "," + 0 + ")"; });;
 
 			var rowField = selDims[i],
@@ -352,7 +352,7 @@ function loadVisHelper(resData) {
 
 		// change color when highlight
 		if (d3.select("#" + key).attr("class") != "entSelected") {
-			d3.select("#" + frameID + "_frame").attr("fill", color.entHighlight);
+			d3.select("#" + frameID + "_frame").attr("fill", biset.colors.entHighlight);
 			d3.select("#" + key).attr("class", "entSelected");
 
 			var thisEntID = d3.select("#" + key).attr("id");
