@@ -195,12 +195,25 @@ div.shade-container{
 
 /*size of the list control group*/
 #biset_control {
-    height: 70px;
-    width: 1600px;
+    height: 30px;
+    width: 2560px;
+}
+
+.listTitle {
+    margin-left: 10px;
+    display: inline;
+}
+
+.orderCtrlLabel {
+    margin-left: 70px;
+}
+
+.orderCtrl {
+    margin-left: 5px;
 }
 
 div.listControlGroup {
-    width: 680px;
+    width: 640px;
     float: left;
 }
 
