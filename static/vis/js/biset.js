@@ -2,7 +2,7 @@
 * BiSet
 * A small framework for visual analytics with biclusters
 * Author & Copyright: Maoyuan Sun
-* contact: smaoyuan@gmail.com
+* contact: smaoyuan@vt.edu
 * 
 *
 * This relies on:
@@ -14,7 +14,7 @@ var biset = {
 
 	// global settings
 	// the vis canvas
-	visCanvas: { width: 1280, height: 2650, inUse: 0 },
+	visCanvas: { width: 2560, height: 2650, inUse: 0 },
 	// an individual entity in a list
 	entity: { width: 260, height: 25, rdCorner: 5, freqWidth: 30 },
 	// a list
@@ -214,7 +214,8 @@ biset.addList = function(canvas, listData, bicList, startPos) {
 
     // add control group of a list
     $("#biset_control").append("<div class='listControlGroup'>" +
-    	"<h5 class='listTitle' id='listTitle_" + listNum + "'>" + type + "</h5>" +
+    	"<h5 class='listTitle' id='listTitle_" + listNum + "'>" + type + "</h5> " +
+    	"<span class='orderCtrlLabel glyphicon glyphicon-sort-by-alphabet' id='list_" + listNum + "_ctrl_label'></span>" + 
     	"<select class='orderCtrl' id='list_" + listNum + "_sortCtrl'>" + 
     		"<option value='alph'>alphabeic</option>" +
     		"<option value='freq'>frequency</option>" + 
@@ -1034,6 +1035,16 @@ function addSortCtrl(listView) {
 	// sort a list by selected value
 	$("#" + listView.id + "_sortCtrl").change(function() {
 		var orderBy = $(this).val();
+		if (orderBy == 'freq') {
+			$("#" + listView.id + "_ctrl_label")
+				.removeClass('glyphicon-sort-by-alphabet')
+				.addClass('glyphicon-sort-by-attributes-alt');
+		}
+		if (orderBy == 'alph') {
+			$("#" + listView.id + "_ctrl_label")
+				.removeClass('class glyphicon-sort-by-attributes-alt')
+				.addClass('glyphicon-sort-by-alphabet');
+		}
 		sortList(listView, orderBy);
 	});
 }
