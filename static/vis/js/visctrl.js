@@ -50,8 +50,9 @@ $("#btn_save_config").click(function(){
 
 	console.log(selDims.length);
 
-	if (selDims.length > 2 || selDims.length == 1 || selDims.length == 0){
-		alert("Please select two dimensions.");
+	if (selDims.length < 2){
+	// if (selDims.length > 2 || selDims.length == 1 || selDims.length == 0){
+		alert("Please select at least two dimensions.");
         return;
     }
 	else {
@@ -299,7 +300,8 @@ function loadVisHelper(resData) {
 		var lkey = selDims[i];
 
 		biset.entList.count += 1;
-		biset.entList.startPos += (biset.entList.width + biset.entList.gap) * 2 * i + 1;
+		biset.entList.startPos = (biset.entList.width + biset.entList.gap * 4 + biset.bic.frameWidth) * i;
+		// biset.entList.startPos += (biset.entList.width + biset.entList.gap) * 2 * i + 1;
 
 		var aList = canvas.append('g')
 			.attr('id', 'list_' + biset.entList.count)
@@ -311,7 +313,7 @@ function loadVisHelper(resData) {
 		var aListData = getListDataByKey(listData, lkey);
 
 		// add a list to the vis canvas
-		var aListView = addList(aList, aListData, bicList, biset.entList.startPos);
+		var aListView = biset.addList(aList, aListData, bicList, biset.entList.startPos);
 		// flag the canvas has been used
 		biset.visCanvas.inUse = 1;
 		addSortCtrl(aListView); 
@@ -330,7 +332,7 @@ function loadVisHelper(resData) {
 
 			var rowField = selDims[i],
 				colField = selDims[i + 1];
-			addBics(entLists[i], aBicList, aListData, bicList, bicStartPos, rowField, colField);				
+			biset.addBics(entLists[i], aBicList, aListData, bicList, bicStartPos, rowField, colField);				
 		}
 	}
 
