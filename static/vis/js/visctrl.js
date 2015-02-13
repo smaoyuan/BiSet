@@ -139,10 +139,12 @@ function getListDataByKey(ldata, searchKey) {
 	return null;
 }
 
+
 // these HTTP methods do not require CSRF protection
 function csrfSafeMethod(method) {
     return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
 }
+
 
 /*
 * vis control related request handler
@@ -210,6 +212,7 @@ function loadVisListHelper(resData) {
 	$("#btn_new_vis").prop('disabled',false);
 }
 
+
 /*
 * helper function to save vis config
 * @param resData, server response data for vis list
@@ -223,6 +226,7 @@ function saveVisConfigHelper(resData) {
 	$("#vis_list").selectpicker('refresh');
 }
 
+
 /*
 * helper function to save current vis
 * @param resData, server response data for vis list
@@ -231,6 +235,7 @@ function saveVisHelper(resData) {
 	if (resData.status == "success")
 		alert("Visualization has been successfully saved!");
 }
+
 
 /*
 * helper function to delete current vis
@@ -253,6 +258,7 @@ function deleteVisHelper(resData, visID) {
 		biset.globalParamClear();
 	}
 }
+
 
 /*
 * helper function to load vis by id
@@ -301,7 +307,6 @@ function loadVisHelper(resData) {
 
 		biset.entList.count += 1;
 		biset.entList.startPos = (biset.entList.width + biset.entList.gap * 4 + biset.bic.frameWidth) * i;
-		// biset.entList.startPos += (biset.entList.width + biset.entList.gap) * 2 * i + 1;
 
 		var aList = canvas.append('g')
 			.attr('id', 'list_' + biset.entList.count)
@@ -316,13 +321,13 @@ function loadVisHelper(resData) {
 		var aListView = biset.addList(aList, aListData, bicList, biset.entList.startPos);
 		// flag the canvas has been used
 		biset.visCanvas.inUse = 1;
-		addSortCtrl(aListView); 
+		addSortCtrl(aListView);
 	}
 
 	// add all bics with lines
 	for (var i = 0; i < selDims.length; i++) {
 		if (i % 2 == 0) {
-			var bicStartPos = (biset.entList.width + biset.entList.gap) * 2 * (i / 2 + 1) - ((biset.entList.width + biset.entList.gap) * 2 * (i / 2 + 1) - biset.entList.width - biset.bic.frameWidth) / 2 - biset.bic.frameWidth;
+			var bicStartPos = biset.entList.width * (i / 2 + 1) + biset.entList.gap * 2 * (i + 1) + biset.bic.frameWidth * (i / 2);
 
 			var aBicList = canvas.append('g')
 				.attr('id', 'bic_list_' + biset.entList.count)
@@ -441,6 +446,7 @@ function loadVisHelper(resData) {
 		}
 	}
 }
+
 
 /*
 * helper function to get info from wiki
