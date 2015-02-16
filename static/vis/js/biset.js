@@ -73,7 +73,6 @@ var durations = {
 
 // an array to store all links
 var connections = [],
-	biclusters = [],
 	entLists = [],
 	selectedEnts = [];
 
@@ -834,10 +833,12 @@ function hoverUpdateAll(aBicList, aBicIDList, theBicFrameID, eventType) {
 
 
 biset.addBics = function(preListCanvas, bicListCanvas, listData, bicList, bicStartPos, row, col) {
-	// total entities in bics
+		// total entities in bics
 	var	bicTotalEnts = [],
-	// # of left ents in a bic
-		bicLeftEnts = [];
+		// # of left ents in a bic
+		bicLeftEnts = [],
+		// all biclusters between two given lists
+		biclusters = [];
 
 	for (key in bicList) {
 		var entNumInRow = bicList[key].row.length,
@@ -888,10 +889,10 @@ biset.addBics = function(preListCanvas, bicListCanvas, listData, bicList, bicSta
 	    .attr("height", biset.entity.height - 1)
 	    .attr("rx", biset.bic.frameRdCorner)
 	    .attr("ry", biset.bic.frameRdCorner)
-	    .attr("fill", biset.colors.bicFrameColor);	      			
+	    .attr("fill", biset.colors.bicFrameColor);
+
 
     for (var i = 0; i < biclusters.length; i++) {
-    	// console.log(biclusters[i]);
     	var rowType = biclusters[i].rowField,
     		colType = biclusters[i].colField,
     		rowIDs = biclusters[i].row,
@@ -901,7 +902,6 @@ biset.addBics = function(preListCanvas, bicListCanvas, listData, bicList, bicSta
 		for (var j = 0; j < rowIDs.length; j++) {
 			var obj1 = d3.select("#" + rowType + "_" + rowIDs[j]);
 				obj2 = d3.select("#bic_" + bicID);
-
 			// append lines to previous list g
 			connections.push(biset.addLink(obj1, obj2, biset.colors.lineNColor, canvas));
 			// obj2.attr({cursor: "move"});
@@ -1144,7 +1144,6 @@ biset.updateLink = function(links) {
 */
 biset.globalParamClear = function() {
 	connections = [];
-	biclusters = [];
 	entLists = [];
 	selectedEnts = [];
 	biset.entList.count = 0;
