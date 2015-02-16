@@ -280,9 +280,6 @@ function loadVisHelper(resData) {
 	if ($("#vis_ctrl").hasClass("hide_this"))
 		$("#vis_ctrl").removeClass('hide_this');
 
-	// if ($("#vis_dim_select").hasClass("hide_this"))
-	// 	$("#vis_dim_select").removeClass('hide_this');
-
 	// load visualizations
 	var listData = resData.lists,
 		bicList = resData.bics,
@@ -325,20 +322,27 @@ function loadVisHelper(resData) {
 	}
 
 	// add all bics with lines
-	for (var i = 0; i < selDims.length; i++) {
-		if (i % 2 == 0) {
-			var bicStartPos = biset.entList.width * (i / 2 + 1) + biset.entList.gap * 2 * (i + 1) + biset.bic.frameWidth * (i / 2);
+	for (var i = 0; i < selDims.length - 1; i++) {
+		var bicStartPos = biset.entList.width * (i + 1) + biset.entList.gap * 2 * (2 * i + 1) + biset.bic.frameWidth * i,
+			bicListID = i + 1;
+	
+		var aBicList = canvas.append('g')
+			.attr('id', 'bic_list_' + bicListID)
+			.attr('width', biset.bicList.width)
+			.attr('height', biset.bicList.height)
+			.attr("transform", function(d, i) { return "translate(" + bicStartPos + "," + 0 + ")"; });
 
-			var aBicList = canvas.append('g')
-				.attr('id', 'bic_list_' + biset.entList.count)
-				.attr('width', biset.bicList.width)
-				.attr('height', biset.bicList.height)
-				.attr("transform", function(d, i) { return "translate(" + bicStartPos + "," + 0 + ")"; });;
+		var rowField = selDims[i],
+			colField = selDims[i + 1];
 
-			var rowField = selDims[i],
-				colField = selDims[i + 1];
-			biset.addBics(entLists[i], aBicList, aListData, bicList, bicStartPos, rowField, colField);				
+		// the bicluster list
+		var theList = [];
+		for (key in bicList) {
+			if (bicList[key].rowField == selDims[i] && bicList[key].colField == selDims[i + 1])
+				theList.push(bicList[key]);
 		}
+
+		biset.addBics(entLists[i], aBicList, aListData, theList, bicStartPos, rowField, colField);
 	}
 
 	// load highlight entities
