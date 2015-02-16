@@ -214,7 +214,7 @@ biset.addList = function(canvas, listData, bicList, startPos) {
 
     // add control group of a list
     $("#biset_control").append("<div class='listControlGroup'>" +
-    	"<h5 class='listTitle' id='listTitle_" + listNum + "'>" + type + "</h5> " +
+    	"<div class='listTileContainer'><h5 class='listTitle' id='listTitle_" + listNum + "'>" + type + "</h5></div> " +
     	"<span class='orderCtrlLabel glyphicon glyphicon-sort-by-alphabet' id='list_" + listNum + "_ctrl_label'></span>" + 
     	"<select class='orderCtrl' id='list_" + listNum + "_sortCtrl'>" + 
     		"<option value='alph'>alphabeic</option>" +
@@ -833,12 +833,10 @@ function hoverUpdateAll(aBicList, aBicIDList, theBicFrameID, eventType) {
 }
 
 
-biset.addBics = function(preListCanvas, bicListCanvas, listData, bicList, bicStartPos, row, col) {    		
-		// ratio between row and column
-	var // bicRowPercent = [],
-		// total entities in bics
-		bicTotalEnts = [],
-		// # of left ents in a bic
+biset.addBics = function(preListCanvas, bicListCanvas, listData, bicList, bicStartPos, row, col) {
+	// total entities in bics
+	var	bicTotalEnts = [],
+	// # of left ents in a bic
 		bicLeftEnts = [];
 
 	for (key in bicList) {
@@ -846,8 +844,6 @@ biset.addBics = function(preListCanvas, bicListCanvas, listData, bicList, bicSta
 			entNumInCol = bicList[key].col.length,
 			// tmpRatio = entNumInRow / (entNumInRow + entNumInCol),
 			tmpSum = entNumInRow + entNumInCol;
-		// ratio of each bic
-		// bicRowPercent.push(tmpRatio);
 
 		bicTotalEnts.push(tmpSum);
 		// tmpTotalEnts.push(tmpSum);
@@ -860,11 +856,6 @@ biset.addBics = function(preListCanvas, bicListCanvas, listData, bicList, bicSta
 
 	var bicEntsMin = Array.min(bicTotalEnts),
 		bicEntsMax = Array.max(bicTotalEnts);
-
-	// visual percentage based on ratio
-	// var bicRatio = d3.scale.linear()
-	//     .domain([0, 1])
-	//     .range([1, biset.bic.frameWidth]);
 
     // visual percentage based on the count
 	var bicEntsCount = d3.scale.linear()
@@ -885,17 +876,15 @@ biset.addBics = function(preListCanvas, bicListCanvas, listData, bicList, bicSta
 	bics.append("rect")
   		.attr("id", function(d, i) { return "bic_left_" + d.bicID; })
 	    .attr("width", function(d, i) { return bicEntsCount(bicLeftEnts[i]); })
-	    // .attr("width", function(d, i) { return bicRatio(bicRowPercent[i]); })
 	    .attr("height", biset.entity.height - 1)
 	    .attr("rx", biset.bic.innerRdCorner)
 	    .attr("ry", biset.bic.innerRdCorner)
 	    .attr("fill", biset.colors.entFreColor);
 
-	// 100% proportion
+	// set the length of a bicluster based on its component
 	bics.append("rect")
 		.attr("id", function(d, i) { return "bic_frame_" + d.bicID; })
 		.attr("width", function(d, i) { return bicEntsCount(bicTotalEnts[i]); })
-	    // .attr("width", bic.frameWidth)
 	    .attr("height", biset.entity.height - 1)
 	    .attr("rx", biset.bic.frameRdCorner)
 	    .attr("ry", biset.bic.frameRdCorner)
@@ -929,13 +918,6 @@ biset.addBics = function(preListCanvas, bicListCanvas, listData, bicList, bicSta
 			obj1.call(biset.objDrag);
 		}
     }
-
-    // hide bics for mouse over
-    // we should hide bics after adding the line, 
-    // since the pos of line is determined by that of bics
-    // d3.selectAll(".bics");
-    	// .style("opacity", 0);
-		// .style("display", "none");
 }
 
 
