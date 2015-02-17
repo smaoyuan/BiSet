@@ -311,7 +311,6 @@ def loadVis(request):
     lstsBisetsJson = getLstsBisets(listNames)
     
     
-    
     selectedNodes = VisNodes.objects.filter(vis = visID)
     
     lstsBisetsJson["highlight_ent"] = {}
@@ -321,7 +320,51 @@ def loadVis(request):
         lstsBisetsJson["highlight_ent"][identity] = \
             {"nodeType": item.nodeType, "nodeID": item.nodeId}   
     
-    
+    lstsBisetsJson["relNetwork"] = {}
+    networkData = lstsBisetsJson["relNetwork"]
+    bics = lstsBisetsJson["bics"]
+    lists = lstsBisetsJson["lists"]
+
+    # add all bic with its entities in the dictionary
+    for bic in bics:
+        tmpArray = []
+        rowType = bics[bic]["rowField"]
+        colType = bics[bic]["colField"]
+        rows = bics[bic]["row"]
+        cols = bics[bic]["col"]
+
+        # get all row id
+        for row in rows:
+            rowID = str(rowType) + "_" + str(row)
+            tmpArray.append(rowID)
+
+        for col in cols:
+            colID = str(colType) + "_" + str(col)
+            tmpArray.append(colID)
+
+        bicID = "bic_" + str(bics[bic]["bicID"])
+        networkData[bicID] = tmpArray
+
+    # all all entities with their bics in the dictionary
+    for lst in lists:
+        listType = lst["listType"]
+        entities = lst["entities"]
+        for ent in entities:
+            entityID = str(listType) + "_" + str(ent["entityID"])
+            leftBics = ent["bicSetsLeft"]
+            rightBics = ent["bicSetsRight"]
+            tmpArray = []
+            if len(leftBics) != 0:
+                for lbic in leftBics:
+                    thisbicID = "bic_" + str(lbic)
+                    tmpArray.append(lbic)
+            if len(rightBics) != 0:
+                for rbic in rightBics:
+                    thisbicID = "bic_" + str(rbic)
+                    tmpArray.append(rbic)
+            if len(tmpArray) != 0:
+                networkData[entityID] = tmpArray
+
     return HttpResponse(json.dumps(lstsBisetsJson))
     
 
