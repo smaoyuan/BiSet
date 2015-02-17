@@ -173,8 +173,11 @@ biset.objDrag = d3.behavior.drag()
 * @param listData, data to generate the list
 * @param bicList, the list of all bics
 * @param startPos, position to draw bar
+* @param networkData, all connections between bics and ents
 */
-biset.addList = function(canvas, listData, bicList, startPos) {
+biset.addList = function(canvas, listData, bicList, startPos, networkData) {
+
+	console.log(networkData);
 	
 	// type of the list
 	var type = listData.listType,
@@ -182,6 +185,9 @@ biset.addList = function(canvas, listData, bicList, startPos) {
 		listNum = listData.listID,
 	// entities in the list
 		entSet = listData.entities;
+
+	console.log(type);
+	console.log(listNum);
 
 	// values of each entity
 	var dataValues = [],
@@ -243,36 +249,67 @@ biset.addList = function(canvas, listData, bicList, startPos) {
 	    		var entData = d3.select(this).data()[0],
 	    			// all associated bic ids
 	    			leftRelBicIDs = [],
-	    			rightRelBicIDs = [];
+	    			rightRelBicIDs = [],
+	    			theOriID = entData.entityID,
+	    			thisEntID = thisEntType + "_" + theOriID;
+
+    			console.log(thisEntID);
+
+				var nodes = new Set();
+    			if (networkData[thisEntID] !== undefined) {
+    				
+    				var kwdSet = new Set();
+    				var expEntSet = new Set();
+    				// kwdSet.add(thisEntType);
+    				expEntSet.add(thisEntID);
+    				// nodes.push(thisEntID);
+    				allRelPaths = biset.findAllPaths(expEntSet, networkData, nodes, kwdSet);
+
+    				console.log(nodes);
+
+    				nodes.forEach(function(node) {
+    					d3.select("#" + node + "_frame")
+	    					.attr("fill", "red");
+	    				});
+    			}
+    			// else {
+    			// 	nodes.forEach(function(node) {
+    			// 		d3.select("#" + node + "_frame")
+	    		// 			.attr("fill", biset.color.entNormal);
+	    		// 		});
+    			// 	nodes.clear();
+    			// }
+
+
 
 	    		// change color when highlight
-	    		if (biset.elementGetClass(this) != "entSelected") {
-	    			var oriEntClass = biset.elementGetClass(this);
-	    			d3.select("#" + frameID + "_frame").attr("fill", biset.colors.entHover);
-	    			var nEntClass = oriEntClass + " entHover";
-	    			biset.elementSetClass(this, nEntClass);
+	    // 		if (biset.elementGetClass(this) != "entSelected") {
+	    // 			var oriEntClass = biset.elementGetClass(this);
+	    // 			d3.select("#" + frameID + "_frame").attr("fill", biset.colors.entHover);
+	    // 			var nEntClass = oriEntClass + " entHover";
+	    // 			biset.elementSetClass(this, nEntClass);
 
-					// 1st list
-					if (thisListID == 1) {
-						if (entData.bicSetsRight != null) {
-							for (var i = 0; i < entData.bicSetsRight.length; i++)
-								rightRelBicIDs.push(entData.bicSetsRight[i]);
+					// // 1st list
+					// if (thisListID == 1) {
+					// 	if (entData.bicSetsRight != null) {
+					// 		for (var i = 0; i < entData.bicSetsRight.length; i++)
+					// 			rightRelBicIDs.push(entData.bicSetsRight[i]);
 
-							// update when hovering
-							hoverUpdateAll(bicList, rightRelBicIDs, frameID, "MouseOver");
-						}
-					}
-					// 2nd list
-					else {
-						if (entData.bicSetsLeft != null) {
-							for (var i = 0; i < entData.bicSetsLeft.length; i++)
-								leftRelBicIDs.push(entData.bicSetsLeft[i]);
+					// 		// update when hovering
+					// 		hoverUpdateAll(bicList, rightRelBicIDs, frameID, "MouseOver");
+					// 	}
+					// }
+					// // 2nd list
+					// else {
+					// 	if (entData.bicSetsLeft != null) {
+					// 		for (var i = 0; i < entData.bicSetsLeft.length; i++)
+					// 			leftRelBicIDs.push(entData.bicSetsLeft[i]);
 
-							// update when hovering
-							hoverUpdateAll(bicList, leftRelBicIDs, frameID, "MouseOver");
-						}
-					}
-	    		}
+					// 		// update when hovering
+					// 		hoverUpdateAll(bicList, leftRelBicIDs, frameID, "MouseOver");
+					// 	}
+					// }
+	    // 		}
     		}
 
     	})
@@ -393,9 +430,7 @@ biset.addList = function(canvas, listData, bicList, startPos) {
 						// 	// record the bic has been clicked
 						// 	bicDisplayed[bicIDVal] += 1;
 
-						console.log(d3.selectAll(".entSelected"));
 						var selEnts = d3.selectAll(".entSelected");
-						console.log(selEnts[0].length);
 						for (var i = 0; i < selEnts[0].length; i++) {
 							// console.log(d3.select(selEnts[0][i]).attr("id"));
 							var entDomain = d3.select(selEnts[0][i]).attr("id").split("_")[0];
@@ -889,7 +924,11 @@ biset.addBics = function(preListCanvas, bicListCanvas, listData, bicList, bicSta
 	    .attr("height", biset.entity.height - 1)
 	    .attr("rx", biset.bic.frameRdCorner)
 	    .attr("ry", biset.bic.frameRdCorner)
-	    .attr("fill", biset.colors.bicFrameColor);
+	    .attr("fill", biset.colors.bicFrameColor)
+	    .on("mouseover", function(d, i) {
+	    	console.log(d.bicID);
+	    	var thisBicID = "bic_" + d.bicID;
+	    });
 
 
     for (var i = 0; i < biclusters.length; i++) {
@@ -1181,6 +1220,98 @@ biset.elementGetClass = function(elementID) {
 */
 biset.elementSetClass = function(elementID, className) {
 	d3.select(elementID).attr("class", className);
+}
+
+
+biset.findAllPaths = function(expandSet, consDict, nodeSet, key) {
+
+	var toBeExpanded = new Set();
+
+	var found = false;
+
+	if (expandSet.size == 0)
+		return;
+
+	expandSet.forEach(function(value) {
+		nodeSet.add(value);
+		if (consDict[value] !== undefined) {
+			var tmpArray = consDict[value];
+			for (var i = 0; i < tmpArray.length; i++) {
+				found = false;
+				key.forEach(function(kval) {
+					if (tmpArray[i].indexOf(kval) >= 0) {
+						found = true;
+					}
+				});
+				if (found == false) {
+					toBeExpanded.add(tmpArray[i]);
+				}
+			}
+		}
+	});
+
+	if (nodeSet.size != 1) {
+		nodeSet.forEach(function(node) {
+			var nodeType = node.split("_")[0];
+			if (nodeType != "bic") {
+				key.add(nodeType);
+			}
+		});
+	}
+
+	biset.findAllPaths(toBeExpanded, consDict, nodeSet, key);
+
+	// console.log(nodeSet);
+
+	// nodeSet.forEach(function(value) {
+	// 	console.log(value);
+	// });
+
+	// for (var i = 0; i < expandSet.length; i++) {
+	// 	nodeSet.add(expandSet[i]);
+	// }
+
+
+
+
+	// if (nodeSet.indexOf(nodeID) >= 0)
+	// 	return;
+	// else {
+	// 	if (consDict[nodeID] === undefined)
+	// 		return;
+	// 	else {
+	// 		var tmpArray = consDict[nodeID];
+	// 		nodeSet.push(nodeID);
+	// 		for (var i = 0; i < tmpArray.length; i++) {
+	// 			var currentNode = tmpArray[i];
+	// 			if (currentNode.indexOf(key) >= 0)
+	// 				continue;
+	// 			// nodeSet.push(currentNode);
+	// 			biset.findAllPaths(currentNode, consDict, nodeSet, key);
+	// 		}
+
+	// 		// while (tmpArray.length > 0) {
+	// 		// 	var currentNode = tmpArray.shift();
+	// 		// 	biset.findAllPaths(currentNode, consDict);
+	// 		// }			
+	// 	}
+	// }
+
+	// var allPaths = [];
+	// if (consDict[nodeID] === undefined)
+	// 	return;
+	// else {
+	// 	// var i = 0;
+	// 	// console.log(nodeID);
+	// 	thePath.push(nodeID);
+	// 	var tmpArray = consDict[nodeID];
+	// 	while (tmpArray.length > 0) {
+	// 		var currentNode = tmpArray.shift();
+	// 		biset.findAllPaths(currentNode, consDict);
+	// 	}
+		// allPaths.push(thePath);
+		// return allPaths;
+	// }
 }
 
 
