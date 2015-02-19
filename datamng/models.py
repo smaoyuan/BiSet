@@ -15,8 +15,8 @@ class Person(models.Model):
 	person_count = models.IntegerField(default=0)
 
 class PersonDoc(models.Model):
-	person_name = models.ForeignKey(Person)
-	doc_id = models.ForeignKey(DocName)
+	person = models.ForeignKey(Person)
+	doc = models.ForeignKey(DocName)
 
 ####
 
@@ -25,8 +25,8 @@ class Location(models.Model):
 	location_count = models.IntegerField(default=0)
 
 class LocationDoc(models.Model):
-	location_name = models.ForeignKey(Location)
-	doc_id = models.ForeignKey(DocName)
+	location = models.ForeignKey(Location)
+	doc = models.ForeignKey(DocName)
 
 ####
 
@@ -35,8 +35,8 @@ class Phone(models.Model):
 	phone_count = models.IntegerField(default=0)
 
 class PhoneDoc(models.Model):
-	phone_number = models.ForeignKey(Phone)
-	doc_id = models.ForeignKey(DocName)
+	phone = models.ForeignKey(Phone)
+	doc = models.ForeignKey(DocName)
 
 ####
 
@@ -45,8 +45,8 @@ class Date(models.Model):
 	date_count = models.IntegerField(default=0)
 
 class DateDoc(models.Model):
-	date_string = models.ForeignKey(Date)
-	doc_id = models.ForeignKey(DocName)
+	date = models.ForeignKey(Date)
+	doc = models.ForeignKey(DocName)
 
 
 ####
@@ -56,8 +56,8 @@ class Org(models.Model):
 	org_count = models.IntegerField(default=0)
 
 class OrgDoc(models.Model):
-	org_name = models.ForeignKey(Org)
-	doc_id = models.ForeignKey(DocName)
+	org = models.ForeignKey(Org)
+	doc = models.ForeignKey(DocName)
 
 ####
 
@@ -66,8 +66,8 @@ class Misc(models.Model):
 	misc_count = models.IntegerField(default=0)
 
 class MiscDoc(models.Model):
-	misc_string = models.ForeignKey(Misc)
-	doc_id = models.ForeignKey(DocName)
+	misc = models.ForeignKey(Misc)
+	doc = models.ForeignKey(DocName)
 
 ####
 
@@ -77,8 +77,8 @@ class Money(models.Model):
 	money_count = models.IntegerField(default=0)
 
 class MoneyDoc(models.Model):
-	money_string = models.ForeignKey(Money)
-	doc_id = models.ForeignKey(DocName)
+	money = models.ForeignKey(Money)
+	doc = models.ForeignKey(DocName)
 
 ####
 
