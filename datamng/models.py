@@ -7,6 +7,7 @@ from dataset.models import Doc, DataSet
 
 class DocName(models.Model):
     doc_name = models.CharField(max_length=30, unique= True)
+    doc_content = models.TextField(default="")
     dataset = models.ForeignKey(DataSet)
 
 class Person(models.Model):
