@@ -61,9 +61,9 @@ var biset = {
 		// normal line
 		lineNColor: "rgba(0, 0, 0, 0.1)",
 		// hover entity to show links
-		linePreHColor: "rgba(252, 30, 36, 0.18)",
+		linePreHColor: "rgba(252, 30, 36, 0.28)",
 		// selecte entity to highlight links
-		lineHColor: "rgba(252, 30, 36, 0.45)", //"rgba(0, 143, 135, 0.4)",
+		lineHColor: "rgba(252, 30, 36, 0.35)", //"rgba(0, 143, 135, 0.4)",
 		lsortColor: "rgba(0,0,0,0)"
 	}
 }
@@ -255,10 +255,13 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 	    				
 	    				var kwdSet = new Set(),
 	    					expEntSet = new Set(),
+	    					// expEntSet = [],
 							allLinks = new Set();
 	    				expEntSet.add(thisEntID);
 
 	    				biset.findAllNodes(expEntSet, networkData, nodes, kwdSet, allLinks);
+
+	    				console.log(nodes);
 
 		    			// highlight all relevent entities
 						nodes.forEach(function(node) {
@@ -442,6 +445,17 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 						linkStateUpdate("#" + link, biset.colors.lineHColor,
 							biset.conlink.hwidth, "lineSelected", durations.lnTrans);
 					});
+
+					console.log(d3.select("g#list_1")[0][0].childNodes);
+
+					var allNodes = d3.select("g#list_1")[0][0].childNodes;
+					for (var i = 0; i < allNodes.length; i++) {
+						console.log(d3.select(allNodes[i]).attr("id"));
+					}
+
+					// d3.select("g#list_1")[0][0].childNodes.forEach(function(d) {
+					// 	console.log(d3.select(this).attr("id"));
+					// })
     			}
 			}	
   		});
@@ -656,7 +670,7 @@ function hoverUpdateAll(aBicList, aBicIDList, theBicFrameID, eventType) {
 }
 
 
-biset.addBics = function(preListCanvas, bicListCanvas, listData, bicList, bicStartPos, row, col) {
+biset.addBics = function(preListCanvas, bicListCanvas, listData, bicList, bicStartPos, row, col, networkData) {
 		// total entities in bics
 	var	bicTotalEnts = [],
 		// # of left ents in a bic
@@ -685,21 +699,57 @@ biset.addBics = function(preListCanvas, bicListCanvas, listData, bicList, bicSta
     // visual percentage based on the count
 	var bicEntsCount = d3.scale.linear()
 		.domain([0, bicEntsMax])
-		.range([0, biset.bic.frameWidth]);	
+		.range([0, biset.bic.frameWidth]);
+
+	console.log(biclusters);	
 
     // add all bics
 	var bics = bicListCanvas.selectAll(".bics")
 		.data(biclusters)
 		.enter().append("g")
-		.attr("id", function(d, i) { return "bic_" + d.bicID; })
+		.attr("id", function(d, i) {
+			var rfield = d.rowField,
+				cfield = d.colField;
+			return rfield + "_" + cfield + "_bic_" + d.bicID; 
+		})
 		.attr("class", "bics")
   		.attr("transform", function(d, i) {
+
+  	// 		var cfield = d.colField,
+  	// 			rfield = d.rowField,
+  	// 			cols = d.col,
+  	// 			rows = d.row,
+  	// 			yPos = 0;
+
+			// // y pos of the row ents
+			// for (var j = 0; j < rows.length; j++){
+			// 	var rid = rfield + "_" + rows[j],
+			// 		rY = d3.select("#" + rid)[0][0].getBoundingClientRect().top;
+			// 	yPos += rY;
+			// }
+
+			// // y pos of the col ents
+			// for (var k = 0; k < cols.length; k++) {
+			// 	var cid = cfield + "_" + cols[k],
+			// 		cY = d3.select("#" + cid)[0][0].getBoundingClientRect().top;
+			// 	yPos += cY;
+			// }
+
+			// yPos = yPos / (rows.length + cols.length);
+
+  	// 		return "translate(" + 0 + "," + yPos + ")";
+
+  			// original position
   			return "translate(" + 0 + "," + (i + 1) * biset.bic.frameHeight + ")"; 
   		});
 
 	// proportion of row
 	bics.append("rect")
-  		.attr("id", function(d, i) { return "bic_" + d.bicID + "_left"; })
+  		.attr("id", function(d, i) {
+			var rfield = d.rowField,
+				cfield = d.colField; 
+  			return rfield + "_" + cfield + "_bic_" + d.bicID + "_left"; 
+  		})
 	    .attr("width", function(d, i) { return bicEntsCount(bicLeftEnts[i]); })
 	    .attr("height", biset.entity.height - 1)
 	    .attr("rx", biset.bic.innerRdCorner)
@@ -708,16 +758,60 @@ biset.addBics = function(preListCanvas, bicListCanvas, listData, bicList, bicSta
 
 	// set the length of a bicluster based on its component
 	bics.append("rect")
-		.attr("id", function(d, i) { return "bic_" + d.bicID + "_frame"; })
+		.attr("id", function(d, i) {
+			var rfield = d.rowField,
+				cfield = d.colField;  
+			return rfield + "_" + cfield + "_bic_" + d.bicID + "_frame"; 
+		})
 		.attr("width", function(d, i) { return bicEntsCount(bicTotalEnts[i]); })
 	    .attr("height", biset.entity.height - 1)
 	    .attr("rx", biset.bic.frameRdCorner)
 	    .attr("ry", biset.bic.frameRdCorner)
 	    .attr("fill", biset.colors.bicFrameColor)
-	    .on("mouseover", function(d, i) {
-	    	console.log(d.bicID);
-	    	var thisBicID = "bic_" + d.bicID;
-	    });
+
+    // mouseover event for bics
+    bics.on("mouseover", function(d, i) {
+    	console.log(d);
+
+		var rfield = d.rowField,
+			cfield = d.colField;
+
+    	var thisBicID = rfield + "_" + cfield + "_bic_" + d.bicID;
+    	console.log(thisBicID);
+
+		var kwdSet = new Set(),
+			nodes = new Set(),
+			expEntSet = new Set(),
+			allLinks = new Set();
+		expEntSet.add(thisBicID);
+
+		biset.findAllNodes(expEntSet, networkData, nodes, kwdSet, allLinks);
+
+		console.log(nodes);
+		console.log(allLinks);
+
+		// highlight all relevent entities
+		nodes.forEach(function(node) {
+			if (node.indexOf("bic_") < 0) {
+				if (biset.elementGetClass("#" + node) != "entSelectedCol"){
+					colEntUpdate("#" + node + "_frame", biset.colors.entColRel,
+						"entMHight", durations.colEntTrans);
+				}
+			}
+			// else {
+			// 	if (biset.elementGetClass("#" + node + "_frame") != "bicSelected") {
+			// 		bicFrameUpdate("#" + node + "_frame", biset.colors.bicFramePreHColor, 
+			// 			biset.bic.frameHStrokeWidth, durations.bicFrameTrans);
+			// 	}
+			// }
+		});
+		// update the status of relevant links
+		allLinks.forEach(function(link) {
+			linkStateUpdate("#" + link, biset.colors.linePreHColor,
+				biset.conlink.hwidth, "lineMHight", durations.lnTrans);
+		});
+
+    });
 
 
     for (var i = 0; i < biclusters.length; i++) {
@@ -729,7 +823,7 @@ biset.addBics = function(preListCanvas, bicListCanvas, listData, bicList, bicSta
 
 		for (var j = 0; j < rowIDs.length; j++) {
 			var obj1 = d3.select("#" + rowType + "_" + rowIDs[j]);
-				obj2 = d3.select("#bic_" + bicID);
+				obj2 = d3.select("#" + rowType + "_" + colType + "_bic_" + bicID);
 			// append lines to previous list g
 			connections.push(biset.addLink(obj1, obj2, biset.colors.lineNColor, canvas));
 			// obj2.attr({cursor: "move"});
@@ -737,7 +831,7 @@ biset.addBics = function(preListCanvas, bicListCanvas, listData, bicList, bicSta
 		}
 
 		for (var k = 0; k < colIDs.length; k++) {
-			var obj1 = d3.select("#bic_" + bicID),
+			var obj1 = d3.select("#" + rowType + "_" + colType + "_bic_" + bicID),
 				obj2 = d3.select("#" + colType + "_" + colIDs[k]);
 
 			// append lines to previous list g
@@ -1030,16 +1124,29 @@ biset.findAllNodes = function(expandSet, consDict, nodeSet, key, paths) {
 		return;
 
 	expandSet.forEach(function(value) {
-		nodeSet.add(value);
+
+		if (!nodeSet.has(value))
+			nodeSet.add(value);
+
 		if (consDict[value] !== undefined) {
 			var tmpArray = consDict[value];
 			for (var i = 0; i < tmpArray.length; i++) {
 				found = false;
 				key.forEach(function(kval) {
-					if (tmpArray[i].indexOf(kval) >= 0)
-						found = true;
+					var typewd = tmpArray[i].split("_");
+					if (typewd.length == 2) {
+						if (kval == typewd[0]) {
+							found = true;
+						}
+					}
+					else {
+						var tmpKey = typewd[0] + "_" + typewd[1];
+						if (tmpKey == kval) {
+							found = true;
+						}
+					}
 				});
-				if (found == false){
+				if (found == false) {
 					toBeExpanded.add(tmpArray[i]);
 
 					var a = value,
@@ -1059,13 +1166,103 @@ biset.findAllNodes = function(expandSet, consDict, nodeSet, key, paths) {
 
 	if (nodeSet.size != 1) {
 		nodeSet.forEach(function(node) {
-			var nodeType = node.split("_")[0];
-			if (nodeType != "bic")
+			var nodeType = node.split("_")[0],
+				idSize = node.split("_").length;
+			if (idSize == 2)
 				key.add(nodeType);
+			else {
+				var type2 = node.split("_")[1];
+				key.add(nodeType + "_" + type2);
+			}
 		});
+	}
+	if (toBeExpanded.size == 0) {
+		// expandSet.forEach(function(epNode) {
+		// 	nodeSet.delete(epNode);
+		// });
+		return;
 	}
 
 	biset.findAllNodes(toBeExpanded, consDict, nodeSet, key, paths);
+
+
+
+	// var toBeExpanded = new Set();
+	// var found = false;
+
+	// if (expandSet.size == 0)
+	// 	return;
+
+	// // nodeSet.size == 
+
+	// expandSet.forEach(function(value) {
+	// 	nodeSet.add(value);
+	// 	if (consDict[value] !== undefined) {
+	// 		var tmpArray = consDict[value];
+	// 		for (var i = 0; i < tmpArray.length; i++) {
+	// 			found = false;
+	// 			key.forEach(function(kval) {
+	// 				if (tmpArray[i].indexOf(kval) >= 0)
+	// 					found = true;
+	// 			});
+	// 			if (found == false){
+	// 				var findExpand = false;
+	// 				//if (!nodeSet.has(tmpArray[i]))
+	// 				{
+	// 					if (tmpArray[i].indexOf("bic") >= 0) {
+	// 						var tmpEnt = consDict[tmpArray[i]];
+	// 						for (var j = 0; j < tmpEnt.length; j++) {
+	// 							var etype = tmpEnt[j].split("_")[0];
+	// 							var etype2 = value.split("_")[0];
+	// 							if (!key.has(etype) && etype != etype2) {
+	// 								findExpand = true;
+	// 								toBeExpanded.add(tmpArray[i]);
+	// 								break;
+	// 							}
+	// 						}
+	// 					}
+	// 					else {
+	// 						findExpand = true;
+	// 						toBeExpanded.add(tmpArray[i]);
+	// 					}
+	// 				}	// continue;
+						
+	// 				 {
+	// 				 	if (findExpand == true) {
+	// 						var a = value,
+	// 							b = tmpArray[i];
+	// 						if (a.localeCompare(b) < 0) {
+	// 							var tmp = b,
+	// 								b = a,
+	// 								a = tmp;
+	// 						}
+
+	// 						var curPath = a + "__" + b;
+	// 						paths.add(curPath);					 		
+	// 				 	}
+
+	// 				}
+	// 			}
+	// 		}
+	// 	}
+	// });
+
+	// //if (nodeSet.size != 1) 
+	// {
+	// 	nodeSet.forEach(function(node) {
+	// 		var nodeType = node.split("_")[0];
+	// 		if (nodeType != "bic")
+	// 			key.add(nodeType);
+	// 	});
+	// }
+	// if (toBeExpanded.size == 0) {
+	// 	expandSet.forEach(function(epNode) {
+	// 		nodeSet.delete(epNode);
+	// 	});
+	// 	return;
+	// }
+
+	// biset.findAllNodes(toBeExpanded, consDict, nodeSet, key, paths);
 }
 
 
