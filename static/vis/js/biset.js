@@ -33,7 +33,7 @@ var biset = {
 	// a bicluster list
 	bicList: { width: 60, height: 2650 },
 	// a connection link between two elements
-	conlink: { nwidth: 0.8, hwidth: 2 },
+	conlink: { nwidth: 0.8, hwidth: 1.5 },
 
 	// color settings
 	colors: {
@@ -61,9 +61,9 @@ var biset = {
 		// normal line
 		lineNColor: "rgba(0, 0, 0, 0.1)",
 		// hover entity to show links
-		linePreHColor: "rgba(252, 30, 36, 0.5)",
+		linePreHColor: "rgba(252, 30, 36, 0.18)",
 		// selecte entity to highlight links
-		lineHColor: "rgba(0, 143, 135, 0.4)",
+		lineHColor: "rgba(252, 30, 36, 0.45)", //"rgba(0, 143, 135, 0.4)",
 		lsortColor: "rgba(0,0,0,0)"
 	}
 }
@@ -254,45 +254,34 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 	    			if (networkData[thisEntID] !== undefined) {
 	    				
 	    				var kwdSet = new Set(),
-	    					expEntSet = new Set();
-						var allLinks = [];
+	    					expEntSet = new Set(),
+							allLinks = new Set();
 	    				expEntSet.add(thisEntID);
 
 	    				biset.findAllNodes(expEntSet, networkData, nodes, kwdSet, allLinks);
+
+		    			// highlight all relevent entities
+						nodes.forEach(function(node) {
+							if (node.indexOf("bic_") < 0) {
+								if (biset.elementGetClass("#" + node) != "entSelectedCol"){
+									colEntUpdate("#" + node + "_frame", biset.colors.entColRel,
+										"entMHight", durations.colEntTrans);
+								}
+							}
+							else {
+								if (biset.elementGetClass("#" + node + "_frame") != "bicSelected") {
+									bicFrameUpdate("#" + node + "_frame", biset.colors.bicFramePreHColor, 
+										biset.bic.frameHStrokeWidth, durations.bicFrameTrans);
+								}
+							}
+						});
+						// update the status of relevant links
+						allLinks.forEach(function(link) {
+							linkStateUpdate("#" + link, biset.colors.linePreHColor,
+								biset.conlink.hwidth, "lineMHight", durations.lnTrans);
+						});
 	    			}
-
-	    			// highlight all relevent entities
-					nodes.forEach(function(node) {
-						if (node.indexOf("bic_") < 0) {
-							if (biset.elementGetClass("#" + node) != "entSelectedCol"){
-								colEntUpdate("#" + node + "_frame", biset.colors.entColRel,
-									"entMHight", durations.colEntTrans);
-							}
-						}
-						else {
-							if (biset.elementGetClass("#" + node + "_frame") != "bicSelected") {
-								bicFrameUpdate("#" + node + "_frame", biset.colors.bicFramePreHColor, 
-									biset.bic.frameHStrokeWidth, durations.bicFrameTrans);
-							}
-						}
-					});
-
-					console.log(nodes);
     			}
-
-				// console.log(allLinks.length);
-
-				// for (var i = 0; i < allLinks.length; i++) {
-				// 	var lobj1 = allLinks[i].obj1,
-				// 		lobj2 = allLinks[i].obj2;
-				// 	console.log(lobj1);
-				// 	console.log(lobj2);
-				// 	// linkStateUpdate("#" + rowField + "_" + rowListIDs[j] + "__" + thisBicID, 
-				// 		// biset.colors.linePreHColor, biset.conlink.hwidth, "lineMHight", durations.lnTrans);
-				// }
-
-				// empty the set
-				// nodes.clear();
     		}
     	})
 		// mouseout event handler
@@ -315,32 +304,35 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 	    			if (networkData[thisEntID] !== undefined) {
 	    				
 	    				var kwdSet = new Set(),
-	    					expEntSet = new Set();
-						var allLinks = [];
+	    					expEntSet = new Set(),
+							allLinks = new Set();
 	    				expEntSet.add(thisEntID);
 
 	    				biset.findAllNodes(expEntSet, networkData, nodes, kwdSet, allLinks);
+
+		    			// unhighlight all relevent entities
+						nodes.forEach(function(node) {
+							if (node.indexOf("bic_") < 0) {
+								if (biset.elementGetClass("#" + node) != "entSelectedCol"){
+									colEntUpdate("#" + node + "_frame", biset.colors.entNormal,
+										"entNormal", durations.colEntTrans);
+								}
+							}
+							else {
+								if (biset.elementGetClass("#" + node + "_frame") != "bicSelected") {
+									bicFrameUpdate("#" + node + "_frame", biset.colors.bicFrameColor, 
+										biset.bic.frameNStrokeWidth, durations.bicFrameTrans);
+								}
+							}
+						});
+
+						// update the status of relevant links
+						allLinks.forEach(function(link) {
+							linkStateUpdate("#" + link, biset.colors.lineNColor,
+								biset.conlink.nwidth, "lineNormal", durations.lnTrans);
+						});
 	    			}
-
-	    			// unhighlight all relevent entities
-					nodes.forEach(function(node) {
-						if (node.indexOf("bic_") < 0) {
-							if (biset.elementGetClass("#" + node) != "entSelectedCol"){
-								colEntUpdate("#" + node + "_frame", biset.colors.entNormal,
-									"entNormal", durations.colEntTrans);
-							}
-						}
-						else {
-							if (biset.elementGetClass("#" + node + "_frame") != "bicSelected") {
-								bicFrameUpdate("#" + node + "_frame", biset.colors.bicFrameColor, 
-									biset.bic.frameNStrokeWidth, durations.bicFrameTrans);
-							}
-						}
-					});
-
     			}
-				// empty the set
-				// nodes.clear();
     		}
     	})
 		// click event handler for entities
@@ -418,33 +410,39 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
     			if (networkData[thisEntID] !== undefined) {
     				
     				var kwdSet = new Set(),
-    					expEntSet = new Set();
-					var allLinks = [];
+    					expEntSet = new Set(),
+						allLinks = new Set();
     				expEntSet.add(thisEntID);
 
     				biset.findAllNodes(expEntSet, networkData, nodes, kwdSet, allLinks);
-    			}
 
-    			// highlight all relevent entities
-				nodes.forEach(function(node) {
-					if (node != thisEntID) {
-						if (node.indexOf("bic_") < 0) {
-							// colEntUpdate("#" + node + "_frame", biset.colors.entColRel2,
-							// 	"entSelectedCol", durations.colEntTrans);
+	    			// highlight all relevent entities
+					nodes.forEach(function(node) {
+						if (node != thisEntID) {
+							if (node.indexOf("bic_") < 0) {
+								// colEntUpdate("#" + node + "_frame", biset.colors.entColRel2,
+								// 	"entSelectedCol", durations.colEntTrans);
 
-							if (biset.elementGetClass("#" + node) != "entSelectedCol"){
-				    			d3.select("#" + node + "_frame")
-				    				.attr("fill", biset.colors.entColRel2);
-								biset.elementSetClass("#" + node, "entSelectedCol");
+								if (biset.elementGetClass("#" + node) != "entSelectedCol"){
+					    			d3.select("#" + node + "_frame")
+					    				.attr("fill", biset.colors.entColRel2);
+									biset.elementSetClass("#" + node, "entSelectedCol");
+								}
+							}
+							else {
+								bicFrameUpdate("#" + node + "_frame", biset.colors.bicFramePreHColor, 
+									biset.bic.frameHStrokeWidth, durations.bicFrameTrans);
+								biset.elementSetClass("#" + node + "_frame", "bicSelected");
 							}
 						}
-						else {
-							bicFrameUpdate("#" + node + "_frame", biset.colors.bicFramePreHColor, 
-								biset.bic.frameHStrokeWidth, durations.bicFrameTrans);
-							biset.elementSetClass("#" + node + "_frame", "bicSelected");
-						}
-					}
-				});
+					});
+
+					// update the status of relevant links
+					allLinks.forEach(function(link) {
+						linkStateUpdate("#" + link, biset.colors.lineHColor,
+							biset.conlink.hwidth, "lineSelected", durations.lnTrans);
+					});
+    			}
 			}	
   		});
 
@@ -942,7 +940,16 @@ biset.addLink = function (obj1, obj2, line, d3obj, bg) {
             // default to be hide
             line: d3obj.append("path")
             		.attr("d", path)
-            		.attr("id", function() { return obj1.attr("id") + "__" + obj2.attr("id")})
+            		.attr("id", function() {
+            			var lid1 = obj1.attr("id"),
+            				lid2 = obj2.attr("id");
+        				if (lid1.localeCompare(lid2) < 0) {
+        					var tmpID = lid1,
+        						lid1 = lid2,
+        						lid2 = tmpID;
+        				}
+            			return lid1 + "__" + lid2;
+            		})
             		.attr("class", "lineNormal")
             		.style("stroke", biset.colors.lineNColor)
             		.style("stroke-width", biset.conlink.nwidth)
@@ -1035,8 +1042,16 @@ biset.findAllNodes = function(expandSet, consDict, nodeSet, key, paths) {
 				if (found == false){
 					toBeExpanded.add(tmpArray[i]);
 
-					var curPath = {"obj1": value, "obj2": tmpArray[i]};
-					paths.push(curPath);
+					var a = value,
+						b = tmpArray[i];
+					if (a.localeCompare(b) < 0) {
+						var tmp = b,
+							b = a,
+							a = tmp;
+					}
+
+					var curPath = a + "__" + b;
+					paths.add(curPath);
 				}
 			}
 		}
