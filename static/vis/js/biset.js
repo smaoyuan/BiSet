@@ -16,7 +16,7 @@ var biset = {
 	// the vis canvas
 	visCanvas: { width: 2560, height: 2650, inUse: 0 },
 	// an individual entity in a list
-	entity: { width: 260, height: 25, rdCorner: 5, freqWidth: 30 },
+	entity: { width: 260, height: 30, rdCorner: 5, freqWidth: 30, nBorder: 0, moBorder: 1.2, selBorder: 2 },
 	// a list
 	entList: { width: 260, height: 2650, gap: 80, topGap: 10, startPos: 0, count: 0 },
 	// a bicluster in-between two lists
@@ -46,6 +46,13 @@ var biset = {
 
 		entColRel2: "rgba(228, 122, 30, 0.28)",
 
+		// entity border for normal case
+		entNormalBorder: "rgba(0, 0, 0, 1)",
+		// entity border color when mouseover
+		entMouseOverBorder: "rgba(0, 79, 173, 0.9)",
+
+
+
 		// entity highlight
 		entHighlight: "rgba(228, 122, 30, 0.4)",
 		// entity frequency
@@ -65,13 +72,14 @@ var biset = {
 		// selecte entity to highlight links
 		lineHColor: "rgba(252, 30, 36, 0.35)", //"rgba(0, 143, 135, 0.4)",
 		lsortColor: "rgba(0,0,0,0)"
-	}
-}
+	},
 
-var durations = {
-	bicFrameTrans: 300,
-	lnTrans: 250,
-	colEntTrans: 0
+	// latency for tansitions
+	durations: {
+		bicFrameTrans: 300,
+		lnTrans: 250,
+		colEntTrans: 0
+	}
 }
 
 // an array to store all links
@@ -233,113 +241,170 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
   		.enter().append("g")
   		.attr('class', type)
   		.attr("id", function(d, i) { return type + "_" + d.entityID;})
-  		.attr("transform", function(d, i) { return "translate(" + 1 + "," + y(d.entValue) + ")"; })
-  		// mouseover event
-    	.on("mouseover", function(d, i) {
+  		.attr("transform", function(d, i) { return "translate(" + 1 + "," + y(d.entValue) + ")"; });
 
-    		// when dragging stops
-    		if (draged == 0) {
 
-    			if (biset.elementGetClass(this) != "entSelected"
-    				&& biset.elementGetClass(this) != "entSelectedCol") {
+	// mouseover event
+    bar.on("mouseover", function(d, i) {
 
-		    		var frameID = d3.select(this).attr("id"),
-		    			thisEntType = frameID.split("_")[0];
+    	console.log(d);
 
-		    		var entData = d3.select(this).data()[0],
-		    			theOriID = entData.entityID,
-		    			thisEntID = thisEntType + "_" + theOriID;
+		// when dragging stops
+		if (draged == 0) {
 
-					var nodes = new Set();
-	    			if (networkData[thisEntID] !== undefined) {
-	    				
-	    				var kwdSet = new Set(),
-	    					expEntSet = new Set(),
-	    					// expEntSet = [],
-							allLinks = new Set();
-	    				expEntSet.add(thisEntID);
+			// if (biset.elementGetClass(this) != "entSelected"
+			// 	&& biset.elementGetClass(this) != "entSelectedCol") {
 
-	    				biset.findAllNodes(expEntSet, networkData, nodes, kwdSet, allLinks);
+			if (d.mouseovered == false) {
+	    		var frameID = d3.select(this).attr("id"),
+	    			thisEntType = frameID.split("_")[0];
 
-	    				console.log(nodes);
+	    		var entData = d3.select(this).data()[0],
+	    			theOriID = entData.entityID,
+	    			thisEntID = thisEntType + "_" + theOriID;
 
-		    			// highlight all relevent entities
-						nodes.forEach(function(node) {
-							if (node.indexOf("bic_") < 0) {
-								if (biset.elementGetClass("#" + node) != "entSelectedCol"){
-									colEntUpdate("#" + node + "_frame", biset.colors.entColRel,
-										"entMHight", durations.colEntTrans);
-								}
+    			console.log(frameID);
+
+				var nodes = new Set();
+    			if (networkData[thisEntID] !== undefined) {
+    				
+    				var kwdSet = new Set(),
+    					expEntSet = new Set(),
+    					// expEntSet = [],
+						allLinks = new Set();
+    				expEntSet.add(thisEntID);
+
+    				biset.findAllNodes(expEntSet, networkData, nodes, kwdSet, allLinks);
+
+	    			// highlight all relevent entities
+					nodes.forEach(function(node) {
+						if (node.indexOf("bic_") < 0) {
+							// co-related entity, just highlight the bar
+							// if (biset.elementGetClass("#" + node) != "entSelectedCol")
+							// 	biset.barUpdate("#" + node + "_frame", biset.colors.entColRel,
+							// 		"entMHight", "", "", biset.durations.colEntTrans);
+							// change both color and border for the mouseovered entity
+							if (node == frameID) {
+								biset.barUpdate("#" + node + "_frame", biset.colors.entColRel,
+									"entMHight", biset.colors.entMouseOverBorder, 
+									biset.entity.moBorder, biset.durations.colEntTrans);
 							}
-							else {
-								if (biset.elementGetClass("#" + node + "_frame") != "bicSelected") {
-									bicFrameUpdate("#" + node + "_frame", biset.colors.bicFramePreHColor, 
-										biset.bic.frameHStrokeWidth, durations.bicFrameTrans);
-								}
+							else if (biset.elementGetClass("#" + node) != "entSelectedCol") {
+								biset.barUpdate("#" + node + "_frame", biset.colors.entColRel,
+									"entMHight", "", "", biset.durations.colEntTrans);								
 							}
-						});
-						// update the status of relevant links
-						allLinks.forEach(function(link) {
-							linkStateUpdate("#" + link, biset.colors.linePreHColor,
-								biset.conlink.hwidth, "lineMHight", durations.lnTrans);
-						});
-	    			}
+						}
+						else {
+							if (biset.elementGetClass("#" + node + "_frame") != "bicSelected") {
+								biset.frameUpdate("#" + node + "_frame", biset.colors.bicFramePreHColor, 
+									biset.bic.frameHStrokeWidth, biset.durations.bicFrameTrans);
+							}
+						}
+					});
+					// update the status of relevant links
+					allLinks.forEach(function(link) {
+						linkStateUpdate("#" + link, biset.colors.linePreHColor,
+							biset.conlink.hwidth, "lineMHight", biset.durations.lnTrans);
+					});
+
+	    			// biset.frameUpdate("#" + frameID + "_frame", 
+    				// 	biset.colors.entMouseOverBorder, biset.entity.moBorder, 0);
     			}
-    		}
-    	})
-		// mouseout event handler
-    	.on("mouseout", function() {
-
-    		// when dragging stops
-    		if (draged == 0) {
-
-    			if (biset.elementGetClass(this) != "entSelected"
-    				&& biset.elementGetClass(this) != "entSelectedCol") { 
-
-		    		var frameID = d3.select(this).attr("id"),
-		    			thisEntType = frameID.split("_")[0];
-
-		    		var entData = d3.select(this).data()[0],
-		    			theOriID = entData.entityID,
-		    			thisEntID = thisEntType + "_" + theOriID;
-
-					var nodes = new Set();
-	    			if (networkData[thisEntID] !== undefined) {
-	    				
-	    				var kwdSet = new Set(),
-	    					expEntSet = new Set(),
-							allLinks = new Set();
-	    				expEntSet.add(thisEntID);
-
-	    				biset.findAllNodes(expEntSet, networkData, nodes, kwdSet, allLinks);
-
-		    			// unhighlight all relevent entities
-						nodes.forEach(function(node) {
-							if (node.indexOf("bic_") < 0) {
-								if (biset.elementGetClass("#" + node) != "entSelectedCol"){
-									colEntUpdate("#" + node + "_frame", biset.colors.entNormal,
-										"entNormal", durations.colEntTrans);
-								}
-							}
-							else {
-								if (biset.elementGetClass("#" + node + "_frame") != "bicSelected") {
-									bicFrameUpdate("#" + node + "_frame", biset.colors.bicFrameColor, 
-										biset.bic.frameNStrokeWidth, durations.bicFrameTrans);
-								}
-							}
-						});
-
-						// update the status of relevant links
-						allLinks.forEach(function(link) {
-							linkStateUpdate("#" + link, biset.colors.lineNColor,
-								biset.conlink.nwidth, "lineNormal", durations.lnTrans);
-						});
-	    			}
+    			else{
+	    			biset.frameUpdate("#" + frameID + "_frame", 
+    					biset.colors.entMouseOverBorder, biset.entity.moBorder, 0);
     			}
-    		}
-    	})
+
+				// change the status to be mouseovered
+				d.mouseovered = true;
+			}
+
+
+			// }
+		}
+
+		console.log(d.mouseovered);
+	});
+
+	// mouseout event handler
+	bar.on("mouseout", function(d, i) {
+
+		// when dragging stops
+		if (draged == 0) {
+
+			// if (biset.elementGetClass(this) != "entSelected"
+			// 	&& biset.elementGetClass(this) != "entSelectedCol") {
+
+
+
+			if (d.mouseovered == true) {
+
+	    		var frameID = d3.select(this).attr("id"),
+	    			thisEntType = frameID.split("_")[0];
+
+	    		var entData = d3.select(this).data()[0],
+	    			theOriID = entData.entityID,
+	    			thisEntID = thisEntType + "_" + theOriID;
+
+				var nodes = new Set();
+    			if (networkData[thisEntID] !== undefined) {
+    				
+    				var kwdSet = new Set(),
+    					expEntSet = new Set(),
+						allLinks = new Set();
+    				expEntSet.add(thisEntID);
+
+    				biset.findAllNodes(expEntSet, networkData, nodes, kwdSet, allLinks);
+
+	    			// unhighlight all relevent entities
+					nodes.forEach(function(node) {
+						if (node.indexOf("bic_") < 0) {
+							// if (biset.elementGetClass("#" + node) != "entSelectedCol")
+							// 	biset.barUpdate("#" + node + "_frame", biset.colors.entNormal,
+							// 		"entNormal", "", "", biset.durations.colEntTrans);
+
+							// change both color and border for the mouseovered entity
+							if (node == frameID) {
+								biset.barUpdate("#" + node + "_frame", biset.colors.entNormal,
+									"entNormal", biset.colors.entNormalBorder, 
+									biset.entity.nBorder, biset.durations.colEntTrans);
+							}
+							else if (biset.elementGetClass("#" + node) != "entSelectedCol") {
+								biset.barUpdate("#" + node + "_frame", biset.colors.entNormal,
+									"entNormal", "", "", biset.durations.colEntTrans);								
+							}
+						}
+						else {
+							if (biset.elementGetClass("#" + node + "_frame") != "bicSelected") {
+								biset.frameUpdate("#" + node + "_frame", biset.colors.bicFrameColor, 
+									biset.bic.frameNStrokeWidth, biset.durations.bicFrameTrans);
+							}
+						}
+					});
+
+					// update the status of relevant links
+					allLinks.forEach(function(link) {
+						linkStateUpdate("#" + link, biset.colors.lineNColor,
+							biset.conlink.nwidth, "lineNormal", biset.durations.lnTrans);
+					});
+	    			// biset.frameUpdate("#" + frameID + "_frame", biset.colors.entNormalBorder, 
+    				// 	biset.entity.nBorder, 0);
+
+    			}
+    			else {
+	    			biset.frameUpdate("#" + frameID + "_frame", biset.colors.entNormalBorder, 
+    					biset.entity.nBorder, 0);
+    			}
+
+				// switch mouseover to off
+				d.mouseovered = false;
+			}
+
+			// }
+		}
+	});
 		// click event handler for entities
-		.on("click", function() {
+		bar.on("click", function() {
 
     		var frameID = d3.select(this).attr("id"),
     			thisEntType = frameID.split("_")[0],
@@ -433,8 +498,8 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 								}
 							}
 							else {
-								bicFrameUpdate("#" + node + "_frame", biset.colors.bicFramePreHColor, 
-									biset.bic.frameHStrokeWidth, durations.bicFrameTrans);
+								biset.frameUpdate("#" + node + "_frame", biset.colors.bicFramePreHColor, 
+									biset.bic.frameHStrokeWidth, biset.durations.bicFrameTrans);
 								biset.elementSetClass("#" + node + "_frame", "bicSelected");
 							}
 						}
@@ -443,7 +508,7 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 					// update the status of relevant links
 					allLinks.forEach(function(link) {
 						linkStateUpdate("#" + link, biset.colors.lineHColor,
-							biset.conlink.hwidth, "lineSelected", durations.lnTrans);
+							biset.conlink.hwidth, "lineSelected", biset.durations.lnTrans);
 					});
 
 					console.log(d3.select("g#list_1")[0][0].childNodes);
@@ -470,7 +535,7 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 	// add bar for each entity
 	var entityFreIndicator = bar.append("rect")
 	    .attr("width", function(d, i) { return freIndicatorWidth(d.entFreq); })
-	    .attr("height", biset.entity.height - 1)
+	    .attr("height", biset.entity.height - 3)
 	    .attr("rx", biset.entity.rdCorner)
 	    .attr("ry", biset.entity.rdCorner)
 	    .attr("id", function(d, i) { return type + "_" + d.entityID + "_freq";})
@@ -480,7 +545,7 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 	var entityFrame = bar.append("rect")
 		.datum(function(d) { return d; })
 	    .attr("width", biset.entity.width)
-	    .attr("height", biset.entity.height - 1)
+	    .attr("height", biset.entity.height - 3)
 	    .attr("rx", biset.entity.rdCorner)
 	    .attr("ry", biset.entity.rdCorner)
 	    .attr("id", function(d, i) { return type + "_" + d.entityID + "_frame";})
@@ -504,17 +569,46 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 
 /*
 * function to update the color of a bic frame
-* @param frameID, the ID of the bic frame
+* @param frameID, the ID of the frame
 * @param newColor, the new color of the frame
 * @param newStrokeWidth, the new stroke width of the frame
 * @param timer, the duration for the update
 */
-function bicFrameUpdate(frameID, newColor, newStrokeWidth, durTimer) {
+biset.frameUpdate = function(frameID, newColor, newStrokeWidth, durTimer) {
 	d3.select(frameID)
 		.transition()
 		.style("stroke", newColor)
 		.style("stroke-width", newStrokeWidth)
 		.duration(durTimer);
+}
+
+
+/*
+* function to update the color of correlated entities
+* @param entID, the ID of correlated entities
+* @param barColor, the new color of the bar
+* @param barClass, the new class of the bar
+* @param bdColor, the color for border
+* @param bdStrokeWidth, border width of the bar
+* @param timer, the duration for the update
+*/
+biset.barUpdate = function(entID, barColor, barClass, bdColor, bdStrokeWidth, durTimer) {
+	// only update the color of the bar
+	if (bdColor == "" && bdStrokeWidth == "")
+		d3.select(entID)
+			.transition()
+			.attr("fill", barColor)
+			.attr("class", barClass)
+			.duration(durTimer);
+	// update both color and border of the bar
+	else
+		d3.select(entID)
+			.transition()
+			.attr("fill", barColor)
+			.attr("class", barClass)
+			.style("stroke", bdColor)
+			.style("stroke-width", bdStrokeWidth)
+			.duration(durTimer);		
 }
 
 
@@ -533,140 +627,6 @@ function linkStateUpdate(linkID, newColor, newWidth, newClass, durTimer) {
 		.style("stroke-width", newWidth)
 		.attr("class", newClass)
 		.duration(durTimer);
-}
-
-
-/*
-* function to update the color of correlated entities
-* @param entID, the ID of correlated entities
-* @param newColor, the new color of the link
-* @param newClass, the new class of the link
-* @param timer, the duration for the update
-*/
-function colEntUpdate(entID, newColor, newClass, durTimer) {
-	d3.select(entID)
-		.transition()
-		.attr("fill", newColor)
-		.attr("class", newClass)
-		.duration(durTimer);
-}
-
-
-/*
-* function to update bics and links when hovering and out
-* @param aBicList, a list of bic
-* @param aBicIDList, a list of bicID
-* @param theBicFrameID, the frameID of hovered bic
-* @param eventType, the event to triger the update
-*/
-function hoverUpdateAll(aBicList, aBicIDList, theBicFrameID, eventType) {
-	for (var i = 0; i < aBicIDList.length; i++) {
-		var rowListIDs = aBicList[aBicIDList[i]].row,
-			colListIDs = aBicList[aBicIDList[i]].col,
-			rowField = aBicList[aBicIDList[i]].rowField,
-			colField = aBicList[aBicIDList[i]].colField,
-			thisBicID = "bic_" + aBicIDList[i],
-			thisBicFrameID = "bic_frame_" + aBicIDList[i];
-
-		// mouseover highlight
-		if (eventType == "MouseOver") {
-			bicFrameUpdate("#" + thisBicFrameID, biset.colors.bicFramePreHColor, 
-				biset.bic.frameHStrokeWidth, durations.bicFrameTrans);
-
-			// update the row
-			for (var j = 0; j < rowListIDs.length; j++) {
-				linkStateUpdate("#" + rowField + "_" + rowListIDs[j] + "__" + thisBicID, 
-					biset.colors.linePreHColor, biset.conlink.hwidth, "lineMHight", durations.lnTrans);
-
-				if (rowField + "_" + rowListIDs[j] != theBicFrameID
-					&& d3.select("#" + rowField + "_" + rowListIDs[j]).attr("class") != "entSelected")
-					colEntUpdate("#" + rowField + "_" + rowListIDs[j] + "_frame", 
-						biset.colors.entColRel, "entMHight", durations.colEntTrans);
-			}
-
-			// update the column
-			for (var k = 0; k < colListIDs.length; k++) {
-				linkStateUpdate("#" + thisBicID + "__" + colField + "_" + colListIDs[k], 
-					biset.colors.linePreHColor, biset.conlink.hwidth, "lineMHight", durations.lnTrans);
-
-				if (colField + "_" + colListIDs[k] != theBicFrameID
-					&& d3.select("#" + colField + "_" + colListIDs[k]).attr("class") != "entSelected")
-					colEntUpdate("#" + colField + "_" + colListIDs[k] + "_frame", 
-						biset.colors.entColRel, "entMHight", durations.colEntTrans);
-			}
-		}
-		// mouseout unhighlight
-		else if (eventType == "MouseOut") {
-			bicFrameUpdate("#" + thisBicFrameID, biset.colors.bicFrameColor, 
-				biset.bic.frameNStrokeWidth, durations.bicFrameTrans);
-
-			for (var j = 0; j < rowListIDs.length; j++) {
-				if (d3.select("#" + rowField + "_" + rowListIDs[j] + "__" + thisBicID).attr("class") != "linkSelected")
-					linkStateUpdate("#" + rowField + "_" + rowListIDs[j] + "__" + thisBicID, 
-						biset.colors.lineNColor, biset.conlink.nwidth, "lineNormal", durations.lnTrans);
-
-				if (rowField + "_" + rowListIDs[j] != theBicFrameID
-					&& d3.select("#" + rowField + "_" + rowListIDs[j]).attr("class") != "entSelected")
-					colEntUpdate("#" + rowField + "_" + rowListIDs[j] + "_frame", 
-						biset.colors.entNormal, "entNormal", durations.colEntTrans);
-			}
-
-			for (var k = 0; k < colListIDs.length; k++) {
-				if (d3.select("#" + thisBicID + "__" + colField + "_" + colListIDs[k]).attr("class") != "linkSelected")
-					linkStateUpdate("#" + thisBicID + "__" + colField + "_" + colListIDs[k], 
-						biset.colors.lineNColor, biset.conlink.nwidth, "lineNormal", durations.lnTrans);
-
-				if (colField + "_" + colListIDs[k] != theBicFrameID
-					&& d3.select("#" + colField + "_" + colListIDs[k]).attr("class") != "entSelected")
-					colEntUpdate("#" + colField + "_" + colListIDs[k] + "_frame", 
-						biset.colors.entNormal, "entNormal", durations.colEntTrans);
-			}
-		}
-		// click highlight
-		else if (eventType == "ClickHlight") {
-			bicFrameUpdate("#" + thisBicFrameID, biset.colors.bicFrameHColor, 
-				biset.bic.frameHStrokeWidth, durations.bicFrameTrans);
-
-			// update the row
-			for (var j = 0; j < rowListIDs.length; j++) {
-				// linkStateUpdate("#" + rowField + "_" + rowListIDs[j] + "__" + thisBicID, 
-				// 	color.lineNColor, ln.nwidth, "lineNormal", durations.lnTrans);
-				linkStateUpdate("#" + rowField + "_" + rowListIDs[j] + "__" + thisBicID, 
-					biset.colors.lineHColor, biset.conlink.hwidth, "linkSelected", durations.lnTrans);
-
-				if (rowField + "_" + rowListIDs[j] != theBicFrameID){
-					// colEntUpdate("#" + rowField + "_" + rowListIDs[j] + "_frame", 
-					// 	color.entNormal, durations.colEntTrans);
-					colEntUpdate("#" + rowField + "_" + rowListIDs[j] + "_frame", 
-						biset.colors.entHighlight, "entSelected", durations.colEntTrans);
-
-					d3.select("#" + rowField + "_" + rowListIDs[j])
-						.attr("class", "entSelected");
-				}
-			}
-
-			// update the column
-			for (var k = 0; k < colListIDs.length; k++) {
-				// linkStateUpdate("#" + thisBicID + "__" + colField + "_" + colListIDs[k], 
-				// 	color.lineNColor, ln.nwidth, "lineNormal", durations.lnTrans);
-				linkStateUpdate("#" + thisBicID + "__" + colField + "_" + colListIDs[k], 
-					biset.colors.lineHColor, biset.conlink.hwidth, "linkSelected", durations.lnTrans);
-
-				if (colField + "_" + colListIDs[k] != theBicFrameID) {
-					// colEntUpdate("#" + colField + "_" + colListIDs[k] + "_frame", 
-					// 	color.entNormal, durations.colEntTrans);
-					colEntUpdate("#" + colField + "_" + colListIDs[k] + "_frame", 
-						biset.colors.entHighlight, "entSelected", durations.colEntTrans);
-
-					d3.select("#" + colField + "_" + colListIDs[k])
-						.attr("class", "entSelected");
-				}
-			}
-		}
-
-		// else if (eventType == "ClickUHlight") {
-		// }
-	}	
 }
 
 
@@ -699,9 +659,7 @@ biset.addBics = function(preListCanvas, bicListCanvas, listData, bicList, bicSta
     // visual percentage based on the count
 	var bicEntsCount = d3.scale.linear()
 		.domain([0, bicEntsMax])
-		.range([0, biset.bic.frameWidth]);
-
-	console.log(biclusters);	
+		.range([0, biset.bic.frameWidth]);	
 
     // add all bics
 	var bics = bicListCanvas.selectAll(".bics")
@@ -715,32 +673,34 @@ biset.addBics = function(preListCanvas, bicListCanvas, listData, bicList, bicSta
 		.attr("class", "bics")
   		.attr("transform", function(d, i) {
 
-  	// 		var cfield = d.colField,
-  	// 			rfield = d.rowField,
-  	// 			cols = d.col,
-  	// 			rows = d.row,
-  	// 			yPos = 0;
+  			var cfield = d.colField,
+  				rfield = d.rowField,
+  				cols = d.col,
+  				rows = d.row,
+  				yPos = 0,
+  				xPos = 0;
 
-			// // y pos of the row ents
-			// for (var j = 0; j < rows.length; j++){
-			// 	var rid = rfield + "_" + rows[j],
-			// 		rY = d3.select("#" + rid)[0][0].getBoundingClientRect().top;
-			// 	yPos += rY;
-			// }
+			// y pos of the row ents
+			for (var j = 0; j < rows.length; j++){
+				var rid = rfield + "_" + rows[j],
+					rY = d3.select("#" + rid)[0][0].getBoundingClientRect().top;
+				yPos += rY;
+			}
 
-			// // y pos of the col ents
-			// for (var k = 0; k < cols.length; k++) {
-			// 	var cid = cfield + "_" + cols[k],
-			// 		cY = d3.select("#" + cid)[0][0].getBoundingClientRect().top;
-			// 	yPos += cY;
-			// }
+			// y pos of the col ents
+			for (var k = 0; k < cols.length; k++) {
+				var cid = cfield + "_" + cols[k],
+					cY = d3.select("#" + cid)[0][0].getBoundingClientRect().top;
+				yPos += cY;
+			}
 
-			// yPos = yPos / (rows.length + cols.length);
+			xPos = (biset.entList.gap * 4) * cols.length / (rows.length + cols.length) - biset.entList.gap * 2;
+			yPos = yPos / (rows.length + cols.length);
 
-  	// 		return "translate(" + 0 + "," + yPos + ")";
+  			return "translate(" + xPos + "," + yPos + ")";
 
   			// original position
-  			return "translate(" + 0 + "," + (i + 1) * biset.bic.frameHeight + ")"; 
+  			// return "translate(" + 0 + "," + (i + 1) * biset.bic.frameHeight + ")"; 
   		});
 
 	// proportion of row
@@ -794,8 +754,8 @@ biset.addBics = function(preListCanvas, bicListCanvas, listData, bicList, bicSta
 		nodes.forEach(function(node) {
 			if (node.indexOf("bic_") < 0) {
 				if (biset.elementGetClass("#" + node) != "entSelectedCol"){
-					colEntUpdate("#" + node + "_frame", biset.colors.entColRel,
-						"entMHight", durations.colEntTrans);
+					biset.barUpdate("#" + node + "_frame", biset.colors.entColRel,
+						"entMHight", "", "", biset.durations.colEntTrans);
 				}
 			}
 			// else {
@@ -808,7 +768,7 @@ biset.addBics = function(preListCanvas, bicListCanvas, listData, bicList, bicSta
 		// update the status of relevant links
 		allLinks.forEach(function(link) {
 			linkStateUpdate("#" + link, biset.colors.linePreHColor,
-				biset.conlink.hwidth, "lineMHight", durations.lnTrans);
+				biset.conlink.hwidth, "lineMHight", biset.durations.lnTrans);
 		});
 
     });
@@ -858,8 +818,14 @@ function endall(transition, callback) {
 * @param sortType, sorting orders
 */
 function sortList(aList, sortType) {
+
+	console.log(aList);
+
 	// get all entities
-	var entSet = aList.relatedDataSet.entities;
+	var entSet = aList.relatedDataSet.entities,
+		listType = aList.dataType;
+
+	console.log(listType);
 
 	// values of each entity
 	var dataValues = [],
@@ -872,9 +838,9 @@ function sortList(aList, sortType) {
 	}
 
 	// hide the selected line
-	d3.selectAll(".linkSelected").transition()
-		.delay(150)
-		.style("stroke", biset.colors.lsortColor);
+	// d3.selectAll(".linkSelected").transition()
+	// 	.delay(150)
+	// 	.style("stroke", biset.colors.lsortColor);
 
 	// sort by frequency
 	if (sortType == "freq") {
@@ -888,7 +854,7 @@ function sortList(aList, sortType) {
 		// move entities to their new position
 
 		aList.entGroups.transition()
-			.duration(650)
+			.duration(600)
 			.delay(function(d, i) { return i * 15; })
 			.attr("transform", function(d, i) {
 				// return "translate(" + aList.startPos + "," + aList.yAxis(d.index) + ")";
@@ -896,12 +862,36 @@ function sortList(aList, sortType) {
 			})
 
 			.call(endall, function() {
+
+				console.log(d3.selectAll(".bics"));
+				var allBics = d3.selectAll(".bics"),
+					bicToBeMove = [];
+
+				console.log(allBics);
+
+				for (var i = 0; i < allBics[0].length; i++) {
+					console.log(allBics[0][i]);
+					// console.log(d3.select(allBics[i]).attr("id"));
+				}
+				// allBics.forEach(function(d, i) {
+					// console.log(d3.select(this));
+					// console.log(d);
+					// var thisBicID = d3.select(d).attr("id");
+					// console.log(thisBicID);
+					// if (thisBicID.indexOf(listType) >= 0)
+					// 	bicToBeMove.push(thisBicID);
+				// });
+
+				// for (var i = 0; i < bicToBeMove.length; i++) {
+				// 	console.log(bicToBeMove[i]);
+				// }
+
 				biset.updateLink(connections);
 
 				// hide the selected line
-				d3.selectAll(".linkSelected").transition()
-					.delay(150)
-					.style("stroke", biset.colors.lineNColor);
+				// d3.selectAll(".linkSelected").transition()
+				// 	.delay(150)
+				// 	.style("stroke", biset.colors.lineNColor);
 			});
 	}
 
@@ -923,9 +913,9 @@ function sortList(aList, sortType) {
 			    biset.updateLink(connections);
 
 				// hide the selected line
-				d3.selectAll(".linkSelected").transition()
-					.delay(10)
-					.style("stroke", biset.colors.lineNColor);
+				// d3.selectAll(".linkSelected").transition()
+				// 	.delay(10)
+				// 	.style("stroke", biset.colors.lineNColor);
 			});
 	}
 }
