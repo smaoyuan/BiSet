@@ -320,8 +320,14 @@ def loadVis(request):
         lstsBisetsJson["highlight_ent"][identity] = \
             {"nodeType": item.nodeType, "nodeID": item.nodeId}   
     
+    # connections between entities and bics
     lstsBisetsJson["relNetwork"] = {}
+    # relevant docs for entities and bics
+    lstsBisetsJson["relatedDocs"] = {}
+
     networkData = lstsBisetsJson["relNetwork"]
+    relDocs = lstsBisetsJson["relatedDocs"]
+
     bics = lstsBisetsJson["bics"]
     lists = lstsBisetsJson["lists"]
 
@@ -342,13 +348,15 @@ def loadVis(request):
             colID = str(colType) + "_" + str(col)
             tmpArray.append(colID)
 
-        bicID = "bic_" + str(bics[bic]["bicID"])
+        bicID = rowType + "_" + colType + "_bic_" + str(bics[bic]["bicID"])
         networkData[bicID] = tmpArray
 
     # all all entities with their bics in the dictionary
     for lst in lists:
         listType = lst["listType"]
         entities = lst["entities"]
+        rType = lst["rightType"]
+        lType = lst["leftType"]
         for ent in entities:
             entityID = str(listType) + "_" + str(ent["entityID"])
             leftBics = ent["bicSetsLeft"]
@@ -356,14 +364,22 @@ def loadVis(request):
             tmpArray = []
             if len(leftBics) != 0:
                 for lbic in leftBics:
-                    thisbicID = "bic_" + str(lbic)
-                    tmpArray.append(lbic)
+                    thisbicID = lType + "_" + listType + "_bic_" + str(lbic)
+                    tmpArray.append(thisbicID)
             if len(rightBics) != 0:
                 for rbic in rightBics:
-                    thisbicID = "bic_" + str(rbic)
-                    tmpArray.append(rbic)
+                    thisbicID = listType + "_" + rType + "_bic_" + str(rbic)
+                    tmpArray.append(thisbicID)
             if len(tmpArray) != 0:
                 networkData[entityID] = tmpArray
+
+            # retrieve document information for each entity
+            # if not table == "EMPTY":
+            #     cursor = connection.cursor()
+            #     sql_str = "SELECT * FROM datamng_" + listType + "doc as A, datamng_docname as B where " + listType + "_id = " + ent["entityID"] + "and A.doc_id = B.id"
+               
+            #     cursor.execute(sql_str)
+            #     table1_rows = cursor.fetchall()
 
     return HttpResponse(json.dumps(lstsBisetsJson))
     
@@ -439,7 +455,9 @@ def getListDict(tableLeft, table, tableRight, leftClusCols, biclusDict):
                 table1_item_dict[row[0]]['entFreq'] = row[2]
                 table1_item_dict[row[0]]['bicSetsLeft'] = []
                 table1_item_dict[row[0]]['bicSetsRight'] = []
-                table1_item_dict[row[0]]['entSelected'] = 0
+                table1_item_dict[row[0]]['numGroupsSelected'] = 0    # entSelected
+                table1_item_dict[row[0]]['selected'] = False
+                table1_item_dict[row[0]]['mouseovered'] = False
     else:
         return None, None
     
