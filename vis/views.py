@@ -458,6 +458,7 @@ def getListDict(tableLeft, table, tableRight, leftClusCols, biclusDict):
                 table1_item_dict[row[0]]['numGroupsSelected'] = 0    # entSelected
                 table1_item_dict[row[0]]['selected'] = False
                 table1_item_dict[row[0]]['mouseovered'] = False
+                table1_item_dict[row[0]]['entType'] = table
     else:
         return None, None
     
