@@ -456,9 +456,11 @@ def getListDict(tableLeft, table, tableRight, leftClusCols, biclusDict):
                 table1_item_dict[row[0]]['bicSetsLeft'] = []
                 table1_item_dict[row[0]]['bicSetsRight'] = []
                 table1_item_dict[row[0]]['numGroupsSelected'] = 0    # entSelected
+                table1_item_dict[row[0]]['numCoSelected'] = 0
                 table1_item_dict[row[0]]['selected'] = False
                 table1_item_dict[row[0]]['mouseovered'] = False
                 table1_item_dict[row[0]]['entType'] = table
+                table1_item_dict[row[0]]['entityIDCmp'] = str(table) + "_" + str(row[0])
     else:
         return None, None
     
