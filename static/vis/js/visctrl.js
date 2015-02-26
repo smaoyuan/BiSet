@@ -283,7 +283,10 @@ function loadVisHelper(resData) {
 	// load visualizations
 	var listData = resData.lists,
 		bicList = resData.bics,
-		entHighlightData = resData.highlight_ent;
+		entHighlightData = resData.highlight_ent
+		networkData = resData.relNetwork;
+
+	console.log(resData);
 
 	// get the total number of bics
 	var bicNum = 0;
@@ -314,8 +317,11 @@ function loadVisHelper(resData) {
 
 		var aListData = getListDataByKey(listData, lkey);
 
+		// console.log(selDims);
+
 		// add a list to the vis canvas
-		var aListView = biset.addList(aList, aListData, bicList, biset.entList.startPos);
+		var aListView = biset.addList(aList, aListData, bicList, biset.entList.startPos, networkData);
+				
 		// flag the canvas has been used
 		biset.visCanvas.inUse = 1;
 		addSortCtrl(aListView);
@@ -342,7 +348,7 @@ function loadVisHelper(resData) {
 				theList.push(bicList[key]);
 		}
 
-		biset.addBics(entLists[i], aBicList, aListData, theList, bicStartPos, rowField, colField);
+		biset.addBics(entLists[i], aBicList, aListData, theList, bicStartPos, rowField, colField, networkData);
 	}
 
 	// load highlight entities
