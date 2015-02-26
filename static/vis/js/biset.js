@@ -97,8 +97,16 @@ var bicDisplayed = [];
 // a diction to record all relations for a mouseovered entity
 var relations = [], // new Set(),
 	relationsLink = [],
-	entPathCal = new Set(),
-	entsHighlight = [], // new Set(),
+
+	entPathCaled = new Set(),
+	entPathLinkedEnts = [],
+	entPathLinkedLinks = [],
+
+	// entsHighlight = [],
+
+	highlightEntSet = new Set(),
+	highlightEntList = [],
+
 	// a set of all selected entities
 	selEntSet = new Set();
 
@@ -294,33 +302,13 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 					thisID = thisEntType + "_" + thisEntID,
 					thisFrameID = thisID + "_frame";
 
-				// var nodes = new Set();
     			if (networkData[thisID] !== undefined) {
 
-    				if (entPathCal.has(thisID) == false) {
+					// releated info for current node
+					var relInfo = biset.corelatedInfo(thisID, networkData);
 
-	    					// a group of nodes related with each other
-	    				var nodes = new Set(),
-	    					// keyword of the node (e.g., people, location) 
-	    					kwdSet = new Set(),
-	    					// a set of nodes to be expanded 	
-	    					expEntSet = new Set(),
-	    					// a set of links between these related nodes	
-							allLinks = new Set();
-
-						expEntSet.add(thisID);
-	    				biset.findAllNodes(expEntSet, networkData, nodes, kwdSet, allLinks);
-
-	    				entPathCal.add(thisID);
-
-    					// add all related nodes and links 
-						relations[thisID] = nodes;
-						relationsLink[thisID] = allLinks;
-    				}
-    				else {
-    					var nodes = relations[thisID],
-    						allLinks = relationsLink[thisID];
-    				}
+					var nodes = relInfo.ents,
+						allLinks = relInfo.paths;
 
 					// update the status of current entity
 					biset.barUpdate("#" + thisFrameID, biset.colors.entColRel,
@@ -340,22 +328,25 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 						}
 						else {
 							if (node != thisID){
-								// allEnts[node].numCoSelected += 1;
-								entsHighlight[node] = allEnts[node].numCoSelected;
+								// record all nodes need highlight
+								highlightEntSet.add(node);
+
+								// how much each node need highlight
+								allEnts[node].numCoSelected += 1;
+								highlightEntList[node] = allEnts[node].numCoSelected;
 							}
 						}
 					});
 
-					console.log(entsHighlight);
-					for (e in entsHighlight) {
-						if (entsHighlight[e] == 1)
-							biset.barUpdate("#" + e + "_frame", biset.colors.entColRel, "entMHight", "", "");
-						else {
-							var alfaVal = 0.15 + 0.05 * parseInt(entsHighlight[e]),
-								colEntNewColor = "rgba(228, 122, 30, " + alfaVal + ")";
-								biset.barUpdate("#" + e + "_frame", colEntNewColor, "entMHight", "", "");
-						}
-					}
+					highlightEntSet.forEach(function(e) {
+						var alfaVal = 0.15 + 0.05 * (parseInt(highlightEntList[e]) - 1),
+							colEntNewColor = "rgba(228, 122, 30, " + alfaVal + ")";
+							biset.barUpdate("#" + e + "_frame", colEntNewColor, "entMHight", "", "");
+					});
+
+
+					console.log(highlightEntList);
+
 					// entsHighlight.forEach(function(e){
 						// if (e.numCoSelected == 1)
 						// 	biset.barUpdate("#" + e.ent + "_frame", biset.colors.entColRel, "entMHight", "", "");
@@ -406,7 +397,7 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 
     			if (networkData[thisID] !== undefined) {
 
-    				if (entPathCal.has(thisID) == false) {
+    				if (entPathCaled.has(thisID) == false) {
 						var nodes = new Set();
 	    				var kwdSet = new Set(),
     						expEntSet = new Set(),
@@ -415,21 +406,21 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
     					expEntSet.add(thisID);
     					biset.findAllNodes(expEntSet, networkData, nodes, kwdSet, allLinks);
 
-	    				entPathCal.add(thisID);
+	    				entPathCaled.add(thisID);
 
     					// add all related nodes and links 
-						relations[thisID] = nodes;
-						relationsLink[thisID] = allLinks;
+						entPathLinkedEnts[thisID] = nodes;
+						entPathLinkedLinks[thisID] = allLinks;
     				}
     				else {
-    					nodes = relations[thisID];
-    					allLinks = relationsLink[thisID];
+    					nodes = entPathLinkedEnts[thisID];
+    					allLinks = entPathLinkedLinks[thisID];
     				}
 
     				var relEnts = [],
     					relBics = [];
 
-					console.log(entsHighlight);    					
+					console.log(highlightEntList);    					
 
 	    			// unhighlight all relevent entities
 					nodes.forEach(function(node) {
@@ -441,17 +432,17 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 									// relEnts.push(node);
 									// allEnts[node].numCoSelected -= 1;
 									// if (allEnts[node].numCoSelected > 0)
-										entsHighlight[node] = allEnts[node].numCoSelected;
+										highlightEntList[node] = allEnts[node].numCoSelected;
 								// }
 							}
 						}
 					});
 
-					for (e in entsHighlight) {
-						if (entsHighlight[e] == 0)
+					for (e in highlightEntList) {
+						if (highlightEntList[e] == 0)
 							biset.barUpdate("#" + e + "_frame", biset.colors.entNormal, "entMHight", "", "");
 						else {
-							var alfaVal = 0.15 + 0.05 * parseInt(entsHighlight[e]),
+							var alfaVal = 0.15 + 0.05 * parseInt(highlightEntList[e]),
 								colEntNewColor = "rgba(228, 122, 30, " + alfaVal + ")";
 								biset.barUpdate("#" + e + "_frame", colEntNewColor, "entMHight", "", "");
 						}
@@ -537,7 +528,7 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 			allEnts[thisID].numCoSelected += 1;
 
 			if (networkData[thisID] !== undefined) {
-				if (entPathCal.has(thisID) == false) {
+				if (entPathCaled.has(thisID) == false) {
 
     					// a group of nodes related with each other
     				var nodes = new Set(),
@@ -551,15 +542,15 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 					expEntSet.add(thisID);
     				biset.findAllNodes(expEntSet, networkData, nodes, kwdSet, allLinks);
 
-    				entPathCal.add(thisID);
+    				entPathCaled.add(thisID);
 
 					// add all related nodes and links 
-					relations[thisID] = nodes;
-					relationsLink[thisID] = allLinks;
+					entPathLinkedEnts[thisID] = nodes;
+					entPathLinkedLinks[thisID] = allLinks;
 				}
 				else {
-					var nodes = relations[thisID],
-						allLinks = relationsLink[thisID];
+					var nodes = entPathLinkedEnts[thisID],
+						allLinks = entPathLinkedLinks[thisID];
 				}
 
 				var relBics = [];
@@ -572,7 +563,7 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 					else {
 						if (node != thisID){
 							allEnts[node].numCoSelected += 1;
-							entsHighlight[node] = allEnts[node].numCoSelected;
+							highlightEntList[node] = allEnts[node].numCoSelected;
 						}
 					}
 				});
@@ -591,7 +582,7 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 			allEnts[thisID].numCoSelected -= 1;
 
 			if (networkData[thisID] !== undefined) {
-				if (entPathCal.has(thisID) == false) {
+				if (entPathCaled.has(thisID) == false) {
 
     					// a group of nodes related with each other
     				var nodes = new Set(),
@@ -605,15 +596,15 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 					expEntSet.add(thisID);
     				biset.findAllNodes(expEntSet, networkData, nodes, kwdSet, allLinks);
 
-    				entPathCal.add(thisID);
+    				entPathCaled.add(thisID);
 
 					// add all related nodes and links 
-					relations[thisID] = nodes;
-					relationsLink[thisID] = allLinks;
+					entPathLinkedEnts[thisID] = nodes;
+					entPathLinkedLinks[thisID] = allLinks;
 				}
 				else {
-					var nodes = relations[thisID],
-						allLinks = relationsLink[thisID];
+					var nodes = entPathLinkedEnts[thisID],
+						allLinks = entPathLinkedLinks[thisID];
 				}
 
 				var relBics = [];
@@ -626,7 +617,7 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 					else {
 						if (node != thisID){
 							allEnts[node].numCoSelected -= 1;
-							entsHighlight[node] = allEnts[node].numCoSelected;
+							highlightEntList[node] = allEnts[node].numCoSelected;
 						}
 					}
 				});
@@ -719,6 +710,160 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 		"texts": viewText
 	}
     return listView;	    
+}
+
+
+/*
+* union two sets
+* @param set1, the 1st set
+* @param set2, the 2nd set
+* @return rset, a set with all elements in set1 and set 2
+*/
+biset.setUnion = function(set1, set2) {
+	if (set1.size == 0)
+		return set2;
+	else if (set2.size == 0)
+		return set1;
+	else {
+		var rset = new Set();
+		set1.forEach(function(e) {
+			rest.add(e);
+		});
+
+		set2.forEach(function(e) {
+			if (reset.has(e) == false)
+				reset.add(e);
+		});
+
+		return rset;
+	}
+}
+
+
+/*
+* intersect two sets
+* @param set1, the 1st set
+* @param set2, the 2nd set
+* @return rset, a set with all elements in set1 and set 2
+*/
+biset.setIntersect = function(set1, set2){
+	if (set1.size == 0 || set2.size == 0)
+		return null;
+	else {
+		var rset = new Set();
+		set1.forEach(function(e) {
+			if (set2.has(e) == true)
+				rset.add(e);
+		});
+
+		return rset;
+	}
+}
+
+
+biset.corelatedInfo = function(entID, networkData) {
+	if (entPathCaled.has(entID) == false) {
+
+			// a group of nodes related with each other
+		var nodes = new Set(),
+			// keyword of the node (e.g., people, location) 
+			kwdSet = new Set(),
+			// a set of nodes to be expanded 	
+			expEntSet = new Set(),
+			// a set of links between these related nodes	
+			allLinks = new Set();
+
+		expEntSet.add(entID);
+		biset.findAllNodes(expEntSet, networkData, nodes, kwdSet, allLinks);
+
+		entPathCaled.add(entID);
+
+		// add all related nodes and links 
+		entPathLinkedEnts[entID] = nodes;
+		entPathLinkedLinks[entID] = allLinks;
+	}
+	else {
+		var nodes = entPathLinkedEnts[entID],
+			allLinks = entPathLinkedLinks[entID];
+	}
+
+	var obj = {};
+	obj.ents = nodes;
+	obj.paths = allLinks;
+
+	return obj;
+}
+
+
+biset.findAllNodes = function(expandSet, consDict, nodeSet, key, paths) {
+
+	var toBeExpanded = new Set();
+	var found = false;
+
+	if (expandSet.size == 0)
+		return;
+
+	expandSet.forEach(function(value) {
+
+		if (!nodeSet.has(value))
+			nodeSet.add(value);
+
+		if (consDict[value] !== undefined) {
+			var tmpArray = consDict[value];
+			for (var i = 0; i < tmpArray.length; i++) {
+				found = false;
+				key.forEach(function(kval) {
+					var typewd = tmpArray[i].split("_");
+					if (typewd.length == 2) {
+						if (kval == typewd[0]) {
+							found = true;
+						}
+					}
+					else {
+						var tmpKey = typewd[0] + "_" + typewd[1];
+						if (tmpKey == kval) {
+							found = true;
+						}
+					}
+				});
+				if (found == false) {
+					toBeExpanded.add(tmpArray[i]);
+
+					var a = value,
+						b = tmpArray[i];
+					if (a.localeCompare(b) < 0) {
+						var tmp = b,
+							b = a,
+							a = tmp;
+					}
+
+					var curPath = a + "__" + b;
+					paths.add(curPath);
+				}
+			}
+		}
+	});
+
+	if (nodeSet.size != 1) {
+		nodeSet.forEach(function(node) {
+			var nodeType = node.split("_")[0],
+				idSize = node.split("_").length;
+			if (idSize == 2)
+				key.add(nodeType);
+			else {
+				var type2 = node.split("_")[1];
+				key.add(nodeType + "_" + type2);
+			}
+		});
+	}
+	if (toBeExpanded.size == 0) {
+		// expandSet.forEach(function(epNode) {
+		// 	nodeSet.delete(epNode);
+		// });
+		return;
+	}
+
+	biset.findAllNodes(toBeExpanded, consDict, nodeSet, key, paths);
 }
 
 
@@ -1250,157 +1395,6 @@ biset.elementGetClass = function(elementID) {
 */
 biset.elementSetClass = function(elementID, className) {
 	d3.select(elementID).attr("class", className);
-}
-
-
-biset.findAllNodes = function(expandSet, consDict, nodeSet, key, paths) {
-
-	var toBeExpanded = new Set();
-	var found = false;
-
-	if (expandSet.size == 0)
-		return;
-
-	expandSet.forEach(function(value) {
-
-		if (!nodeSet.has(value))
-			nodeSet.add(value);
-
-		if (consDict[value] !== undefined) {
-			var tmpArray = consDict[value];
-			for (var i = 0; i < tmpArray.length; i++) {
-				found = false;
-				key.forEach(function(kval) {
-					var typewd = tmpArray[i].split("_");
-					if (typewd.length == 2) {
-						if (kval == typewd[0]) {
-							found = true;
-						}
-					}
-					else {
-						var tmpKey = typewd[0] + "_" + typewd[1];
-						if (tmpKey == kval) {
-							found = true;
-						}
-					}
-				});
-				if (found == false) {
-					toBeExpanded.add(tmpArray[i]);
-
-					var a = value,
-						b = tmpArray[i];
-					if (a.localeCompare(b) < 0) {
-						var tmp = b,
-							b = a,
-							a = tmp;
-					}
-
-					var curPath = a + "__" + b;
-					paths.add(curPath);
-				}
-			}
-		}
-	});
-
-	if (nodeSet.size != 1) {
-		nodeSet.forEach(function(node) {
-			var nodeType = node.split("_")[0],
-				idSize = node.split("_").length;
-			if (idSize == 2)
-				key.add(nodeType);
-			else {
-				var type2 = node.split("_")[1];
-				key.add(nodeType + "_" + type2);
-			}
-		});
-	}
-	if (toBeExpanded.size == 0) {
-		// expandSet.forEach(function(epNode) {
-		// 	nodeSet.delete(epNode);
-		// });
-		return;
-	}
-
-	biset.findAllNodes(toBeExpanded, consDict, nodeSet, key, paths);
-
-
-
-	// var toBeExpanded = new Set();
-	// var found = false;
-
-	// if (expandSet.size == 0)
-	// 	return;
-
-	// // nodeSet.size == 
-
-	// expandSet.forEach(function(value) {
-	// 	nodeSet.add(value);
-	// 	if (consDict[value] !== undefined) {
-	// 		var tmpArray = consDict[value];
-	// 		for (var i = 0; i < tmpArray.length; i++) {
-	// 			found = false;
-	// 			key.forEach(function(kval) {
-	// 				if (tmpArray[i].indexOf(kval) >= 0)
-	// 					found = true;
-	// 			});
-	// 			if (found == false){
-	// 				var findExpand = false;
-	// 				//if (!nodeSet.has(tmpArray[i]))
-	// 				{
-	// 					if (tmpArray[i].indexOf("bic") >= 0) {
-	// 						var tmpEnt = consDict[tmpArray[i]];
-	// 						for (var j = 0; j < tmpEnt.length; j++) {
-	// 							var etype = tmpEnt[j].split("_")[0];
-	// 							var etype2 = value.split("_")[0];
-	// 							if (!key.has(etype) && etype != etype2) {
-	// 								findExpand = true;
-	// 								toBeExpanded.add(tmpArray[i]);
-	// 								break;
-	// 							}
-	// 						}
-	// 					}
-	// 					else {
-	// 						findExpand = true;
-	// 						toBeExpanded.add(tmpArray[i]);
-	// 					}
-	// 				}	// continue;
-						
-	// 				 {
-	// 				 	if (findExpand == true) {
-	// 						var a = value,
-	// 							b = tmpArray[i];
-	// 						if (a.localeCompare(b) < 0) {
-	// 							var tmp = b,
-	// 								b = a,
-	// 								a = tmp;
-	// 						}
-
-	// 						var curPath = a + "__" + b;
-	// 						paths.add(curPath);					 		
-	// 				 	}
-
-	// 				}
-	// 			}
-	// 		}
-	// 	}
-	// });
-
-	// //if (nodeSet.size != 1) 
-	// {
-	// 	nodeSet.forEach(function(node) {
-	// 		var nodeType = node.split("_")[0];
-	// 		if (nodeType != "bic")
-	// 			key.add(nodeType);
-	// 	});
-	// }
-	// if (toBeExpanded.size == 0) {
-	// 	expandSet.forEach(function(epNode) {
-	// 		nodeSet.delete(epNode);
-	// 	});
-	// 	return;
-	// }
-
-	// biset.findAllNodes(toBeExpanded, consDict, nodeSet, key, paths);
 }
 
 
