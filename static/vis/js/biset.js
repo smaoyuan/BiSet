@@ -235,10 +235,6 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 		// entIDList.push(type + "_" + entSet[i].entityID);
 	}
 
-	// for (abic in bicList) {
-	// 	console.log(bicList[abic]);
-	// }
-
 	dataValues.sort();
 
 	// position for each entity in y-axis
@@ -259,9 +255,6 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
     		"<option value='freq'>frequency</option>" + 
 		"</select>" + 
 	"</div>");
-
-	// console.log(entSet);
-	// console.log(bicList);
 
 	// all entities
 	for (var i = 0; i < entSet.length; i++)
@@ -583,9 +576,6 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 			}
 			else {
 				highlightEntSet.forEach(function(e) {
-					console.log(e);
-					console.log(allEntsInVis[e]);
-
 					if (e.indexOf("_bic") < 0) {
 						allEntsInVis[e].numCoSelected = 0;
 						highlightEntList[e] = allEntsInVis[e].numCoSelected;
@@ -618,22 +608,11 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 							allEntsInVis[e].numCoSelected += 1;
 							highlightEntList[e] = allEntsInVis[e].numCoSelected;
 
-							console.log(highlightEntList[e]);
-
 							if (highlightEntSet.has(e) == false)
 								highlightEntSet.add(e);
 						}
 					});
 				}
-
-				console.log(highlightEntSet.size);
-
-				console.log(highlightEntSet);
-
-				// for (e in highlightEntList) {
-				// 	console.log(e);
-				// 	console.log(highlightEntList[e]);
-				// }
 
 				// change the bar border
 				biset.barUpdate("#" + thisFrameID, biset.colors.entColRel, biset.colors.entMouseOverBorder, biset.entity.moBorder); //"entMHight", 
@@ -978,13 +957,11 @@ biset.addBics = function(preListCanvas, bicListCanvas, listData, bicList, bicSta
 
     // mouseover event for bics
     bics.on("mouseover", function(d, i) {
-    	console.log(d);
 
 		var rfield = d.rowField,
 			cfield = d.colField;
 
     	var thisBicID = rfield + "_" + cfield + "_bic_" + d.bicID;
-    	console.log(thisBicID);
 
 		var kwdSet = new Set(),
 			nodes = new Set(),
@@ -993,9 +970,6 @@ biset.addBics = function(preListCanvas, bicListCanvas, listData, bicList, bicSta
 		expEntSet.add(thisBicID);
 
 		biset.findAllNodes(expEntSet, networkData, nodes, kwdSet, allLinks);
-
-		console.log(nodes);
-		console.log(allLinks);
 
 		// highlight all relevent entities
 		nodes.forEach(function(node) {
@@ -1071,8 +1045,6 @@ function sortList(aList, sortType) {
 	var entSet = aList.relatedDataSet.entities,
 		listType = aList.dataType;
 
-	console.log(listType);
-
 	// values of each entity
 	var dataValues = [],
 		// dataFrequency = [],
@@ -1109,7 +1081,6 @@ function sortList(aList, sortType) {
 
 			.call(endall, function() {
 
-				console.log(d3.selectAll(".bics"));
 				var allBics = d3.selectAll(".bics"),
 					bicToBeMove = [];
 
