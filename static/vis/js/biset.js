@@ -289,7 +289,7 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
     			if (networkData[thisID] !== undefined) {
 
 					// releated info for current node
-					var relInfo = biset.corelatedInfo(thisID, networkData);
+					var relInfo = biset.findAllCons(thisID, networkData);
 
 					var nodes = relInfo.ents,
 						allLinks = relInfo.paths;
@@ -322,7 +322,7 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 					highlightEntSet.forEach(function(e) {
 						var alfaVal = 0.15 + 0.05 * (parseInt(highlightEntList[e]) - 1),
 							colEntNewColor = "rgba(228, 122, 30, " + alfaVal + ")";
-							biset.barUpdate("#" + e + "_frame", colEntNewColor, "", ""); 
+						biset.barUpdate("#" + e + "_frame", colEntNewColor, "", ""); 
 					});
 
 					// update the status of relevant links
@@ -360,7 +360,7 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
     			if (networkData[thisID] !== undefined) {
 
 					// releated info for current node
-					var relInfo = biset.corelatedInfo(thisID, networkData);
+					var relInfo = biset.findAllCons(thisID, networkData);
 
 					var nodes = relInfo.ents,
 						allLinks = relInfo.paths;
@@ -397,17 +397,6 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 						if (allEnts[key].numCoSelected == 0)
 							biset.barUpdate("#" + allEnts[key].entityIDCmp + "_frame", biset.colors.entNormal, "", ""); 
 					}
-
-
-					// for (e in highlightEntList) {
-					// 	if (highlightEntList[e] == 0)
-					// 		biset.barUpdate("#" + e + "_frame", biset.colors.entNormal, "entMHight", "", "");
-					// 	else {
-					// 		var alfaVal = 0.15 + 0.05 * parseInt(highlightEntList[e]),
-					// 			colEntNewColor = "rgba(228, 122, 30, " + alfaVal + ")";
-					// 			biset.barUpdate("#" + e + "_frame", colEntNewColor, "entMHight", "", "");
-					// 	}
-					// }					
 
 					for (var j = 0; j < relBics.length; j++)
 						biset.barUpdate("#" + relBics[j] + "_frame", "", biset.colors.bicFrameColor, biset.bic.frameNStrokeWidth);
@@ -485,7 +474,7 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 				if (networkData[thisID] !== undefined) {
 
 					// releated info for current node
-					var relInfo = biset.corelatedInfo(thisID, networkData);
+					var relInfo = biset.findAllCons(thisID, networkData);
 
 					var nodes = relInfo.ents,
 						allLinks = relInfo.paths;
@@ -670,9 +659,14 @@ biset.setIntersect = function(set1, set2){
 }
 
 
-biset.corelatedInfo = function(entID, networkData) {
+/*
+* Given an entity, find its all related nodes and links
+* @param entID, the id of an entity
+* @param consDict, a dictionary of all relations
+* @return {obj}, a object contains related nodes and links
+*/
+biset.findAllCons = function(entID, consDict) {
 	if (entPathCaled.has(entID) == false) {
-
 			// a group of nodes related with each other
 		var nodes = new Set(),
 			// keyword of the node (e.g., people, location) 
@@ -683,7 +677,7 @@ biset.corelatedInfo = function(entID, networkData) {
 			allLinks = new Set();
 
 		expEntSet.add(entID);
-		biset.findAllNodes(expEntSet, networkData, nodes, kwdSet, allLinks);
+		biset.findAllConsHelper(expEntSet, consDict, nodes, kwdSet, allLinks);
 
 		entPathCaled.add(entID);
 
@@ -697,14 +691,21 @@ biset.corelatedInfo = function(entID, networkData) {
 	}
 
 	var obj = {};
-	obj.ents = nodes;
-	obj.paths = allLinks;
+		obj.ents = nodes;
+		obj.paths = allLinks;
 
 	return obj;
 }
 
 
-biset.findAllNodes = function(expandSet, consDict, nodeSet, key, paths) {
+/*
+* Given an entity, find its all related nodes and links
+* @param expandSet, a set of entity to be expanded for exam
+* @param consDict, a dictionary of relations for all entities
+* @param key, a set of keywords of entity types
+* @param paths, a set of paths from the given entity to all connected nodes
+*/
+biset.findAllConsHelper = function(expandSet, consDict, nodeSet, key, paths) {
 
 	var toBeExpanded = new Set();
 	var found = false;
@@ -713,7 +714,6 @@ biset.findAllNodes = function(expandSet, consDict, nodeSet, key, paths) {
 		return;
 
 	expandSet.forEach(function(value) {
-
 		if (!nodeSet.has(value))
 			nodeSet.add(value);
 
@@ -723,16 +723,13 @@ biset.findAllNodes = function(expandSet, consDict, nodeSet, key, paths) {
 				found = false;
 				key.forEach(function(kval) {
 					var typewd = tmpArray[i].split("_");
-					if (typewd.length == 2) {
-						if (kval == typewd[0]) {
+					if (typewd.length == 2)
+						if (kval == typewd[0])
 							found = true;
-						}
-					}
 					else {
 						var tmpKey = typewd[0] + "_" + typewd[1];
-						if (tmpKey == kval) {
+						if (tmpKey == kval)
 							found = true;
-						}
 					}
 				});
 				if (found == false) {
@@ -753,7 +750,7 @@ biset.findAllNodes = function(expandSet, consDict, nodeSet, key, paths) {
 		}
 	});
 
-	if (nodeSet.size != 1) {
+	if (nodeSet.size != 1)
 		nodeSet.forEach(function(node) {
 			var nodeType = node.split("_")[0],
 				idSize = node.split("_").length;
@@ -764,15 +761,11 @@ biset.findAllNodes = function(expandSet, consDict, nodeSet, key, paths) {
 				key.add(nodeType + "_" + type2);
 			}
 		});
-	}
-	if (toBeExpanded.size == 0) {
-		// expandSet.forEach(function(epNode) {
-		// 	nodeSet.delete(epNode);
-		// });
-		return;
-	}
 
-	biset.findAllNodes(toBeExpanded, consDict, nodeSet, key, paths);
+	if (toBeExpanded.size == 0)
+		return;
+
+	biset.findAllConsHelper(toBeExpanded, consDict, nodeSet, key, paths);
 }
 
 
@@ -939,7 +932,7 @@ biset.addBics = function(preListCanvas, bicListCanvas, listData, bicList, bicSta
 			allLinks = new Set();
 		expEntSet.add(thisBicID);
 
-		biset.findAllNodes(expEntSet, networkData, nodes, kwdSet, allLinks);
+		biset.findAllConsHelper(expEntSet, networkData, nodes, kwdSet, allLinks);
 
 		// highlight all relevent entities
 		nodes.forEach(function(node) {
