@@ -105,9 +105,9 @@ var relations = [], // new Set(),
 	// a map of all entities, key: entID, val: ent object
 	allEntsInVis = [],
 
-	// entsHighlight = [],
-
+	// node (ent + bic) needs to be highlighted
 	highlightEntSet = new Set(),
+	// a map of value for coloring each highlight node
 	highlightEntList = [],
 
 	// a set of all selected entities
@@ -124,9 +124,9 @@ var canvas = d3.select("#biset_canvas")
     .attr('height', biset.visCanvas.height);
 
 // for debug
-$("svg").css({"border-color": "#C1E0FF", 
-         "border":"0px", 
-         "border-style":"solid"});
+// $("svg").css({"border-color": "#C1E0FF", 
+//          "border":"0px", 
+//          "border-style":"solid"});
 
 var svgPos = canvas[0][0].getBoundingClientRect(),
 	svgCanvasOffset = { left: svgPos.left, top: svgPos.top };
@@ -322,8 +322,7 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 						allLinks = relInfo.paths;
 
 					// update the status of current entity
-					biset.barUpdate("#" + thisFrameID, biset.colors.entColRel,
-						"entMHight", biset.colors.entMouseOverBorder, biset.entity.moBorder);
+					biset.barUpdate("#" + thisFrameID, biset.colors.entColRel, biset.colors.entMouseOverBorder, biset.entity.moBorder); //"entMHight", 
 
 					allEnts[thisID].numCoSelected += 1;
 
@@ -337,10 +336,7 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 						}
 						else {
 							if (node != thisID){
-								// record all nodes need highlight
-
-								// biset.setUnion()
-
+								// record the node that need highlight
 								highlightEntSet.add(node);
 
 								// how much each node need highlight
@@ -353,12 +349,8 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 					highlightEntSet.forEach(function(e) {
 						var alfaVal = 0.15 + 0.05 * (parseInt(highlightEntList[e]) - 1),
 							colEntNewColor = "rgba(228, 122, 30, " + alfaVal + ")";
-							biset.barUpdate("#" + e + "_frame", colEntNewColor, "entMHight", "", "");
+							biset.barUpdate("#" + e + "_frame", colEntNewColor, "", ""); //"entMHight", 
 					});
-
-					// highlight all bics
-					// for (var j = 0; j < relBics.length; j++)
-					// 	biset.frameUpdate("#" + relBics[j] + "_frame", biset.colors.bicFramePreHColor, biset.bic.frameHStrokeWidth);					
 
 					// update the status of relevant links
 					allLinks.forEach(function(link) {
@@ -368,9 +360,9 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
     			}
 
     			// just update the border
-    			else {
-	    			biset.frameUpdate("#" + thisFrameID, biset.colors.entMouseOverBorder, biset.entity.moBorder);
-    			}
+    			else
+	    			biset.barUpdate("#" + thisFrameID, "", biset.colors.entMouseOverBorder, biset.entity.moBorder);
+
 				// change the status to be mouseovered
 				d.mouseovered = true;
 			}
@@ -389,8 +381,7 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 
 				// if (d.numCoSelected == 0)
 					// change the bar status to normal
-					biset.barUpdate("#" + thisFrameID, biset.colors.entNormal,
-						"entNormal", biset.colors.entNormalBorder, biset.entity.nBorder);
+					biset.barUpdate("#" + thisFrameID, biset.colors.entNormal, biset.colors.entNormalBorder, biset.entity.nBorder); //"entNormal", 
 					allEnts[thisID].numCoSelected -= 1;
 
     			if (networkData[thisID] !== undefined) {
@@ -401,8 +392,7 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 					var nodes = relInfo.ents,
 						allLinks = relInfo.paths;
 
-    				var relEnts = [],
-    					relBics = [];   					
+    				var	relBics = [];   					
 
 	    			// unhighlight all relevent entities
 					nodes.forEach(function(node) {
@@ -425,7 +415,7 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 						if (e.indexOf("_bic") < 0) {
 							var alfaVal = 0.15 + 0.05 * (parseInt(highlightEntList[e]) - 1),
 								colEntNewColor = "rgba(228, 122, 30, " + alfaVal + ")";
-								biset.barUpdate("#" + e + "_frame", colEntNewColor, "entMHight", "", "");
+								biset.barUpdate("#" + e + "_frame", colEntNewColor, "", ""); //"entMHight", 
 						}
 					});
 
@@ -437,7 +427,7 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 
 					for (key in allEntsInVis) {
 						if (allEntsInVis[key].numCoSelected == 0)
-							biset.barUpdate("#" + allEntsInVis[key].entityIDCmp + "_frame", biset.colors.entNormal, "entMHight", "", "");
+							biset.barUpdate("#" + allEntsInVis[key].entityIDCmp + "_frame", biset.colors.entNormal, "", ""); //"entMHight", 
 					}
 
 
@@ -451,11 +441,8 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 					// 	}
 					// }					
 
-					// for (var i = 0; i < relEnts.length; i++)
-					// 	biset.barUpdate("#" + relEnts[i] + "_frame", biset.colors.entNormal, "entNormal", "", "");
-
 					for (var j = 0; j < relBics.length; j++)
-						biset.frameUpdate("#" + relBics[j] + "_frame", biset.colors.bicFrameColor, biset.bic.frameNStrokeWidth);
+						biset.barUpdate("#" + relBics[j] + "_frame", "", biset.colors.bicFrameColor, biset.bic.frameNStrokeWidth);
 
 					// update the status of relevant links
 					allLinks.forEach(function(link) {
@@ -524,8 +511,7 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 
 	    	if (selEntSet.size == 0) {
 				// change the bar status to "select"
-				biset.barUpdate("#" + thisFrameID, biset.colors.entColRel, //entHighlight,
-					"entSelected", biset.colors.entSelBorder, biset.entity.selBorder);
+				biset.barUpdate("#" + thisFrameID, biset.colors.entColRel, biset.colors.entSelBorder, biset.entity.selBorder); //"entSelected", 
 	    	}
 			else {
 				if (networkData[thisID] !== undefined) {
@@ -562,7 +548,7 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 						if (e.indexOf("bic_") < 0) {
 							var alfaVal = 0.15 + 0.05 * (parseInt(highlightEntList[e]) - 1),
 								colEntNewColor = "rgba(228, 122, 30, " + alfaVal + ")";
-								biset.barUpdate("#" + e + "_frame", colEntNewColor, "entMHight", "", "");
+								biset.barUpdate("#" + e + "_frame", colEntNewColor, "", ""); //"entMHight", 
 						}
 					});
 
@@ -574,36 +560,26 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 
 					for (key in allEntsInVis) {
 						if (allEntsInVis[key].numCoSelected == 0)
-							biset.barUpdate("#" + allEntsInVis[key].entityIDCmp + "_frame", biset.colors.entNormal, "entMHight", "", "");
+							biset.barUpdate("#" + allEntsInVis[key].entityIDCmp + "_frame", biset.colors.entNormal, "", ""); //"entMHight", 
 					}
-
-					console.log(highlightEntList[thisID]);
 
 					var alfaValThisEnt = 0.15 + 0.05 * (parseInt(highlightEntList[thisID]) - 1),
 						colorForThisEnt = "rgba(228, 122, 30, " + alfaValThisEnt + ")";
 
-					biset.barUpdate("#" + thisFrameID, colorForThisEnt, //entHighlight,
-						"entSelected", biset.colors.entSelBorder, biset.entity.selBorder);
-
 					// change the bar status to "select"
-					// biset.barUpdate("#" + thisFrameID, biset.colors.entColRel, //entHighlight,
-					// 	"entSelected", biset.colors.entSelBorder, biset.entity.selBorder);
+					biset.barUpdate("#" + thisFrameID, colorForThisEnt, biset.colors.entSelBorder, biset.entity.selBorder); //"entSelected", 
 				}
 			}
 
 			// record the clicked node
 			selEntSet.add(thisID);
-
-			// allEnts[thisID].numCoSelected += 1;
-
 			d.selected = true;
 	    }
 	    else {
 
 			if (selEntSet.size == 1) {
 				// change the bar border
-				biset.barUpdate("#" + thisFrameID, biset.colors.entColRel,
-					"entMHight", biset.colors.entMouseOverBorder, biset.entity.moBorder);				
+				biset.barUpdate("#" + thisFrameID, biset.colors.entColRel, biset.colors.entMouseOverBorder, biset.entity.moBorder);	//"entMHight", 			
 			}
 			else {
 				highlightEntSet.forEach(function(e) {
@@ -616,9 +592,6 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 					}
 				});
 				highlightEntSet.clear();
-
-				console.log(highlightEntSet);
-				console.log(selEntSet);
 
 				var selEnts = [];
 				selEntSet.forEach(function(e) {
@@ -663,14 +636,13 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 				// }
 
 				// change the bar border
-				biset.barUpdate("#" + thisFrameID, biset.colors.entColRel,
-					"entMHight", biset.colors.entMouseOverBorder, biset.entity.moBorder);
+				biset.barUpdate("#" + thisFrameID, biset.colors.entColRel, biset.colors.entMouseOverBorder, biset.entity.moBorder); //"entMHight", 
 
 				highlightEntSet.forEach(function(e) {
 					if (e.indexOf("_bic") < 0) {
 						var alfaVal = 0.15 + 0.05 * (parseInt(highlightEntList[e]) - 1),
 							colEntNewColor = "rgba(228, 122, 30, " + alfaVal + ")";
-							biset.barUpdate("#" + e + "_frame", colEntNewColor, "entMHight", "", "");
+							biset.barUpdate("#" + e + "_frame", colEntNewColor, "", ""); //"entMHight", 
 					}
 				});
 
@@ -856,19 +828,6 @@ biset.findAllNodes = function(expandSet, consDict, nodeSet, key, paths) {
 
 
 /*
-* function to update the color of a bic frame
-* @param frameID, the ID of the frame
-* @param newColor, the new color of the frame
-* @param newStrokeWidth, the new stroke width of the frame
-*/
-biset.frameUpdate = function(frameID, newColor, newStrokeWidth) {
-	d3.select(frameID)
-		.style("stroke", newColor)
-		.style("stroke-width", newStrokeWidth);
-}
-
-
-/*
 * function to update the color of correlated entities
 * @param entID, the ID of correlated entities
 * @param barColor, the new color of the bar
@@ -876,20 +835,27 @@ biset.frameUpdate = function(frameID, newColor, newStrokeWidth) {
 * @param bdColor, the color for border
 * @param bdStrokeWidth, border width of the bar
 */
-biset.barUpdate = function(entID, barColor, barClass, bdColor, bdStrokeWidth) {
+biset.barUpdate = function(entID, barColor, bdColor, bdStrokeWidth) { //barClass, 
 	// only update the color of the bar
 	if (bdColor == "" && bdStrokeWidth == "")
 		d3.select(entID)
 			.attr("fill", barColor)
-			.attr("class", barClass)
-
-	// update both color and border of the bar
-	else
-		d3.select(entID)
-			.attr("fill", barColor)
-			.attr("class", barClass)
-			.style("stroke", bdColor)
-			.style("stroke-width", bdStrokeWidth)	
+			// .attr("class", barClass)
+	else {
+		// update both color and border of the bar
+		if (barColor != "")
+			d3.select(entID)
+				.attr("fill", barColor)
+				// .attr("class", barClass)
+				.style("stroke", bdColor)
+				.style("stroke-width", bdStrokeWidth);
+		// update the border of the bar
+		else
+			d3.select(entID)
+				// .attr("class", barClass)
+				.style("stroke", bdColor)
+				.style("stroke-width", bdStrokeWidth);
+	}
 }
 
 
@@ -1035,8 +1001,7 @@ biset.addBics = function(preListCanvas, bicListCanvas, listData, bicList, bicSta
 		nodes.forEach(function(node) {
 			if (node.indexOf("bic_") < 0) {
 				if (biset.elementGetClass("#" + node) != "entSelectedCol"){
-					biset.barUpdate("#" + node + "_frame", biset.colors.entColRel,
-						"entMHight", "", "");
+					biset.barUpdate("#" + node + "_frame", biset.colors.entColRel, "", ""); //"entMHight", 
 				}
 			}
 			// else {
