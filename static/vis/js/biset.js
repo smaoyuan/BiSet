@@ -212,13 +212,11 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 	var dataValues = [],
 		dataFrequency = [],
 		dataIndex = [];
-		// id of all entities in a list with type
-		// entIDList = [];
+
 	for (var i = 0; i < entSet.length; i++) {
 		dataValues.push(entSet[i].entValue);
 		dataFrequency.push(entSet[i].entFreq);
 		dataIndex.push(entSet[i].index);
-		// entIDList.push(type + "_" + entSet[i].entityID);
 	}
 
 	dataValues.sort();
@@ -297,7 +295,7 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 						allLinks = relInfo.paths;
 
 					// update the status of current entity
-					biset.barUpdate("#" + thisFrameID, biset.colors.entHover, biset.colors.entMouseOverBorder, biset.entity.moBorder); //"entMHight", 
+					biset.barUpdate("#" + thisFrameID, biset.colors.entHover, biset.colors.entMouseOverBorder, biset.entity.moBorder);
 
 					allEnts[thisID].numCoSelected += 1;
 
@@ -324,7 +322,7 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 					highlightEntSet.forEach(function(e) {
 						var alfaVal = 0.15 + 0.05 * (parseInt(highlightEntList[e]) - 1),
 							colEntNewColor = "rgba(228, 122, 30, " + alfaVal + ")";
-							biset.barUpdate("#" + e + "_frame", colEntNewColor, "", ""); //"entMHight", 
+							biset.barUpdate("#" + e + "_frame", colEntNewColor, "", ""); 
 					});
 
 					// update the status of relevant links
@@ -356,7 +354,7 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 
 				// if (d.numCoSelected == 0)
 					// change the bar status to normal
-					biset.barUpdate("#" + thisFrameID, biset.colors.entNormal, biset.colors.entNormalBorder, biset.entity.nBorder); //"entNormal", 
+					biset.barUpdate("#" + thisFrameID, biset.colors.entNormal, biset.colors.entNormalBorder, biset.entity.nBorder); 
 					allEnts[thisID].numCoSelected -= 1;
 
     			if (networkData[thisID] !== undefined) {
@@ -390,14 +388,14 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 						if (e.indexOf("_bic") < 0) {
 							var alfaVal = 0.15 + 0.05 * (parseInt(highlightEntList[e]) - 1),
 								colEntNewColor = "rgba(228, 122, 30, " + alfaVal + ")";
-								biset.barUpdate("#" + e + "_frame", colEntNewColor, "", ""); //"entMHight", 
+								biset.barUpdate("#" + e + "_frame", colEntNewColor, "", ""); 
 						}
 					});
 
 					// unhighlight the rest nodes
 					for (key in allEnts) {
 						if (allEnts[key].numCoSelected == 0)
-							biset.barUpdate("#" + allEnts[key].entityIDCmp + "_frame", biset.colors.entNormal, "", ""); //"entMHight", 
+							biset.barUpdate("#" + allEnts[key].entityIDCmp + "_frame", biset.colors.entNormal, "", ""); 
 					}
 
 
@@ -481,7 +479,7 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 
 	    	if (selEntSet.size == 0) {
 				// change the bar status to "select"
-				biset.barUpdate("#" + thisFrameID, biset.colors.entHover, biset.colors.entSelBorder, biset.entity.selBorder); //"entSelected", 
+				biset.barUpdate("#" + thisFrameID, biset.colors.entHover, biset.colors.entSelBorder, biset.entity.selBorder); 
 	    	}
 			else {
 				if (networkData[thisID] !== undefined) {
@@ -518,21 +516,21 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 						if (e.indexOf("bic_") < 0) {
 							var alfaVal = 0.15 + 0.05 * (parseInt(highlightEntList[e]) - 1),
 								colEntNewColor = "rgba(228, 122, 30, " + alfaVal + ")";
-								biset.barUpdate("#" + e + "_frame", colEntNewColor, "", ""); //"entMHight", 
+								biset.barUpdate("#" + e + "_frame", colEntNewColor, "", ""); 
 						}
 					});
 
 					// unhighlight the rest nodes
 					for (key in allEnts) {
 						if (allEnts[key].numCoSelected == 0)
-							biset.barUpdate("#" + allEnts[key].entityIDCmp + "_frame", biset.colors.entNormal, "", ""); //"entMHight", 
+							biset.barUpdate("#" + allEnts[key].entityIDCmp + "_frame", biset.colors.entNormal, "", "");
 					}
 
 					var alfaValThisEnt = 0.15 + 0.05 * (parseInt(highlightEntList[thisID]) - 1),
 						colorForThisEnt = "rgba(228, 122, 30, " + alfaValThisEnt + ")";
 
 					// change the bar status to "select"
-					biset.barUpdate("#" + thisFrameID, colorForThisEnt, biset.colors.entSelBorder, biset.entity.selBorder); //"entSelected", 
+					biset.barUpdate("#" + thisFrameID, colorForThisEnt, biset.colors.entSelBorder, biset.entity.selBorder); 
 				}
 			}
 
@@ -544,7 +542,7 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 
 			if (selEntSet.size == 1) {
 				// change the bar border
-				biset.barUpdate("#" + thisFrameID, biset.colors.entHover, biset.colors.entMouseOverBorder, biset.entity.moBorder);	//"entMHight", 			
+				biset.barUpdate("#" + thisFrameID, biset.colors.entHover, biset.colors.entMouseOverBorder, biset.entity.moBorder);			
 			}
 			else {
 				highlightEntSet.forEach(function(e) {
@@ -587,13 +585,13 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 				}
 
 				// change the bar border
-				biset.barUpdate("#" + thisFrameID, biset.colors.entHover, biset.colors.entMouseOverBorder, biset.entity.moBorder); //"entMHight", 
+				biset.barUpdate("#" + thisFrameID, biset.colors.entHover, biset.colors.entMouseOverBorder, biset.entity.moBorder); 
 
 				highlightEntSet.forEach(function(e) {
 					if (e.indexOf("_bic") < 0) {
 						var alfaVal = 0.15 + 0.05 * (parseInt(highlightEntList[e]) - 1),
 							colEntNewColor = "rgba(228, 122, 30, " + alfaVal + ")";
-							biset.barUpdate("#" + e + "_frame", colEntNewColor, "", ""); //"entMHight", 
+							biset.barUpdate("#" + e + "_frame", colEntNewColor, "", "");
 					}
 				});
 
@@ -947,7 +945,7 @@ biset.addBics = function(preListCanvas, bicListCanvas, listData, bicList, bicSta
 		nodes.forEach(function(node) {
 			if (node.indexOf("bic_") < 0) {
 				if (biset.elementGetClass("#" + node) != "entSelectedCol"){
-					biset.barUpdate("#" + node + "_frame", biset.colors.entHover, "", ""); //"entMHight", 
+					biset.barUpdate("#" + node + "_frame", biset.colors.entHover, "", "");
 				}
 			}
 		});
