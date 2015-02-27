@@ -37,14 +37,10 @@ var biset = {
 
 	// color settings
 	colors: {
-		// entity normal
+		// entity normal: blue
 		entNormal: "rgba(78, 131, 232, 0.3)",
 		// entity hover
-		entHover: "rgba(78, 131, 232, 0.5)",
-		// corelated entities
-		entColRel: "rgba(228, 122, 30, 0.15)",
-
-		entColRel2: "rgba(228, 122, 30, 0.28)",
+		entHover: "rgba(228, 122, 30, 0.15)",
 
 		// entity border for normal case
 		entNormalBorder: "rgba(0, 0, 0, 1)",
@@ -52,26 +48,23 @@ var biset = {
 		entMouseOverBorder: "rgba(0, 79, 173, 0.9)",
 		// entity border when selected
 		entSelBorder: "rgba(0, 0, 0, 0.6)",
-
-		// entity highlight
-		entHighlight: "rgba(228, 122, 30, 0.4)",
-		// entity frequency
+		// entity frequency (dark blue)
 		entFreColor: "rgba(22, 113, 229, 0.3)",
 
 		// normal bic frame
 		bicFrameColor: "rgba(0, 20, 20, 0.2)",
-		// hovering the entity to highlight bic
-		bicFramePreHColor: "rgba(252, 30, 36, 0.5)",
+
 		// select entity to highlight bic
-		bicFrameHColor: "rgba(45, 168, 75, 0.6)",
+		// bicFrameHColor: "rgba(45, 168, 75, 0.6)",
 		// the border of the bic frame
-		bicFrameBorderColor: "rgba(0, 0, 0, 0.6)",
-		// normal line
+		// bicFrameBorderColor: "rgba(0, 0, 0, 0.6)",
+
+		// normal line (light gray)
 		lineNColor: "rgba(0, 0, 0, 0.1)",
 		// hover entity to show links
 		linePreHColor: "rgba(252, 30, 36, 0.28)",
 		// selecte entity to highlight links
-		lineHColor: "rgba(252, 30, 36, 0.35)", //"rgba(0, 143, 135, 0.4)",
+		lineHColor: "rgba(252, 30, 36, 0.35)",
 		lsortColor: "rgba(0,0,0,0)"
 	},
 
@@ -315,7 +308,7 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 						allLinks = relInfo.paths;
 
 					// update the status of current entity
-					biset.barUpdate("#" + thisFrameID, biset.colors.entColRel, biset.colors.entMouseOverBorder, biset.entity.moBorder); //"entMHight", 
+					biset.barUpdate("#" + thisFrameID, biset.colors.entHover, biset.colors.entMouseOverBorder, biset.entity.moBorder); //"entMHight", 
 
 					allEnts[thisID].numCoSelected += 1;
 
@@ -504,7 +497,7 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 
 	    	if (selEntSet.size == 0) {
 				// change the bar status to "select"
-				biset.barUpdate("#" + thisFrameID, biset.colors.entColRel, biset.colors.entSelBorder, biset.entity.selBorder); //"entSelected", 
+				biset.barUpdate("#" + thisFrameID, biset.colors.entHover, biset.colors.entSelBorder, biset.entity.selBorder); //"entSelected", 
 	    	}
 			else {
 				if (networkData[thisID] !== undefined) {
@@ -572,7 +565,7 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 
 			if (selEntSet.size == 1) {
 				// change the bar border
-				biset.barUpdate("#" + thisFrameID, biset.colors.entColRel, biset.colors.entMouseOverBorder, biset.entity.moBorder);	//"entMHight", 			
+				biset.barUpdate("#" + thisFrameID, biset.colors.entHover, biset.colors.entMouseOverBorder, biset.entity.moBorder);	//"entMHight", 			
 			}
 			else {
 				highlightEntSet.forEach(function(e) {
@@ -615,7 +608,7 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 				}
 
 				// change the bar border
-				biset.barUpdate("#" + thisFrameID, biset.colors.entColRel, biset.colors.entMouseOverBorder, biset.entity.moBorder); //"entMHight", 
+				biset.barUpdate("#" + thisFrameID, biset.colors.entHover, biset.colors.entMouseOverBorder, biset.entity.moBorder); //"entMHight", 
 
 				highlightEntSet.forEach(function(e) {
 					if (e.indexOf("_bic") < 0) {
@@ -975,15 +968,9 @@ biset.addBics = function(preListCanvas, bicListCanvas, listData, bicList, bicSta
 		nodes.forEach(function(node) {
 			if (node.indexOf("bic_") < 0) {
 				if (biset.elementGetClass("#" + node) != "entSelectedCol"){
-					biset.barUpdate("#" + node + "_frame", biset.colors.entColRel, "", ""); //"entMHight", 
+					biset.barUpdate("#" + node + "_frame", biset.colors.entHover, "", ""); //"entMHight", 
 				}
 			}
-			// else {
-			// 	if (biset.elementGetClass("#" + node + "_frame") != "bicSelected") {
-			// 		bicFrameUpdate("#" + node + "_frame", biset.colors.bicFramePreHColor, 
-			// 			biset.bic.frameHStrokeWidth, durations.bicFrameTrans);
-			// 	}
-			// }
 		});
 		// update the status of relevant links
 		allLinks.forEach(function(link) {
@@ -1070,7 +1057,6 @@ function sortList(aList, sortType) {
 		// aList.yAxis.domain(dataFrequency);
 
 		// move entities to their new position
-
 		aList.entGroups.transition()
 			.duration(600)
 			.delay(function(d, i) { return i * 15; })
