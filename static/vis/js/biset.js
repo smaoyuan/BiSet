@@ -95,9 +95,6 @@ var relations = [], // new Set(),
 	entPathLinkedEnts = [],
 	entPathLinkedLinks = [],
 
-	// a map of all entities, key: entID, val: ent object
-	allEntsInVis = [],
-
 	// node (ent + bic) needs to be highlighted
 	highlightEntSet = new Set(),
 	// a map of value for coloring each highlight node
@@ -106,7 +103,7 @@ var relations = [], // new Set(),
 	// a set of all selected entities
 	selEntSet = new Set();
 
-// a global list for all entities
+// a global list for all entities (key: entID, val: ent object)
 var allEnts = {};
 
 // canvas for visualizations
@@ -207,13 +204,9 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 	// entities in this list
 		entSet = listData.entities;
 
-	// add current ents in all ents list
-	for (var i = 0; i < entSet.length; i++){
-
-		// allEntsInVis.push(entSet[i]);
-
-		allEntsInVis[entSet[i].entityIDCmp] = entSet[i];
-	}
+	// all entities
+	for (var i = 0; i < entSet.length; i++)
+		allEnts[entSet[i].entityIDCmp] = entSet[i];
 
 	// values of each entity
 	var dataValues = [],
@@ -248,10 +241,6 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
     		"<option value='freq'>frequency</option>" + 
 		"</select>" + 
 	"</div>");
-
-	// all entities
-	for (var i = 0; i < entSet.length; i++)
-		allEnts[entSet[i].entityIDCmp] = entSet[i];
 
 	// add group to the svg
 	var bar = canvas.selectAll("." + type)
@@ -406,14 +395,9 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 					});
 
 					// unhighlight the rest nodes
-					// for (var i = 0; i < allEntsInVis.length; i++) {
-					// 	if (allEntsInVis[i].numCoSelected == 0)
-					// 		biset.barUpdate("#" + allEntsInVis[i].entityIDCmp + "_frame", biset.colors.entNormal, "entMHight", "", "");
-					// }
-
-					for (key in allEntsInVis) {
-						if (allEntsInVis[key].numCoSelected == 0)
-							biset.barUpdate("#" + allEntsInVis[key].entityIDCmp + "_frame", biset.colors.entNormal, "", ""); //"entMHight", 
+					for (key in allEnts) {
+						if (allEnts[key].numCoSelected == 0)
+							biset.barUpdate("#" + allEnts[key].entityIDCmp + "_frame", biset.colors.entNormal, "", ""); //"entMHight", 
 					}
 
 
@@ -539,14 +523,9 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 					});
 
 					// unhighlight the rest nodes
-					// for (var i = 0; i < allEntsInVis.length; i++) {
-					// 	if (allEntsInVis[i].numCoSelected == 0)
-					// 		biset.barUpdate("#" + allEntsInVis[i].entityIDCmp + "_frame", biset.colors.entNormal, "entMHight", "", "");
-					// }
-
-					for (key in allEntsInVis) {
-						if (allEntsInVis[key].numCoSelected == 0)
-							biset.barUpdate("#" + allEntsInVis[key].entityIDCmp + "_frame", biset.colors.entNormal, "", ""); //"entMHight", 
+					for (key in allEnts) {
+						if (allEnts[key].numCoSelected == 0)
+							biset.barUpdate("#" + allEnts[key].entityIDCmp + "_frame", biset.colors.entNormal, "", ""); //"entMHight", 
 					}
 
 					var alfaValThisEnt = 0.15 + 0.05 * (parseInt(highlightEntList[thisID]) - 1),
@@ -570,8 +549,8 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 			else {
 				highlightEntSet.forEach(function(e) {
 					if (e.indexOf("_bic") < 0) {
-						allEntsInVis[e].numCoSelected = 0;
-						highlightEntList[e] = allEntsInVis[e].numCoSelected;
+						allEnts[e].numCoSelected = 0;
+						highlightEntList[e] = allEnts[e].numCoSelected;
 					}
 				});
 				highlightEntSet.clear();
@@ -586,8 +565,8 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 				// add the initial set for highlight
 				initHighlightSet.forEach(function(e){
 					if (e.indexOf("_bic") < 0) {
-						allEntsInVis[e].numCoSelected += 1;
-						highlightEntList[e] = allEntsInVis[e].numCoSelected;
+						allEnts[e].numCoSelected += 1;
+						highlightEntList[e] = allEnts[e].numCoSelected;
 
 						highlightEntSet.add(e);						
 					}
@@ -598,8 +577,8 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 
 					tmpSet.forEach(function(e){
 						if (e.indexOf("_bic") < 0) {
-							allEntsInVis[e].numCoSelected += 1;
-							highlightEntList[e] = allEntsInVis[e].numCoSelected;
+							allEnts[e].numCoSelected += 1;
+							highlightEntList[e] = allEnts[e].numCoSelected;
 
 							if (highlightEntSet.has(e) == false)
 								highlightEntSet.add(e);
