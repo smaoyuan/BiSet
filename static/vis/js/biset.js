@@ -95,16 +95,25 @@ var relations = [], // new Set(),
 	entPathLinkedEnts = [],
 	entPathLinkedLinks = [],
 
-	// node (ent + bic) needs to be highlighted
+	// node needs to be highlighted
 	highlightEntSet = new Set(),
 	// a map of value for coloring each highlight node
 	highlightEntList = [],
 
+	// bic needs to be highlighted
+	highlightBicSet = new Set(),
+	// a map of value for enlarge the border of highlight bic
+	highlightBicList = [],
+
 	// a set of all selected entities
 	selEntSet = new Set();
+	// a set of all selected bics
+	selBicSet = new Set();
 
 // a global list for all entities (key: entID, val: ent object)
-var allEnts = {};
+var allEnts = {},
+// a global list for all bics (key: bicID, val: bic object), initialized in visctrl.js
+	allBics = {};
 
 // canvas for visualizations
 var canvas = d3.select("#biset_canvas")
@@ -204,6 +213,10 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 	// entities in this list
 		entSet = listData.entities;
 
+	// console.log(bicList);
+
+	console.log(allBics);
+
 	// all entities
 	for (var i = 0; i < entSet.length; i++)
 		allEnts[entSet[i].entityIDCmp] = entSet[i];
@@ -301,8 +314,14 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 
 	    			// highlight all relevent entities
 					nodes.forEach(function(node){
-						if (node.indexOf("bic_") >= 0)
-							relBics.push(node);
+						if (node.indexOf("bic_") > 0) {
+							// relBics.push(node);
+
+							// record the bic that need highlight
+							highlightBicSet.add(node);
+							allBics[node].bicNumCoSelected += 1;
+							highlightBicList[node] = allBics[node].bicNumCoSelected;
+						}
 						else {
 							if (node != thisID){
 								// record the node that need highlight
@@ -315,10 +334,16 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 						}
 					});
 
-
-					relBics.forEach(function(b) {
-						biset.barUpdate("#" + b + "_frame", "", biset.colors.bicFrameHColor, biset.bic.frameHStrokeWidth); 
+					highlightBicSet.forEach(function(e){
+						var increasedWidth = 2 * (highlightBicList[e] - 1),
+							bicFrameNewBorder = biset.bic.frameHStrokeWidth + increasedWidth;
+						biset.barUpdate("#" + e + "_frame", "", biset.colors.bicFrameHColor, bicFrameNewBorder); 
 					});
+
+
+					// relBics.forEach(function(b) {
+					// 	biset.barUpdate("#" + b + "_frame", "", biset.colors.bicFrameHColor, biset.bic.frameHStrokeWidth); 
+					// });
 
 					highlightEntSet.forEach(function(e) {
 						var alfaVal = 0.15 + 0.05 * (parseInt(highlightEntList[e]) - 1),
@@ -369,8 +394,17 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 
 	    			// unhighlight all relevent entities
 					nodes.forEach(function(node) {
-						if (node.indexOf("bic_") >= 0)
-							relBics.push(node);
+						if (node.indexOf("bic_") > 0) {
+
+							// relBics.push(node);
+
+							allBics[node].bicNumCoSelected -= 1;
+
+							if (allBics[node].bicNumCoSelected == 0)
+								highlightBicSet.delete(node);
+							else
+								highlightBicList[node] = allBics[node].bicNumCoSelected;
+						}
 						else {
 							if (node != thisID) {
 								allEnts[node].numCoSelected -= 1;
@@ -382,6 +416,18 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 							}
 						}
 					});
+
+					highlightBicSet.forEach(function(e) {
+						var increasedWidth = 2 * (highlightBicList[e] - 1.0),
+							bicFrameNewBorder = biset.bic.frameHStrokeWidth + increasedWidth;
+						biset.barUpdate("#" + e + "_frame", "", biset.colors.bicFrameHColor, bicFrameNewBorder); 
+					});
+
+					for (e in allBics) {
+						if (allBics[e].bicNumCoSelected == 0)
+							biset.barUpdate("#" + e + "_frame", "", biset.colors.bicFrameHColor, 0); 
+					}
+
 
 					// highlight ents those need to be highlighted
 					highlightEntSet.forEach(function(e) {
@@ -702,7 +748,13 @@ biset.findAllCons = function(entID, consDict, entPathCaled) {
 		
 	return obj;
 }
-//get key value based on node type
+
+
+/*
+* Get key value based on node type
+* @param node, the id of a node
+* @return {string}, the type of this node
+*/
 biset.getKeyfromNode = function(node){
 	var ret;
 	var nodeType = node.split("_")[0],
@@ -715,6 +767,7 @@ biset.getKeyfromNode = function(node){
 	}
 	return ret;
 }
+
 
 /*
 * Given an entity, find its all related nodes and links
@@ -870,11 +923,7 @@ biset.addBics = function(preListCanvas, bicListCanvas, listData, bicList, bicSta
 	var bics = bicListCanvas.selectAll(".bics")
 		.data(biclusters)
 		.enter().append("g")
-		.attr("id", function(d, i) {
-			var rfield = d.rowField,
-				cfield = d.colField;
-			return rfield + "_" + cfield + "_bic_" + d.bicID; 
-		})
+		.attr("id", function(d) { return d.bicIDCmp; })
 		.attr("class", "bics")
   		.attr("transform", function(d, i) {
 
