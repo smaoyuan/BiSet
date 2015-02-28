@@ -279,7 +279,6 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
     bar.on("mouseover", function(d, i) {
 		// when dragging stops
 		if (draged == 0) {
-
 			if (d.mouseovered == false && d.selected == false) {
 				var thisEntType = d.entType,
 					thisEntID = d.entityID,
@@ -288,25 +287,22 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 
     			if (networkData[thisID] !== undefined) {
 
-					// releated info for current node
-					var relInfo = biset.findAllCons(thisID, networkData);
-
-					var nodes = relInfo.ents,
+					// all releated info (nodes + links) of current node
+					var relInfo = biset.findAllCons(thisID, networkData),
+						nodes = relInfo.ents,
 						allLinks = relInfo.paths;
 
 					// update the status of current entity
 					biset.barUpdate("#" + thisFrameID, biset.colors.entHover, biset.colors.entMouseOverBorder, biset.entity.moBorder);
-
 					allEnts[thisID].numCoSelected += 1;
 
-						// all realted bics
+					// all realted bics
 					var	relBics = [];
 
 	    			// highlight all relevent entities
 					nodes.forEach(function(node){
-						if (node.indexOf("bic_") >= 0){
+						if (node.indexOf("bic_") >= 0)
 							relBics.push(node);
-						}
 						else {
 							if (node != thisID){
 								// record the node that need highlight
@@ -332,7 +328,7 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 					});
     			}
 
-    			// just update the border
+    			// just update the border of this ent
     			else
 	    			biset.barUpdate("#" + thisFrameID, "", biset.colors.entMouseOverBorder, biset.entity.moBorder);
 
@@ -352,10 +348,9 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 					thisID = thisEntType + "_" + thisEntID,
 					thisFrameID = thisID + "_frame";
 
-				// if (d.numCoSelected == 0)
-					// change the bar status to normal
-					biset.barUpdate("#" + thisFrameID, biset.colors.entNormal, biset.colors.entNormalBorder, biset.entity.nBorder); 
-					allEnts[thisID].numCoSelected -= 1;
+				// change the bar status to normal
+				biset.barUpdate("#" + thisFrameID, biset.colors.entNormal, biset.colors.entNormalBorder, biset.entity.nBorder); 
+				allEnts[thisID].numCoSelected -= 1;
 
     			if (networkData[thisID] !== undefined) {
 
@@ -452,15 +447,13 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
         				var text = "Do you mean: " + optiontxt[0] + ", or "  + optiontxt[1] + "?";
 	        			$("#vis_wiki_text").html(text);
         			}
-        			else {
+        			else
         				$("#vis_wiki_text").html(empTxt);
-        			}
         		}
 	        },
 	        beforeSend: function(xhr, settings) {
-	            if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+	            if (!csrfSafeMethod(settings.type) && !this.crossDomain)
 	                xhr.setRequestHeader("X-CSRFToken", csrftoken);
-	            }
 	        }
 	    });
 
@@ -488,7 +481,6 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 						}
 						else {
 							if (node != thisID){
-
 								if (highlightEntList[node] == 1) {
 									allEnts[node].numCoSelected = 0;
 									highlightEntList[node] = allEnts[node].numCoSelected;
@@ -693,7 +685,7 @@ biset.findAllCons = function(entID, consDict) {
 	var obj = {};
 		obj.ents = nodes;
 		obj.paths = allLinks;
-
+		
 	return obj;
 }
 
@@ -862,34 +854,34 @@ biset.addBics = function(preListCanvas, bicListCanvas, listData, bicList, bicSta
 		.attr("class", "bics")
   		.attr("transform", function(d, i) {
 
-  			var cfield = d.colField,
-  				rfield = d.rowField,
-  				cols = d.col,
-  				rows = d.row,
-  				yPos = 0,
-  				xPos = 0;
+  	// 		var cfield = d.colField,
+  	// 			rfield = d.rowField,
+  	// 			cols = d.col,
+  	// 			rows = d.row,
+  	// 			yPos = 0,
+  	// 			xPos = 0;
 
-			// y pos of the row ents
-			for (var j = 0; j < rows.length; j++){
-				var rid = rfield + "_" + rows[j],
-					rY = d3.select("#" + rid)[0][0].getBoundingClientRect().top;
-				yPos += rY;
-			}
+			// // y pos of the row ents
+			// for (var j = 0; j < rows.length; j++){
+			// 	var rid = rfield + "_" + rows[j],
+			// 		rY = d3.select("#" + rid)[0][0].getBoundingClientRect().top;
+			// 	yPos += rY;
+			// }
 
-			// y pos of the col ents
-			for (var k = 0; k < cols.length; k++) {
-				var cid = cfield + "_" + cols[k],
-					cY = d3.select("#" + cid)[0][0].getBoundingClientRect().top;
-				yPos += cY;
-			}
+			// // y pos of the col ents
+			// for (var k = 0; k < cols.length; k++) {
+			// 	var cid = cfield + "_" + cols[k],
+			// 		cY = d3.select("#" + cid)[0][0].getBoundingClientRect().top;
+			// 	yPos += cY;
+			// }
 
-			xPos = (biset.entList.gap * 4) * cols.length / (rows.length + cols.length) - biset.entList.gap * 2;
-			yPos = yPos / (rows.length + cols.length);
+			// xPos = (biset.entList.gap * 4) * cols.length / (rows.length + cols.length) - biset.entList.gap * 2;
+			// yPos = yPos / (rows.length + cols.length);
 
-  			return "translate(" + xPos + "," + yPos + ")";
+  	// 		return "translate(" + xPos + "," + yPos + ")";
 
   			// original position
-  			// return "translate(" + 0 + "," + (i + 1) * biset.bic.frameHeight + ")"; 
+  			return "translate(" + 0 + "," + (i + 1) * biset.bic.frameHeight + ")"; 
   		});
 
 	// proportion of row
@@ -919,36 +911,36 @@ biset.addBics = function(preListCanvas, bicListCanvas, listData, bicList, bicSta
 	    .attr("fill", biset.colors.bicFrameColor)
 
     // mouseover event for bics
-    bics.on("mouseover", function(d, i) {
+  //   bics.on("mouseover", function(d, i) {
 
-		var rfield = d.rowField,
-			cfield = d.colField;
+		// var rfield = d.rowField,
+		// 	cfield = d.colField;
 
-    	var thisBicID = rfield + "_" + cfield + "_bic_" + d.bicID;
+  //   	var thisBicID = rfield + "_" + cfield + "_bic_" + d.bicID;
 
-		var kwdSet = new Set(),
-			nodes = new Set(),
-			expEntSet = new Set(),
-			allLinks = new Set();
-		expEntSet.add(thisBicID);
+		// var kwdSet = new Set(),
+		// 	nodes = new Set(),
+		// 	expEntSet = new Set(),
+		// 	allLinks = new Set();
+		// expEntSet.add(thisBicID);
 
-		biset.findAllConsHelper(expEntSet, networkData, nodes, kwdSet, allLinks);
+		// biset.findAllConsHelper(expEntSet, networkData, nodes, kwdSet, allLinks);
 
-		// highlight all relevent entities
-		nodes.forEach(function(node) {
-			if (node.indexOf("bic_") < 0) {
-				if (biset.elementGetClass("#" + node) != "entSelectedCol"){
-					biset.barUpdate("#" + node + "_frame", biset.colors.entHover, "", "");
-				}
-			}
-		});
-		// update the status of relevant links
-		allLinks.forEach(function(link) {
-			linkStateUpdate("#" + link, biset.colors.linePreHColor,
-				biset.conlink.hwidth, "lineMHight", biset.durations.lnTrans);
-		});
+		// // highlight all relevent entities
+		// nodes.forEach(function(node) {
+		// 	if (node.indexOf("bic_") < 0) {
+		// 		if (biset.elementGetClass("#" + node) != "entSelectedCol"){
+		// 			biset.barUpdate("#" + node + "_frame", biset.colors.entHover, "", "");
+		// 		}
+		// 	}
+		// });
+		// // update the status of relevant links
+		// allLinks.forEach(function(link) {
+		// 	linkStateUpdate("#" + link, biset.colors.linePreHColor,
+		// 		biset.conlink.hwidth, "lineMHight", biset.durations.lnTrans);
+		// });
 
-    });
+  //   });
 
 
     for (var i = 0; i < biclusters.length; i++) {
