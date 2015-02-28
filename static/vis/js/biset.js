@@ -22,7 +22,7 @@ var biset = {
 	// a bicluster in-between two lists
 	bic: { 
 		frameWidth: 60, 
-		frameHStrokeWidth: 4,
+		frameHStrokeWidth: 3,
 		frameNStrokeWidth: 0, 
 		frameHeight: 30,
 		frameBorderWidth: 1.2, 
@@ -55,7 +55,7 @@ var biset = {
 		bicFrameColor: "rgba(0, 20, 20, 0.2)",
 
 		// select entity to highlight bic
-		// bicFrameHColor: "rgba(45, 168, 75, 0.6)",
+		bicFrameHColor: "rgba(45, 168, 75, 0.6)",
 		// the border of the bic frame
 		// bicFrameBorderColor: "rgba(0, 0, 0, 0.6)",
 
@@ -288,7 +288,7 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
     			if (networkData[thisID] !== undefined) {
 
 					// all releated info (nodes + links) of current node
-					var relInfo = biset.findAllCons(thisID, networkData),
+					var relInfo = biset.findAllCons(thisID, networkData, entPathCaled),
 						nodes = relInfo.ents,
 						allLinks = relInfo.paths;
 
@@ -313,6 +313,11 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 								highlightEntList[node] = allEnts[node].numCoSelected;
 							}
 						}
+					});
+
+
+					relBics.forEach(function(b) {
+						biset.barUpdate("#" + b + "_frame", "", biset.colors.bicFrameHColor, biset.bic.frameHStrokeWidth); 
 					});
 
 					highlightEntSet.forEach(function(e) {
@@ -355,7 +360,7 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
     			if (networkData[thisID] !== undefined) {
 
 					// releated info for current node
-					var relInfo = biset.findAllCons(thisID, networkData);
+					var relInfo = biset.findAllCons(thisID, networkData, entPathCaled);
 
 					var nodes = relInfo.ents,
 						allLinks = relInfo.paths;
@@ -467,7 +472,7 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 				if (networkData[thisID] !== undefined) {
 
 					// releated info for current node
-					var relInfo = biset.findAllCons(thisID, networkData);
+					var relInfo = biset.findAllCons(thisID, networkData, entPathCaled);
 
 					var nodes = relInfo.ents,
 						allLinks = relInfo.paths;
@@ -484,12 +489,20 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 								if (highlightEntList[node] == 1) {
 									allEnts[node].numCoSelected = 0;
 									highlightEntList[node] = allEnts[node].numCoSelected;
-
 									highlightEntSet.delete(node);
 								}
 							}
 						}
 					});
+					
+					//delete the frequency 1 items in highlightEntList;
+					for(ent in  highlightEntList){
+						if(highlightEntList[ent] == 1){
+								allEnts[ent].numCoSelected = 0;
+								highlightEntList[ent] = allEnts[ent].numCoSelected;
+								highlightEntSet.delete(ent);
+						}
+					}
 
 					// highlight ents those need to be highlighted
 					highlightEntSet.forEach(function(e) {
@@ -655,9 +668,10 @@ biset.setIntersect = function(set1, set2){
 * Given an entity, find its all related nodes and links
 * @param entID, the id of an entity
 * @param consDict, a dictionary of all relations
+* @param entPathCaled, a set of ents that have been calculated their paths 
 * @return {obj}, a object contains related nodes and links
 */
-biset.findAllCons = function(entID, consDict) {
+biset.findAllCons = function(entID, consDict, entPathCaled) {
 	if (entPathCaled.has(entID) == false) {
 			// a group of nodes related with each other
 		var nodes = new Set(),
@@ -688,7 +702,19 @@ biset.findAllCons = function(entID, consDict) {
 		
 	return obj;
 }
-
+//get key value based on node type
+biset.getKeyfromNode = function(node){
+	var ret;
+	var nodeType = node.split("_")[0],
+		idSize = node.split("_").length;
+	if (idSize == 2)
+		ret = nodeType;
+	else {
+		var type2 = node.split("_")[1];
+		ret  = nodeType + "_" + type2;
+	}
+	return ret;
+}
 
 /*
 * Given an entity, find its all related nodes and links
@@ -710,33 +736,38 @@ biset.findAllConsHelper = function(expandSet, consDict, nodeSet, key, paths) {
 			nodeSet.add(value);
 
 		if (consDict[value] !== undefined) {
-			var tmpArray = consDict[value];
-			for (var i = 0; i < tmpArray.length; i++) {
-				found = false;
-				key.forEach(function(kval) {
-					var typewd = tmpArray[i].split("_");
-					if (typewd.length == 2)
-						if (kval == typewd[0])
-							found = true;
-					else {
-						var tmpKey = typewd[0] + "_" + typewd[1];
-						if (tmpKey == kval)
-							found = true;
-					}
-				});
-				if (found == false) {
-					toBeExpanded.add(tmpArray[i]);
+			
+			if(!key.has(biset.getKeyfromNode(value)))
+			{
+				var tmpArray = consDict[value];
+				for (var i = 0; i < tmpArray.length; i++) {
+					found = false;
+					key.forEach(function(kval) {
+						var typewd = tmpArray[i].split("_");
+						if (typewd.length == 2){
+							if (kval == typewd[0])
+								found = true;
+						}
+						else {
+							var tmpKey = typewd[0] + "_" + typewd[1];
+							if (tmpKey == kval)
+								found = true;
+						}
+					});
+					if (found == false) {
+						toBeExpanded.add(tmpArray[i]);
 
-					var a = value,
-						b = tmpArray[i];
-					if (a.localeCompare(b) < 0) {
-						var tmp = b,
-							b = a,
-							a = tmp;
-					}
+						var a = value,
+							b = tmpArray[i];
+						if (a.localeCompare(b) < 0) {
+							var tmp = b,
+								b = a,
+								a = tmp;
+						}
 
-					var curPath = a + "__" + b;
-					paths.add(curPath);
+						var curPath = a + "__" + b;
+						paths.add(curPath);
+					}
 				}
 			}
 		}
@@ -744,14 +775,7 @@ biset.findAllConsHelper = function(expandSet, consDict, nodeSet, key, paths) {
 
 	if (nodeSet.size != 1)
 		nodeSet.forEach(function(node) {
-			var nodeType = node.split("_")[0],
-				idSize = node.split("_").length;
-			if (idSize == 2)
-				key.add(nodeType);
-			else {
-				var type2 = node.split("_")[1];
-				key.add(nodeType + "_" + type2);
-			}
+			key.add(biset.getKeyfromNode(node));
 		});
 
 	if (toBeExpanded.size == 0)
