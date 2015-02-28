@@ -494,8 +494,11 @@ def getListDict(tableLeft, table, tableRight, leftClusCols, biclusDict):
                     biclusDict[row[2]]['row'] = newRow
                     biclusDict[row[2]]['rowField'] = table
                     biclusDict[row[2]]['colField'] = tableRight
+                    biclusDict[row[2]]['bicIDCmp'] = str(table) + "_" + str(tableRight) + "_bic_" + str(row[2])
                     biclusDict[row[2]]['bicID'] = row[2]
-                    biclusDict[row[2]]['bicSelected'] = 0
+                    biclusDict[row[2]]['bicSelected'] = False
+                    biclusDict[row[2]]['bicMouseOvered'] = False
+                    biclusDict[row[2]]['bicNumCoSelected'] = 0
                 else:
                     biclusDict[row[2]]['row'].append(row[1]);
                     
