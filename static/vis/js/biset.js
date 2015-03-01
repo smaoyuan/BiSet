@@ -311,8 +311,6 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 					highlightEntList[thisID] = allEnts[thisID].numCoSelected;
 
 
-					console.log(allEnts[thisID]);
-
 					// all realted bics
 					var	relBics = [];
 
@@ -338,22 +336,11 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 						}
 					});
 
-					highlightBicSet.forEach(function(e){
-						var increasedWidth = 2 * (highlightBicList[e] - 1),
-							bicFrameNewBorder = biset.bic.frameHStrokeWidth + increasedWidth;
-						biset.barUpdate("#" + e + "_frame", "", biset.colors.bicFrameHColor, bicFrameNewBorder); 
-					});
+					// highlight related bics
+					biset.entsUpdate(highlightBicSet, highlightBicList, "bicBorder");
 
-
-					// relBics.forEach(function(b) {
-					// 	biset.barUpdate("#" + b + "_frame", "", biset.colors.bicFrameHColor, biset.bic.frameHStrokeWidth); 
-					// });
-
-					highlightEntSet.forEach(function(e) {
-						var alfaVal = 0.15 + 0.05 * (parseInt(highlightEntList[e]) - 1),
-							colEntNewColor = "rgba(228, 122, 30, " + alfaVal + ")";
-						biset.barUpdate("#" + e + "_frame", colEntNewColor, "", ""); 
-					});
+					// update the color of ents in highlight set
+					biset.entsUpdate(highlightEntSet, highlightEntList, "entColor");
 
 					// update the status of relevant links
 					allLinks.forEach(function(link) {
@@ -422,26 +409,16 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 						}
 					});
 
-					highlightBicSet.forEach(function(e) {
-						var increasedWidth = 2 * (highlightBicList[e] - 1.0),
-							bicFrameNewBorder = biset.bic.frameHStrokeWidth + increasedWidth;
-						biset.barUpdate("#" + e + "_frame", "", biset.colors.bicFrameHColor, bicFrameNewBorder); 
-					});
+					// highlight related bics
+					biset.entsUpdate(highlightBicSet, highlightBicList, "bicBorder");
 
 					for (e in allBics) {
 						if (allBics[e].bicNumCoSelected == 0)
 							biset.barUpdate("#" + e + "_frame", "", biset.colors.bicFrameHColor, 0); 
 					}
 
-
 					// highlight ents those need to be highlighted
-					highlightEntSet.forEach(function(e) {
-						if (e.indexOf("_bic") < 0) {
-							var alfaVal = 0.15 + 0.05 * (parseInt(highlightEntList[e]) - 1),
-								colEntNewColor = "rgba(228, 122, 30, " + alfaVal + ")";
-								biset.barUpdate("#" + e + "_frame", colEntNewColor, "", ""); 
-						}
-					});
+					biset.entsUpdate(highlightEntSet, highlightEntList, "entColor");
 
 					// unhighlight the rest nodes
 					for (key in allEnts) {
@@ -548,7 +525,11 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 					
 					//delete the frequency 1 items in highlightEntList;
 					for (ent in highlightEntList) {
-						if (highlightEntList[ent] == 1) {
+						if (highlightEntList[ent] == 1 
+								// except for previous selected nodes
+								&& allEnts[ent].selected == false
+								// except for currently selected node
+								&& ent != thisID) {
 								allEnts[ent].numCoSelected = 0;
 								highlightEntList[ent] = allEnts[ent].numCoSelected;
 								highlightEntSet.delete(ent);
@@ -556,16 +537,7 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 					}
 
 					// highlight ents those need to be highlighted
-					highlightEntSet.forEach(function(e) {
-
-						if (e.indexOf("bic_") < 0) {
-							var alfaVal = 0.15 + 0.05 * (parseInt(highlightEntList[e]) - 1),
-								colEntNewColor = "rgba(228, 122, 30, " + alfaVal + ")";
-
-							console.log(alfaVal);	
-							biset.barUpdate("#" + e + "_frame", colEntNewColor, "", ""); 
-						}
-					});
+					biset.entsUpdate(highlightEntSet, highlightEntList, "entColor");
 
 					// unhighlight the rest nodes
 					for (key in allEnts) {
@@ -841,6 +813,30 @@ biset.findAllConsHelper = function(expandSet, consDict, nodeSet, key, paths) {
 		return;
 
 	biset.findAllConsHelper(toBeExpanded, consDict, nodeSet, key, paths);
+}
+
+
+/*
+* update visual attributes of a set of ents
+* @param entSet, a set of entity names
+* @param entValList, a list of values for each ent in the ent set
+* @param updateType, color or border
+*/
+biset.entsUpdate = function(entSet, entValList, updateType) {
+	if (updateType == "entColor") {
+		entSet.forEach(function(e) {
+			var alfaVal = 0.15 + 0.05 * (entValList[e] - 1),
+				colEntNewColor = "rgba(228, 122, 30, " + alfaVal + ")";
+			biset.barUpdate("#" + e + "_frame", colEntNewColor, "", ""); 
+		});
+	}
+	else if (updateType == "bicBorder") {
+		entSet.forEach(function(e){
+			var increasedWidth = 2 * (entValList[e] - 1),
+				bicFrameNewBorder = biset.bic.frameHStrokeWidth + increasedWidth;
+			biset.barUpdate("#" + e + "_frame", "", biset.colors.bicFrameHColor, bicFrameNewBorder); 
+		});		
+	}
 }
 
 
