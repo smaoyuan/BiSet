@@ -308,6 +308,10 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 					// update the status of current entity
 					biset.barUpdate("#" + thisFrameID, biset.colors.entHover, biset.colors.entMouseOverBorder, biset.entity.moBorder);
 					allEnts[thisID].numCoSelected += 1;
+					highlightEntList[thisID] = allEnts[thisID].numCoSelected;
+
+
+					console.log(allEnts[thisID]);
 
 					// all realted bics
 					var	relBics = [];
@@ -381,6 +385,7 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 				// change the bar status to normal
 				biset.barUpdate("#" + thisFrameID, biset.colors.entNormal, biset.colors.entNormalBorder, biset.entity.nBorder); 
 				allEnts[thisID].numCoSelected -= 1;
+				highlightEntList[thisID] = allEnts[thisID].numCoSelected;
 
     			if (networkData[thisID] !== undefined) {
 
@@ -526,12 +531,12 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 					var relBics = [];
 
 	    			// highlight all relevent entities
-					nodes.forEach(function(node){
-						if (node.indexOf("bic_") >= 0){
+					nodes.forEach(function(node) {
+						if (node.indexOf("bic_") >= 0) {
 							relBics.push(node);
 						}
 						else {
-							if (node != thisID){
+							if (node != thisID) {
 								if (highlightEntList[node] == 1) {
 									allEnts[node].numCoSelected = 0;
 									highlightEntList[node] = allEnts[node].numCoSelected;
@@ -542,8 +547,8 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 					});
 					
 					//delete the frequency 1 items in highlightEntList;
-					for(ent in  highlightEntList){
-						if(highlightEntList[ent] == 1){
+					for (ent in highlightEntList) {
+						if (highlightEntList[ent] == 1) {
 								allEnts[ent].numCoSelected = 0;
 								highlightEntList[ent] = allEnts[ent].numCoSelected;
 								highlightEntSet.delete(ent);
@@ -556,7 +561,9 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 						if (e.indexOf("bic_") < 0) {
 							var alfaVal = 0.15 + 0.05 * (parseInt(highlightEntList[e]) - 1),
 								colEntNewColor = "rgba(228, 122, 30, " + alfaVal + ")";
-								biset.barUpdate("#" + e + "_frame", colEntNewColor, "", ""); 
+
+							console.log(alfaVal);	
+							biset.barUpdate("#" + e + "_frame", colEntNewColor, "", ""); 
 						}
 					});
 
@@ -568,7 +575,6 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 
 					var alfaValThisEnt = 0.15 + 0.05 * (parseInt(highlightEntList[thisID]) - 1),
 						colorForThisEnt = "rgba(228, 122, 30, " + alfaValThisEnt + ")";
-
 					// change the bar status to "select"
 					biset.barUpdate("#" + thisFrameID, colorForThisEnt, biset.colors.entSelBorder, biset.entity.selBorder); 
 				}
