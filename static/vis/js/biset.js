@@ -473,7 +473,7 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 					// releated info for current node
 					var relInfo = biset.findAllCons(thisID, networkData, entPathCaled),
 						nodes = relInfo.ents,
-						allLinks = relInfo.paths;
+						links = relInfo.paths;
 
 	    			// highlight all relevent entities
 					nodes.forEach(function(node) {
@@ -494,6 +494,14 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 							}
 						}
 					});
+
+					links.forEach(function(lk) {
+						if (highlightLinkList[lk] == 1) {
+							allLinks[lk].linkNumCoSelected = 0;
+							highlightLinkList[lk] = allLinks[lk].linkNumCoSelected;
+							highlightLinkSet.delete(lk);
+						}
+					});
 					
 					//delete the frequency 1 items in highlightEntList;
 					for (ent in highlightEntList) {
@@ -508,12 +516,21 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 						}
 					}
 
-					// delete bic with frequency 1
+					// delete bic with frequency 1 in highligth bic list
 					for (bic in highlightBicList) {
 						if (highlightBicList[bic] == 1) {
 							allBics[bic].bicNumCoSelected = 0;
 							highlightBicList[bic] = allBics[bic].bicNumCoSelected;
 							highlightBicSet.delete(bic);
+						}
+					}
+
+					// delete link with frequency 1 in highlight link list
+					for (lk in links) {
+						if (highlightLinkList[lk] == 1) {
+							allLinks[lk].linkNumCoSelected = 0;
+							highlightLinkList[lk] = allLinks[lk].linkNumCoSelected;
+							highlightLinkSet.delete(lk);
 						}
 					}
 
@@ -528,6 +545,11 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 					biset.entsUpdate(highlightBicSet, highlightBicList, "bicBorder");
 					// unhighlight all unrelated bics
 					biset.entsBackToNormal(allBics, "bicBorder");
+
+					// update links
+					biset.linksUpdate(highlightLinkSet, highlightLinkList);
+					// unhighlight the rest links
+					biset.linksBackToNormal(allLinks);
 				}
 				// record the clicked node
 				selEntSet.add(thisID);
