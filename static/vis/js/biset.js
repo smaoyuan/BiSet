@@ -306,7 +306,7 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 
 	    			// highlight all relevent entities
 					nodes.forEach(function(node){
-						if (node.indexOf("bic_") > 0) {
+						if (node.indexOf("_bic_") > 0) {
 							// record the bic that need highlight
 							highlightBicSet.add(node);
 							allBics[node].bicNumCoSelected += 1;
@@ -360,7 +360,7 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 
 	    			// unhighlight all relevent entities
 					nodes.forEach(function(node) {
-						if (node.indexOf("bic_") > 0) {
+						if (node.indexOf("_bic_") > 0) {
 							allBics[node].bicNumCoSelected -= 1;
 
 							if (allBics[node].bicNumCoSelected == 0)
@@ -464,12 +464,14 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 						nodes = relInfo.ents,
 						allLinks = relInfo.paths;
 
-					var relBics = [];
-
 	    			// highlight all relevent entities
 					nodes.forEach(function(node) {
-						if (node.indexOf("bic_") >= 0) {
-							relBics.push(node);
+						if (node.indexOf("_bic_") > 0) {
+							if (highlightBicList[node] == 1) {
+								allBics[node].bicNumCoSelected = 0;
+								highlightBicList[node] = allBics[node].bicNumCoSelected;
+								highlightBicSet.delete(node);
+							}
 						}
 						else {
 							if (node != thisID) {
@@ -495,12 +497,26 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 						}
 					}
 
+					// delete bic with frequency 1
+					for (bic in highlightBicList) {
+						if (highlightBicList[bic] == 1) {
+							allBics[bic].bicNumCoSelected = 0;
+							highlightBicList[bic] = allBics[bic].bicNumCoSelected;
+							highlightBicSet.delete(bic);
+						}
+					}
+
 					// highlight ents those need to be highlighted
 					biset.entsUpdate(highlightEntSet, highlightEntList, "entColor");
 					// unhighlight the rest nodes
 					biset.entsBackToNormal(allEnts, "entColor");
 					// change the border of current node
 					biset.barUpdate("#" + thisFrameID, "", biset.colors.entSelBorder, biset.entity.selBorder); 
+
+					// highlight related bics
+					biset.entsUpdate(highlightBicSet, highlightBicList, "bicBorder");
+					// unhighlight all unrelated bics
+					biset.entsBackToNormal(allBics, "bicBorder");
 				}
 			}
 			// record the clicked node
