@@ -213,10 +213,6 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 	// entities in this list
 		entSet = listData.entities;
 
-	// console.log(bicList);
-
-	console.log(allBics);
-
 	// all entities
 	for (var i = 0; i < entSet.length; i++)
 		allEnts[entSet[i].entityIDCmp] = entSet[i];
@@ -519,9 +515,9 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 					biset.entsBackToNormal(allBics, "bicBorder");
 				}
 			}
+			d.selected = true;
 			// record the clicked node
 			selEntSet.add(thisID);
-			d.selected = true;
 	    }
 	    // case for deselecting nodes
 	    else {
@@ -531,13 +527,21 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 				biset.barUpdate("#" + thisFrameID, "", biset.colors.entMouseOverBorder, biset.entity.moBorder);	
 			}
 			else {
+				// clear current ent highlight set
 				highlightEntSet.forEach(function(e) {
-					if (e.indexOf("_bic") < 0) {
+					// if (e.indexOf("_bic_") < 0) {
 						allEnts[e].numCoSelected = 0;
 						highlightEntList[e] = allEnts[e].numCoSelected;
-					}
+					// }
 				});
 				highlightEntSet.clear();
+
+				// clear curret bic highlight set
+				highlightBicSet.forEach(function(e) {
+					allBics[e].bicNumCoSelected = 0;
+					highlightBicList[e] = allBics[e].bicNumCoSelected;
+				});
+				highlightBicSet.clear();
 
 				var selEnts = [];
 				selEntSet.forEach(function(e) { selEnts.push(e); });
@@ -546,10 +550,15 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 
 				// add the initial set for highlight
 				initHighlightSet.forEach(function(e){
-					if (e.indexOf("_bic") < 0) {
+					if (e.indexOf("_bic_") < 0) {
 						highlightEntSet.add(e);
 						allEnts[e].numCoSelected += 1;
 						highlightEntList[e] = allEnts[e].numCoSelected;				
+					}
+					else {
+						highlightBicSet.add(e);
+						allBics[e].bicNumCoSelected += 1;
+						highlightBicList[e] = allBics[e].bicNumCoSelected;
 					}
 				});
 
@@ -557,24 +566,32 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 					var tmpSet = entPathLinkedEnts[selEnts[i]];
 
 					tmpSet.forEach(function(e){
-						if (e.indexOf("_bic") < 0) {
+						if (e.indexOf("_bic_") < 0) {
 							allEnts[e].numCoSelected += 1;
 							highlightEntList[e] = allEnts[e].numCoSelected;
 
 							if (highlightEntSet.has(e) == false)
 								highlightEntSet.add(e);
 						}
+						else {
+							allBics[e].bicNumCoSelected += 1;
+							highlightBicList[e] = allBics[e].bicNumCoSelected;
+
+							if (highlightBicSet.has(e) == false)
+								highlightBicSet.add(e);
+						}
 					});
 				}
 
 				biset.entsUpdate(highlightEntSet, highlightEntList, "entColor");
-
 				// change current ent border to normal
 				biset.barUpdate("#" + thisFrameID, "", biset.colors.entMouseOverBorder, biset.entity.moBorder);
+
+				biset.entsUpdate(highlightBicSet, highlightBicList, "bicBorder");
 			}
+			d.selected = false;
 			// update the set of clicked nodes
 			selEntSet.delete(thisID);
-			d.selected = false;	    	
 	    }
 	});
 
