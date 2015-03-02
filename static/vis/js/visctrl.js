@@ -283,6 +283,7 @@ function loadVisHelper(resData) {
 	// load visualizations
 	var listData = resData.lists,
 		bicList = resData.bics,
+		linkList = resData.links,
 		entHighlightData = resData.highlight_ent
 		networkData = resData.relNetwork;
 
@@ -294,7 +295,15 @@ function loadVisHelper(resData) {
 		bicNum += 1;
 		// set all bics has not been displayed
 		bicDisplayed[key] = 0;
+		// intialize all bics
+		allBics[bicList[key].bicIDCmp] = bicList[key];
 	}
+
+	// initalize all links
+	for (lk in linkList)
+		allLinks[lk] = linkList[lk];
+
+	console.log(allLinks);
 
 	// get selected dimensions
 	var selDims = [];
