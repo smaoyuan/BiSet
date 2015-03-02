@@ -529,10 +529,8 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 			else {
 				// clear current ent highlight set
 				highlightEntSet.forEach(function(e) {
-					// if (e.indexOf("_bic_") < 0) {
-						allEnts[e].numCoSelected = 0;
-						highlightEntList[e] = allEnts[e].numCoSelected;
-					// }
+					allEnts[e].numCoSelected = 0;
+					highlightEntList[e] = allEnts[e].numCoSelected;
 				});
 				highlightEntSet.clear();
 
@@ -544,44 +542,96 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 				highlightBicSet.clear();
 
 				var selEnts = [];
-				selEntSet.forEach(function(e) { selEnts.push(e); });
-
-				var initHighlightSet = entPathLinkedEnts[selEnts[0]];
-
-				// add the initial set for highlight
-				initHighlightSet.forEach(function(e){
-					if (e.indexOf("_bic_") < 0) {
-						highlightEntSet.add(e);
-						allEnts[e].numCoSelected += 1;
-						highlightEntList[e] = allEnts[e].numCoSelected;				
-					}
-					else {
-						highlightBicSet.add(e);
-						allBics[e].bicNumCoSelected += 1;
-						highlightBicList[e] = allBics[e].bicNumCoSelected;
-					}
+				selEntSet.forEach(function(e) {
+					if (e != thisID)
+						selEnts.push(e); 
 				});
 
-				for (var i = 1; i < selEnts.length; i++) {
-					var tmpSet = entPathLinkedEnts[selEnts[i]];
+				var tmpHSet = entPathLinkedEnts[selEnts[0]];
 
-					tmpSet.forEach(function(e){
-						if (e.indexOf("_bic_") < 0) {
+				for (var j = 1; j < selEnts.length; j++)
+					tmpHSet = biset.setIntersect(tmpHSet, entPathLinkedEnts[selEnts[j]]);
+
+				// case: when all clicked nodes have no common node
+				if (tmpHSet.size == 0) {
+					selEntSet.forEach(function(e) {
+						if (e != thisID) {
+							highlightEntSet.add(e);
 							allEnts[e].numCoSelected += 1;
 							highlightEntList[e] = allEnts[e].numCoSelected;
-
-							if (highlightEntSet.has(e) == false)
-								highlightEntSet.add(e);
+						}
+					});			
+				}
+				else {
+					tmpHSet.forEach(function(e) {
+						if (e.indexOf("_bic_") < 0) {
+							highlightEntSet.add(e);
+							allEnts[e].numCoSelected += selEnts.length;
+							highlightEntList[e] = allEnts[e].numCoSelected;
 						}
 						else {
-							allBics[e].bicNumCoSelected += 1;
+							highlightBicSet.add(e);
+							allBics[e].bicNumCoSelected += selEnts.length;
 							highlightBicList[e] = allBics[e].bicNumCoSelected;
-
-							if (highlightBicSet.has(e) == false)
-								highlightBicSet.add(e);
 						}
 					});
 				}
+
+				var curNodeSet = entPathLinkedEnts[thisID];
+				curNodeSet.forEach(function(e) {
+					if (e.indexOf("_bic_") < 0) {
+						allEnts[e].numCoSelected += 1;
+						highlightEntList[e] = allEnts[e].numCoSelected;
+
+						if (!highlightEntSet.has(e))
+							highlightEntSet.add(e);
+					}
+					else {
+						allBics[e].bicNumCoSelected += 1;
+						highlightBicList[e] = allBics[e].bicNumCoSelected;
+
+						if (!highlightBicSet.has(e))
+							highlightBicSet.add(e);
+					}
+				});
+
+
+				// var initHighlightSet = entPathLinkedEnts[selEnts[0]];
+
+				// // add the initial set for highlight
+				// initHighlightSet.forEach(function(e){
+				// 	if (e.indexOf("_bic_") < 0) {
+				// 		highlightEntSet.add(e);
+				// 		allEnts[e].numCoSelected += 1;
+				// 		highlightEntList[e] = allEnts[e].numCoSelected;				
+				// 	}
+				// 	else {
+				// 		highlightBicSet.add(e);
+				// 		allBics[e].bicNumCoSelected += 1;
+				// 		highlightBicList[e] = allBics[e].bicNumCoSelected;
+				// 	}
+				// });
+
+				// for (var i = 1; i < selEnts.length; i++) {
+					// var tmpSet = entPathLinkedEnts[selEnts[i]];
+
+					// tmpSet.forEach(function(e){
+					// 	if (e.indexOf("_bic_") < 0) {
+					// 		allEnts[e].numCoSelected += 1;
+					// 		highlightEntList[e] = allEnts[e].numCoSelected;
+
+					// 		if (highlightEntSet.has(e) == false)
+					// 			highlightEntSet.add(e);
+					// 	}
+					// 	else {
+					// 		allBics[e].bicNumCoSelected += 1;
+					// 		highlightBicList[e] = allBics[e].bicNumCoSelected;
+
+					// 		if (highlightBicSet.has(e) == false)
+					// 			highlightBicSet.add(e);
+					// 	}
+					// });
+				// }
 
 				biset.entsUpdate(highlightEntSet, highlightEntList, "entColor");
 				// change current ent border to normal
@@ -640,7 +690,7 @@ biset.setUnion = function(set1, set2) {
 * @param set2, the 2nd set
 * @return rset, a set with all elements in set1 and set 2
 */
-biset.setIntersect = function(set1, set2){
+biset.setIntersect = function(set1, set2) {
 	if (set1.size == 0 || set2.size == 0) {
 		var nullSet = new Set();
 		return nullSet;
