@@ -595,44 +595,6 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 					}
 				});
 
-
-				// var initHighlightSet = entPathLinkedEnts[selEnts[0]];
-
-				// // add the initial set for highlight
-				// initHighlightSet.forEach(function(e){
-				// 	if (e.indexOf("_bic_") < 0) {
-				// 		highlightEntSet.add(e);
-				// 		allEnts[e].numCoSelected += 1;
-				// 		highlightEntList[e] = allEnts[e].numCoSelected;				
-				// 	}
-				// 	else {
-				// 		highlightBicSet.add(e);
-				// 		allBics[e].bicNumCoSelected += 1;
-				// 		highlightBicList[e] = allBics[e].bicNumCoSelected;
-				// 	}
-				// });
-
-				// for (var i = 1; i < selEnts.length; i++) {
-					// var tmpSet = entPathLinkedEnts[selEnts[i]];
-
-					// tmpSet.forEach(function(e){
-					// 	if (e.indexOf("_bic_") < 0) {
-					// 		allEnts[e].numCoSelected += 1;
-					// 		highlightEntList[e] = allEnts[e].numCoSelected;
-
-					// 		if (highlightEntSet.has(e) == false)
-					// 			highlightEntSet.add(e);
-					// 	}
-					// 	else {
-					// 		allBics[e].bicNumCoSelected += 1;
-					// 		highlightBicList[e] = allBics[e].bicNumCoSelected;
-
-					// 		if (highlightBicSet.has(e) == false)
-					// 			highlightBicSet.add(e);
-					// 	}
-					// });
-				// }
-
 				biset.entsUpdate(highlightEntSet, highlightEntList, "entColor");
 				// change current ent border to normal
 				biset.barUpdate("#" + thisFrameID, "", biset.colors.entMouseOverBorder, biset.entity.moBorder);
