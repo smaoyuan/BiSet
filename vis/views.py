@@ -324,9 +324,15 @@ def loadVis(request):
     lstsBisetsJson["relNetwork"] = {}
     # relevant docs for entities and bics
     lstsBisetsJson["relatedDocs"] = {}
+    # all links
+    lstsBisetsJson["links"] = {}
 
     networkData = lstsBisetsJson["relNetwork"]
     relDocs = lstsBisetsJson["relatedDocs"]
+    links = lstsBisetsJson["links"]
+
+    linkName = Set()
+
 
     bics = lstsBisetsJson["bics"]
     lists = lstsBisetsJson["lists"]
@@ -339,16 +345,27 @@ def loadVis(request):
         rows = bics[bic]["row"]
         cols = bics[bic]["col"]
 
+        bicID = rowType + "_" + colType + "_bic_" + str(bics[bic]["bicID"])
+
         # get all row id
         for row in rows:
             rowID = str(rowType) + "_" + str(row)
             tmpArray.append(rowID)
+            if rowID > bicID:
+                tmpLinkName = rowID + "__" + bicID
+            else:
+                tmpLinkName = bicID + "__" + rowID
+            linkName.add(tmpLinkName)
 
         for col in cols:
             colID = str(colType) + "_" + str(col)
             tmpArray.append(colID)
+            if colID > bicID:
+                tmpLinkName = colID + "__" + bicID
+            else:
+                tmpLinkName = bicID + "__" + colID
+            linkName.add(tmpLinkName)
 
-        bicID = rowType + "_" + colType + "_bic_" + str(bics[bic]["bicID"])
         networkData[bicID] = tmpArray
 
     # all all entities with their bics in the dictionary
@@ -366,10 +383,22 @@ def loadVis(request):
                 for lbic in leftBics:
                     thisbicID = lType + "_" + listType + "_bic_" + str(lbic)
                     tmpArray.append(thisbicID)
+                    if entityID > thisbicID:
+                        tmpLinkName = entityID + "__" + thisbicID
+                    else:
+                        tmpLinkName = thisbicID + "__" + entityID
+                    linkName.add(tmpLinkName)
+
             if len(rightBics) != 0:
                 for rbic in rightBics:
                     thisbicID = listType + "_" + rType + "_bic_" + str(rbic)
                     tmpArray.append(thisbicID)
+                    if entityID > thisbicID:
+                        tmpLinkName = entityID + "__" + thisbicID
+                    else:
+                        tmpLinkName = thisbicID + "__" + entityID
+                    linkName.add(tmpLinkName)
+
             if len(tmpArray) != 0:
                 networkData[entityID] = tmpArray
 
@@ -380,6 +409,9 @@ def loadVis(request):
                
             #     cursor.execute(sql_str)
             #     table1_rows = cursor.fetchall()
+
+    for lk in linkName:
+        links[lk] = { "linkID": lk, "linkNumCoSelected": 0 }
 
     return HttpResponse(json.dumps(lstsBisetsJson))
     
