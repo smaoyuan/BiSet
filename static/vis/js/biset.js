@@ -100,10 +100,15 @@ var relations = [], // new Set(),
 	// a map of value for coloring each highlight node
 	highlightEntList = [],
 
-	// bic needs to be highlighted
+	// bic to be highlighted
 	highlightBicSet = new Set(),
 	// a map of value for enlarge the border of highlight bic
 	highlightBicList = [],
+
+	// links to be highlight
+	highlightLinkSet = new Set(),
+	// a map of value for highlight links
+	highlightLinkList = [],
 
 	// a set of all selected entities
 	selEntSet = new Set();
@@ -112,8 +117,10 @@ var relations = [], // new Set(),
 
 // a global list for all entities (key: entID, val: ent object)
 var allEnts = {},
-// a global list for all bics (key: bicID, val: bic object), initialized in visctrl.js
-	allBics = {};
+	// a global list for all bics (key: bicID, val: bic object), initialized in visctrl.js
+	allBics = {},
+	// a global list for all lists
+	allLinks = {};
 
 // canvas for visualizations
 var canvas = d3.select("#biset_canvas")
@@ -298,9 +305,8 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 					// all releated info (nodes + links) of current node
 					var relInfo = biset.findAllCons(thisID, networkData, entPathCaled),
 						nodes = relInfo.ents,
-						allLinks = relInfo.paths;
+						links = relInfo.paths;
 
-	    			// highlight all relevent entities
 					nodes.forEach(function(node){
 						if (node.indexOf("_bic_") > 0) {
 							// record the bic that need highlight
@@ -317,16 +323,18 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 						}
 					});
 
+					links.forEach(function(lk){
+						highlightLinkSet.add(lk);
+						allLinks[lk].linkNumCoSelected += 1;
+						highlightLinkList[lk] = allLinks[lk].linkNumCoSelected;
+					});
+
 					// highlight related bics
 					biset.entsUpdate(highlightBicSet, highlightBicList, "bicBorder");
 					// update the color of ents in highlight set
 					biset.entsUpdate(highlightEntSet, highlightEntList, "entColor");
-
-					// update the status of relevant links
-					allLinks.forEach(function(link) {
-						linkStateUpdate("#" + link, biset.colors.linePreHColor,
-							biset.conlink.hwidth, "lineMHight", biset.durations.lnTrans);
-					});
+					// update links
+					biset.linksUpdate(highlightLinkSet, highlightLinkList);
     			}
 
     			// add border to current ent
@@ -352,7 +360,7 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 					// releated info for current node
 					var relInfo = biset.findAllCons(thisID, networkData, entPathCaled),
 						nodes = relInfo.ents,
-						allLinks = relInfo.paths; 					
+						links = relInfo.paths; 					
 
 	    			// unhighlight all relevent entities
 					nodes.forEach(function(node) {
@@ -375,6 +383,14 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 						}
 					});
 
+					links.forEach(function(lk){
+						allLinks[lk].linkNumCoSelected -= 1;
+						if (allLinks[lk].linkNumCoSelected == 0)
+							highlightLinkSet.delete(lk);
+						else
+							highlightLinkList[lk] = allLinks[lk].linkNumCoSelected;
+					});
+
 					// highlight related bics
 					biset.entsUpdate(highlightBicSet, highlightBicList, "bicBorder");
 					// unhighlight all unrelated bics
@@ -385,11 +401,10 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 					// unhighlight the rest nodes
 					biset.entsBackToNormal(allEnts, "entColor");
 
-					// update the status of relevant links
-					allLinks.forEach(function(link) {
-						linkStateUpdate("#" + link, biset.colors.lineNColor,
-							biset.conlink.nwidth, "lineNormal", biset.durations.lnTrans);
-					});
+					// update links
+					biset.linksUpdate(highlightLinkSet, highlightLinkList);
+					// unhighlight the rest links
+					biset.linksBackToNormal(allLinks);
     			}
     			// update the border of current node
 				biset.barUpdate("#" + thisFrameID, "", biset.colors.entNormalBorder, biset.entity.nBorder);
@@ -526,7 +541,7 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 
 			d.selected = true;
 	    }
-	    
+
 	    // case for deselecting nodes
 	    else {
 
@@ -646,7 +661,7 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 		"entities": entityFrame,
 		"texts": viewText
 	}
-    return listView;	    
+    return listView;
 }
 
 
@@ -844,7 +859,6 @@ biset.entsBackToNormal = function(entSet, eType) {
 	}
 }
 
-
 /*
 * update visual attributes of a set of ents
 * @param entSet, a set of entity names
@@ -867,7 +881,6 @@ biset.entsUpdate = function(entSet, entValList, updateType) {
 		});		
 	}
 }
-
 
 /*
 * function to update the color of correlated entities
@@ -905,20 +918,40 @@ biset.barUpdate = function(entID, barColor, bdColor, bdStrokeWidth) { //barClass
 
 
 /*
+* change link status back to normal
+* @param linkSet, a list of links
+*/
+biset.linksBackToNormal = function(linkList) {
+	for (l in linkList) {
+		if (linkList[l].linkNumCoSelected == 0)
+			biset.linksUpdateHelper("#" + l, biset.colors.lineNColor, biset.conlink.nwidth);
+	}
+}
+
+/*
+* update all links
+* @param linkSet, a set of links needs update
+* @param linkList, a list of vlaue to determine width of each link
+*/
+biset.linksUpdate = function(linkSet, linkList) {
+	linkSet.forEach(function(l) {
+		var lkWidth = biset.conlink.nwidth + linkList[l] * 0.8;
+		biset.linksUpdateHelper("#" + l, biset.colors.linePreHColor, lkWidth);
+	});
+}
+
+/*
 * function to update the color of links
 * @param linkID, the ID of the link
 * @param newColor, the new color of the link
 * @param newWidth, the new width of the link
 * @param newClass, the new class of the link
-* @param timer, the duration for the update
 */
-function linkStateUpdate(linkID, newColor, newWidth, newClass, durTimer) {
+biset.linksUpdateHelper = function(linkID, newColor, newWidth) { // newClass
 	d3.select(linkID)
-		.transition()
 		.style("stroke", newColor)
 		.style("stroke-width", newWidth)
-		.attr("class", newClass)
-		.duration(durTimer);
+		// .attr("class", newClass);
 }
 
 
