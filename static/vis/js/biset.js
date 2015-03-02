@@ -365,6 +365,7 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 								highlightBicList[node] = allBics[node].bicNumCoSelected;
 						}
 						else {
+							// if (!selEntSet.has(node))
 							allEnts[node].numCoSelected -= 1;
 
 							if (allEnts[node].numCoSelected == 0)
@@ -549,8 +550,9 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 
 				var tmpHSet = entPathLinkedEnts[selEnts[0]];
 
-				for (var j = 1; j < selEnts.length; j++)
+				for (var j = 1; j < selEnts.length; j++) {
 					tmpHSet = biset.setIntersect(tmpHSet, entPathLinkedEnts[selEnts[j]]);
+				}
 
 				// case: when all clicked nodes have no common node
 				if (tmpHSet.size == 0) {
@@ -573,6 +575,15 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 							highlightBicSet.add(e);
 							allBics[e].bicNumCoSelected += selEnts.length;
 							highlightBicList[e] = allBics[e].bicNumCoSelected;
+						}
+					});
+
+					// add selected node that are not in highlight set
+					selEntSet.forEach(function(e) {
+						if (e != thisID && !highlightEntSet.has(e)) {
+							highlightEntSet.add(e);
+							allEnts[e].numCoSelected += 1;
+							highlightEntList[e] = allEnts[e].numCoSelected;
 						}
 					});
 				}
