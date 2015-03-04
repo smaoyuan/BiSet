@@ -52,7 +52,7 @@ var biset = {
 		entFreColor: "rgba(22, 113, 229, 0.3)",
 
 		// normal bic frame
-		bicFrameColor: "rgba(0, 20, 20, 0.2)",
+		bicFrameColor: "rgba(0, 20, 20, 0.1)",
 
 		// select entity to highlight bic
 		bicFrameHColor: "rgba(45, 168, 75, 0.6)",
@@ -262,7 +262,14 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
   		.enter().append("g")
   		.attr('class', type)
   		.attr("id", function(d, i) { return type + "_" + d.entityID;})
-  		.attr("transform", function(d, i) { return "translate(" + 2 + "," + y(d.entValue) + ")"; });
+  		.attr("transform", function(d, i) {
+
+  			// the initial pos for each node
+  			d.xPos = 2;
+  			d.yPos = y(d.entValue);
+
+  			return "translate(" + 2 + "," + y(d.entValue) + ")"; 
+  		});
 
 	// add texts for each entity
 	var viewText = bar.append("text")
@@ -1115,34 +1122,34 @@ biset.addBics = function(preListCanvas, bicListCanvas, listData, bicList, bicSta
 		.attr("class", "bics")
   		.attr("transform", function(d, i) {
 
-  	// 		var cfield = d.colField,
-  	// 			rfield = d.rowField,
-  	// 			cols = d.col,
-  	// 			rows = d.row,
-  	// 			yPos = 0,
-  	// 			xPos = 0;
+  			var cfield = d.colField,
+  				rfield = d.rowField,
+  				cols = d.col,
+  				rows = d.row,
+  				yPos = 0,
+  				xPos = 0;
 
-			// // y pos of the row ents
-			// for (var j = 0; j < rows.length; j++){
-			// 	var rid = rfield + "_" + rows[j],
-			// 		rY = d3.select("#" + rid)[0][0].getBoundingClientRect().top;
-			// 	yPos += rY;
-			// }
+			// y pos of the row ents
+			for (var j = 0; j < rows.length; j++){
+				var rid = rfield + "_" + rows[j],
+					rY = d3.select("#" + rid)[0][0].getBoundingClientRect().top;
+				yPos += rY;
+			}
 
-			// // y pos of the col ents
-			// for (var k = 0; k < cols.length; k++) {
-			// 	var cid = cfield + "_" + cols[k],
-			// 		cY = d3.select("#" + cid)[0][0].getBoundingClientRect().top;
-			// 	yPos += cY;
-			// }
+			// y pos of the col ents
+			for (var k = 0; k < cols.length; k++) {
+				var cid = cfield + "_" + cols[k],
+					cY = d3.select("#" + cid)[0][0].getBoundingClientRect().top;
+				yPos += cY;
+			}
 
 			// xPos = (biset.entList.gap * 4) * cols.length / (rows.length + cols.length) - biset.entList.gap * 2;
-			// yPos = yPos / (rows.length + cols.length);
+			yPos = yPos / (rows.length + cols.length);
 
-  	// 		return "translate(" + xPos + "," + yPos + ")";
+  			return "translate(" + xPos + "," + yPos + ")";
 
   			// original position
-  			return "translate(" + 0 + "," + (i + 1) * biset.bic.frameHeight + ")"; 
+  			// return "translate(" + 0 + "," + (i + 1) * biset.bic.frameHeight + ")"; 
   		});
 
 	// set the length of a bicluster based on its component
@@ -1170,6 +1177,38 @@ biset.addBics = function(preListCanvas, bicListCanvas, listData, bicList, bicSta
 	    .attr("rx", biset.bic.innerRdCorner)
 	    .attr("ry", biset.bic.innerRdCorner)
 	    .attr("fill", biset.colors.entFreColor);
+
+    bics.on("click", function(d) {
+  //   	console.log(d);
+  //   	var lListType = d.rowField,
+  //   		rListType = d.colField;
+
+		// var lListEnts = d3.selectAll("." + lListType),
+		// 	rlistEnts = d3.selectAll("." + rListType);
+
+		// var leftEntList = [],
+		// 	rightEntList = [];
+
+		// d3.selectAll("." + lListType).each(function(d){
+		// 	console.log(d3.select(this));
+		// });
+
+		// lListEnts.forEach(function(d) {
+		// 	console.log(d);
+		// });
+
+    	// for (e in lListEnts[0]) {
+    	// 	console.log(e);
+    	// }
+
+		// console.log(lListEnts[0]);
+
+		// var pos1 = getOffset[lListEnts[0][0]],
+		// 	pos2 = getOffset[lListEnts[0][1]];
+
+		// console.log(pos1);
+		// console.log(pos2);
+    });
 
     // mouseover event for bics
   //   bics.on("mouseover", function(d, i) {
@@ -1284,6 +1323,10 @@ function sortList(aList, sortType) {
 			.duration(600)
 			.delay(function(d, i) { return i * 15; })
 			.attr("transform", function(d, i) {
+
+				d.xPos = 2;
+				d.yPos = aList.yAxis(d.index);
+
 				// return "translate(" + aList.startPos + "," + aList.yAxis(d.index) + ")";
 				return "translate(2," + aList.yAxis(d.index) + ")";
 			})
@@ -1332,7 +1375,11 @@ function sortList(aList, sortType) {
 			.duration(750)
 			.delay(function(d, i) { return i * 15; })
 			.attr("transform", function(d, i) {
-				return "translate(0," + aList.yAxis(d.entValue) + ")";
+
+				d.xPos = 2;
+				d.yPos = aList.yAxis(d.entValue);
+
+				return "translate(2," + aList.yAxis(d.entValue) + ")";
 				// return "translate(" + aList.startPos + "," + aList.yAxis(d.entValue) + ")";				 
 			})
 			.call(endall, function() { 
