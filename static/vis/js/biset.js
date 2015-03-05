@@ -1082,7 +1082,7 @@ biset.linksUpdateHelper = function(linkID, newColor, newWidth) { // newClass
 		// .attr("class", newClass);
 }
 
-
+ 
 biset.addBics = function(preListCanvas, bicListCanvas, listData, bicList, bicStartPos, row, col, networkData) {
 		// total entities in bics
 	var	bicTotalEnts = [],
@@ -1179,70 +1179,160 @@ biset.addBics = function(preListCanvas, bicListCanvas, listData, bicList, bicSta
 	    .attr("fill", biset.colors.entFreColor);
 
     bics.on("click", function(d) {
-  //   	console.log(d);
-  //   	var lListType = d.rowField,
-  //   		rListType = d.colField;
+	
+		var bicID = d.bicID,
+			bicVisID = d.bicIDCmp,
+			lListType = d.rowField,
+			rListType = d.colField;
+		
+		var leftList =[]; //only need update the visualOrder
+		var rightList =[];//only need update the visualOrder
+		var idx = 0;
+		var leftItemList = [];
+		var rightItemList = [];
+		
+		
+		//prepare the left part data
+		d3.selectAll("." + lListType).each(function(d){
+			var index = d3.select(this).attr("id");
+			leftList.push(d);
+			var item= {};
+			item['yPos'] = d.yPos;
+			item['id'] = d.entityID;
+			item['index'] = idx;
+			leftItemList.push(item);
+			idx++;
+		});
+		
+		//prepare the right part data
+		idx = 0;
+		d3.selectAll("." + rListType).each(function(d){
+			var index = d3.select(this).attr("id");
+			rightList.push(d);
+			var item= {};
+			item['yPos'] = d.yPos;
+			item['id'] = d.entityID;
+			item['index'] = idx;
+			rightItemList.push(item);
+			idx++;
+		});
+		
+		//sort based on the y value;
+		leftItemList.sort(function(a, b){ return a.yPos - b.yPos; });
+		rightItemList.sort(function(a, b){ return a.yPos - b.yPos; });
+		
+		var item_set_left = new Set(d.row);
+		var item_set_right = new Set(d.col);
+		var pos = -1;
+		var newListLeft = [];
+		var newListRight = [];
+		
+		//prepare the data
+		for(var i = 0; i < leftItemList.length; i++) {
+			var item = {};
+			item['id'] = 0;
+			item['index'] = 0;
+			item['yPos'] = 0;
+			item['visualIndex'] = 0;
+			newListLeft.push(item);
+		}
+		
+		for(var i = 0; i < rightItemList.length; i++) {
+			var item = {};
+			item['id'] = 0;
+			item['index'] = 0;
+			item['yPos'] = 0;
+			item['visualIndex'] = 0;
+			newListRight.push(item);
+		}
+		
+		//shuffling the left part
+		var pos_2 = item_set_left.size;
+		for(var i = 0; i < leftItemList.length; i++) {
+			if(item_set_left.has(leftItemList[i].id)) {
+				pos++;
+				newListLeft[pos]['visualIndex'] = pos;
+				newListLeft[pos]['id'] = leftItemList[i]['id'];
+				newListLeft[pos]['index'] = leftItemList[i]['index'];
+			}
+			else {
+				newListLeft[pos_2]['visualIndex'] = pos_2;
+				newListLeft[pos_2]['id'] = leftItemList[i]['id'];
+				newListLeft[pos_2]['index'] = leftItemList[i]['index'];
+				pos_2++;
+			}
+		}
+		
+		// shuffling the right part
+		pos = -1;
+		pos_2 = item_set_right.size;
+		for(var i = 0; i < rightItemList.length; i++) {
+			if(item_set_right.has(rightItemList[i].id)) {
+				pos++;
+				newListRight[pos]['visualIndex'] = pos;
+				newListRight[pos]['id'] = rightItemList[i]['id'];
+				newListRight[pos]['index'] = rightItemList[i]['index'];
+			}
+			else {
+				newListRight[pos_2]['visualIndex'] = pos_2;
+				newListRight[pos_2]['id'] = rightItemList[i]['id'];
+				newListRight[pos_2]['index'] = rightItemList[i]['index'];
+				pos_2++;
+			}
+		}
+	 
+		//reverse back to the original order;
+		newListLeft.sort(function(a, b){ return a.index - b.index; });
+		newListRight.sort(function(a, b){ return a.index - b.index; });
+		
+		var yAxisOrderLeft = [];
+		for(var i = 0; i < leftItemList.length; i++)
+			yAxisOrderLeft.push(i);
+		for(var i = 0; i < leftItemList.length; i++)
+			leftList[newListLeft[i].index].entVisualOrder = newListLeft[i].visualIndex;
+		
+		var yAxisOrderRight = [];
+		for(var i = 0; i < rightItemList.length; i++)
+			yAxisOrderRight.push(i);
+		for(var i = 0; i < rightItemList.length; i++)
+			rightList[newListRight[i].index].entVisualOrder = newListRight[i].visualIndex;	
+		 
+		var yAxis = d3.scale.ordinal()
+	    	.domain(yAxisOrderLeft)
+	    	.rangePoints([biset.entList.topGap, leftItemList.length * biset.entity.height + biset.entList.topGap], 0); 
+		 
+		d3.selectAll("." + lListType).transition()
+			.duration(600)
+			.delay(function(d, i) { return i * 15; })
+			.attr("transform", function(d, i) {
+				d.xPos = 2;
+				d.yPos = yAxis(d.entVisualOrder);
+				return "translate(2," + yAxis(d.entVisualOrder) + ")";
+			})
 
-		// var lListEnts = d3.selectAll("." + lListType),
-		// 	rlistEnts = d3.selectAll("." + rListType);
+			.call(endall, function() {
+				biset.updateLink(connections);
+			});
+			 
+		yAxis = d3.scale.ordinal()
+	    	.domain(yAxisOrderRight)
+	    	.rangePoints([biset.entList.topGap, rightItemList.length * biset.entity.height + biset.entList.topGap], 0); 
+		 
+		d3.selectAll("." + rListType).transition()
+			.duration(600)
+			.delay(function(d, i) { return i * 15; })
+			.attr("transform", function(d, i) {
+				d.xPos = 2;
+				d.yPos = yAxis(d.entVisualOrder);
+				return "translate(2," + yAxis(d.entVisualOrder) + ")";
+			})
 
-		// var leftEntList = [],
-		// 	rightEntList = [];
-
-		// d3.selectAll("." + lListType).each(function(d){
-		// 	console.log(d3.select(this));
-		// });
-
-		// lListEnts.forEach(function(d) {
-		// 	console.log(d);
-		// });
-
-    	// for (e in lListEnts[0]) {
-    	// 	console.log(e);
-    	// }
-
-		// console.log(lListEnts[0]);
-
-		// var pos1 = getOffset[lListEnts[0][0]],
-		// 	pos2 = getOffset[lListEnts[0][1]];
-
-		// console.log(pos1);
-		// console.log(pos2);
+			.call(endall, function() {
+				biset.updateLink(connections);
+			});
     });
 
-    // mouseover event for bics
-  //   bics.on("mouseover", function(d, i) {
-
-		// var rfield = d.rowField,
-		// 	cfield = d.colField;
-
-  //   	var thisBicID = rfield + "_" + cfield + "_bic_" + d.bicID;
-
-		// var kwdSet = new Set(),
-		// 	nodes = new Set(),
-		// 	expEntSet = new Set(),
-		// 	allLinks = new Set();
-		// expEntSet.add(thisBicID);
-
-		// biset.findAllConsHelper(expEntSet, networkData, nodes, kwdSet, allLinks);
-
-		// // highlight all relevent entities
-		// nodes.forEach(function(node) {
-		// 	if (node.indexOf("bic_") < 0) {
-		// 		if (biset.elementGetClass("#" + node) != "entSelectedCol"){
-		// 			biset.barUpdate("#" + node + "_frame", biset.colors.entHover, "", "");
-		// 		}
-		// 	}
-		// });
-		// // update the status of relevant links
-		// allLinks.forEach(function(link) {
-		// 	linkStateUpdate("#" + link, biset.colors.linePreHColor,
-		// 		biset.conlink.hwidth, "lineMHight", biset.durations.lnTrans);
-		// });
-
-  //   });
-
-
+    // add links between bic and ent
     for (var i = 0; i < biclusters.length; i++) {
     	var rowType = biclusters[i].rowField,
     		colType = biclusters[i].colField,
@@ -1300,9 +1390,15 @@ function sortList(aList, sortType) {
 		dataIndex = [];
 	for (var i = 0; i < entSet.length; i++) {
 		dataValues.push(entSet[i].entValue);
-		// dataFrequency.push(entSet[i].entFreq);
 		dataIndex.push(entSet[i].index);
+		entSet[i].VisualOrder = entSet[i].index;
 	}
+	
+	var ValueOrder = [];
+	var orderTmp = [];
+	orderTmp = dataValues.slice().sort(function(a,b){return a.localeCompare(b);})
+	ValueOrder = dataValues.slice().map(function(v){ return orderTmp.indexOf(v)});
+	console.log(ValueOrder);
 
 	// hide the selected line
 	// d3.selectAll(".linkSelected").transition()
@@ -1367,6 +1463,10 @@ function sortList(aList, sortType) {
 	// sort by alphabeic order
 	if (sortType == "alph") {
 		dataValues.sort();
+		
+		for (var i = 0; i < entSet.length; i++)
+			entSet[i].VisualOrder = ValueOrder[i];
+		
 		// new positions for each entity
 		aList.yAxis.domain(dataValues);
 
