@@ -55,7 +55,7 @@ var biset = {
 		bicFrameColor: "rgba(0, 20, 20, 0.1)",
 
 		// select entity to highlight bic
-		bicFrameHColor: "rgba(45, 168, 75, 0.6)",
+		bicFrameHColor: "rgba(0, 79, 173, 0.9)", //"rgba(45, 168, 75, 0.6)",
 		// the border of the bic frame
 		// bicFrameBorderColor: "rgba(0, 0, 0, 0.6)",
 
@@ -1178,9 +1178,22 @@ biset.addBics = function(preListCanvas, bicListCanvas, listData, bicList, bicSta
 	    .attr("ry", biset.bic.innerRdCorner)
 	    .attr("fill", biset.colors.entFreColor);
 
+    // mouseover event for bic
+    bics.on("mouseover", function(d) {
+    	var bicVisID = d.bicIDCmp;
+		biset.barUpdate("#" + bicVisID + "_frame", "", biset.colors.bicFrameHColor, 2);
+    });
+
+    // mouseout event for bic
+    bics.on("mouseout",function(d){
+    	var bicVisID = d.bicIDCmp;
+    	biset.barUpdate("#" + bicVisID + "_frame", "", biset.colors.bicFrameColor, 0);
+    });
+
+    // click event for bic
     bics.on("click", function(d) {
 	
-		var bicID = d.bicID,
+		var // bicID = d.bicID,
 			bicVisID = d.bicIDCmp,
 			lListType = d.rowField,
 			rListType = d.colField;
@@ -1190,7 +1203,6 @@ biset.addBics = function(preListCanvas, bicListCanvas, listData, bicList, bicSta
 		var idx = 0;
 		var leftItemList = [];
 		var rightItemList = [];
-		
 		
 		//prepare the left part data
 		d3.selectAll("." + lListType).each(function(d){
