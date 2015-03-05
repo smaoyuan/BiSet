@@ -60,7 +60,9 @@ var biset = {
 		// bicFrameBorderColor: "rgba(0, 0, 0, 0.6)",
 
 		// normal line (light gray)
-		lineNColor: "rgba(0, 0, 0, 0.1)",
+		lineNColor: "rgba(0, 0, 0, 0.06)",
+		// line almost hide
+		lineHDColor: "rgba(0, 0, 0, 0.04)",
 		// hover entity to show links
 		linePreHColor: "rgba(252, 30, 36, 0.28)",
 		// selecte entity to highlight links
@@ -1173,14 +1175,49 @@ biset.addBics = function(preListCanvas, bicListCanvas, listData, bicList, bicSta
 
     // mouseover event for bic
     bics.on("mouseover", function(d) {
-    	var bicVisID = d.bicIDCmp;
-		biset.barUpdate("#" + bicVisID + "_frame", "", biset.colors.bicFrameHColor, 2);
+
+    	var thisID = d.bicIDCmp;
+
+		// releated info for current node
+		var relInfo = biset.findAllCons(thisID, networkData, entPathCaled),
+			nodes = relInfo.ents,
+			links = relInfo.paths;
+
+		links.forEach(function(lk){
+			if (lk.indexOf(thisID) >= 0) {
+				highlightLinkSet.add(lk);
+				allLinks[lk].linkNumCoSelected += 1;
+				highlightLinkList[lk] = allLinks[lk].linkNumCoSelected;
+			}
+		});
+		// update links
+		biset.linksUpdate(highlightLinkSet, highlightLinkList);
+
+		biset.barUpdate("#" + thisID + "_frame", "", biset.colors.bicFrameHColor, 2);
     });
 
     // mouseout event for bic
     bics.on("mouseout",function(d){
-    	var bicVisID = d.bicIDCmp;
-    	biset.barUpdate("#" + bicVisID + "_frame", "", biset.colors.bicFrameColor, 0);
+    	var thisID = d.bicIDCmp;
+
+		// releated info for current node
+		var relInfo = biset.findAllCons(thisID, networkData, entPathCaled),
+			nodes = relInfo.ents,
+			links = relInfo.paths;
+
+		links.forEach(function(lk){
+			allLinks[lk].linkNumCoSelected -= 1;
+			if (allLinks[lk].linkNumCoSelected == 0)
+				highlightLinkSet.delete(lk);
+			else
+				highlightLinkList[lk] = allLinks[lk].linkNumCoSelected;
+		});
+		// update links
+		biset.linksUpdate(highlightLinkSet, highlightLinkList);
+		// unhighlight the rest links
+		biset.linksBackToNormal(allLinks);
+
+    	biset.barUpdate("#" + thisID + "_frame", "", biset.colors.bicFrameColor, 0);
     });
 
     // click event for bic
@@ -1607,8 +1644,6 @@ biset.addLink = function (obj1, obj2, line, d3obj, bg) {
             		.style("stroke", biset.colors.lineNColor)
             		.style("stroke-width", biset.conlink.nwidth)
             		.style("fill", "none"),
-
-            		// .style("display", "none"),
 
             		// .style({stroke: color.lineNColor, fill: "none", display:"none" }), // opacity: 0
             from: obj1,
