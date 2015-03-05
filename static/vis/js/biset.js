@@ -66,13 +66,6 @@ var biset = {
 		// selecte entity to highlight links
 		lineHColor: "rgba(252, 30, 36, 0.35)",
 		lsortColor: "rgba(0,0,0,0)"
-	},
-
-	// latency for tansitions
-	durations: {
-		bicFrameTrans: 300,
-		lnTrans: 250,
-		colEntTrans: 0
 	}
 }
 
@@ -1314,8 +1307,6 @@ biset.addBics = function(preListCanvas, bicListCanvas, listData, bicList, bicSta
 	    	.rangePoints([biset.entList.topGap, leftItemList.length * biset.entity.height + biset.entList.topGap], 0); 
 		 
 		d3.selectAll("." + lListType).transition()
-			.duration(600)
-			.delay(function(d, i) { return i * 15; })
 			.attr("transform", function(d, i) {
 				d.xPos = 2;
 				d.yPos = yAxis(d.entVisualOrder);
@@ -1331,8 +1322,6 @@ biset.addBics = function(preListCanvas, bicListCanvas, listData, bicList, bicSta
 	    	.rangePoints([biset.entList.topGap, rightItemList.length * biset.entity.height + biset.entList.topGap], 0); 
 		 
 		d3.selectAll("." + rListType).transition()
-			.duration(600)
-			.delay(function(d, i) { return i * 15; })
 			.attr("transform", function(d, i) {
 				d.xPos = 2;
 				d.yPos = yAxis(d.entVisualOrder);
@@ -1428,8 +1417,6 @@ function sortList(aList, sortType) {
 
 		// move entities to their new position
 		aList.entGroups.transition()
-			.duration(600)
-			.delay(function(d, i) { return i * 15; })
 			.attr("transform", function(d, i) {
 
 				d.xPos = 2;
@@ -1484,10 +1471,7 @@ function sortList(aList, sortType) {
 
 		// move entities to their new position
 		aList.entGroups.transition()
-			.duration(750)
-			.delay(function(d, i) { return i * 15; })
 			.attr("transform", function(d, i) {
-
 				d.xPos = 2;
 				d.yPos = aList.yAxis(d.entValue);
 
