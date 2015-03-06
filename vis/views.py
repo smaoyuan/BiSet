@@ -328,7 +328,9 @@ def loadVis(request):
     lstsBisetsJson["docs"] = {}
     # all origial relations in the dataset
     lstsBisetsJson["oriRelations"] = getLstsRelations(listNames)
-
+    # origial relations reduced replicate ones in the dataset
+    lstsBisetsJson["oriRelationsReduced"] = getReducedLstsRelations(listNames)
+    
 
     networkData = lstsBisetsJson["relNetwork"]
     relDocs = lstsBisetsJson["relatedDocs"]
@@ -529,6 +531,38 @@ def getLstsRelations(lstNames):
             lstRelations.append({"oriLinkID": lnk, "obj1": obj1ID, "obj2": obj2ID, "docID": "Doc_" + str(row[2])})
 
     return lstRelations
+
+
+def getReducedLstsRelations(lstNames):
+    '''
+    Returns a json object for visualization. 
+    The json contains relations between lists.
+    @param lstNames: the names of lists
+    ''' 
+    length = len(lstNames)
+    lstRelations = []
+
+    for i in range(0, length - 1):
+        lstName1 = lstNames[i]
+        lstName2 = lstNames[i + 1]
+
+        # get data from doc table
+        cursor = connection.cursor()
+        sql_str = "SELECT A." + lstName1 + "_id, B." + lstName2 + "_id, A.doc_id FROM datamng_" + lstName1 + "doc as A, datamng_" + lstName2 + "doc as B where A.doc_id = B.doc_id group by A."+ lstName1 + "_id, B." + lstName2 + "_id"
+        cursor.execute(sql_str)
+        relation_table_rows = cursor.fetchall()
+
+        for row in relation_table_rows:
+            obj1ID = lstName1 + "_" + str(row[0])
+            obj2ID = lstName2 + "_" + str(row[1])
+
+            if (obj1ID > obj2ID):
+                lnk = obj1ID + "__" + obj2ID
+            else:
+                lnk = obj2ID + "__" + obj1ID
+            lstRelations.append({"oriLinkID": lnk, "obj1": obj1ID, "obj2": obj2ID})
+
+    return lstRelations              
 
     
 def getListDict(tableLeft, table, tableRight, leftClusCols, biclusDict):
