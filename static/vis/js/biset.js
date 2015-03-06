@@ -21,17 +21,17 @@ var biset = {
 	entList: { width: 260, height: 2650, gap: 80, topGap: 10, startPos: 0, count: 0 },
 	// a bicluster in-between two lists
 	bic: { 
-		frameWidth: 60, 
+		frameWidth: 90, 
 		frameHStrokeWidth: 3,
 		frameNStrokeWidth: 0, 
 		frameHeight: 30,
-		frameBorderWidth: 1.2, 
+		frameBorderWidth: 1.2,
 		frameRdCorner: 2, 
 		innerRdCorner: 2, 
 		count: 0 
 	},
 	// a bicluster list
-	bicList: { width: 60, height: 2650 },
+	bicList: { width: 90, height: 2650 },
 	// a connection link between two elements
 	conlink: { nwidth: 0.8, hwidth: 1.5 },
 
@@ -115,7 +115,9 @@ var allEnts = {},
 	// a global list for all bics (key: bicID, val: bic object), initialized in visctrl.js
 	allBics = {},
 	// a global list for all lists
-	allLinks = {};
+	allLinks = {},
+	// number of list
+	selectedLists = [];
 
 // canvas for visualizations
 var canvas = d3.select("#biset_canvas")
@@ -250,6 +252,15 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
     		"<option value='freq'>frequency</option>" + 
 		"</select>" + 
 	"</div>");
+
+    // add controller for link list (e.g., bics and links)
+	if (listNum < selectedLists.length) {
+		$("#biset_control").append("<div class='BiclistControlGroup'>" +
+			"<label class='radio-inline'><input type='radio' name='bListRGroup_" + selectedLists[listNum - 1] + "_" + selectedLists[listNum] + "'>Bic</label>" +
+			"<label class='radio-inline'><input type='radio' name='bListRGroup_" + selectedLists[listNum - 1] + "_" + selectedLists[listNum] + "'>Hybrid</label>" +
+			"<label class='radio-inline'><input type='radio' name='bListRGroup_" + selectedLists[listNum - 1] + "_" + selectedLists[listNum] + "'>Links</label>" +
+		"</div>");
+	}
 
 	// add group to the svg
 	var bar = canvas.selectAll("." + type)
@@ -1077,7 +1088,7 @@ biset.linksUpdateHelper = function(linkID, newColor, newWidth) { // newClass
 		// .attr("class", newClass);
 }
 
- 
+
 biset.addBics = function(preListCanvas, bicListCanvas, listData, bicList, bicStartPos, row, col, networkData) {
 		// total entities in bics
 	var	bicTotalEnts = [],
@@ -1107,7 +1118,7 @@ biset.addBics = function(preListCanvas, bicListCanvas, listData, bicList, bicSta
     // visual percentage based on the count
 	var bicEntsCount = d3.scale.linear()
 		.domain([0, bicEntsMax])
-		.range([0, biset.bic.frameWidth]);	
+		.range([0, biset.bic.frameWidth]);
 
     // add all bics
 	var bics = bicListCanvas.selectAll(".bics")
@@ -1205,12 +1216,14 @@ biset.addBics = function(preListCanvas, bicListCanvas, listData, bicList, bicSta
 			nodes = relInfo.ents,
 			links = relInfo.paths;
 
-		links.forEach(function(lk){
-			allLinks[lk].linkNumCoSelected -= 1;
-			if (allLinks[lk].linkNumCoSelected == 0)
-				highlightLinkSet.delete(lk);
-			else
-				highlightLinkList[lk] = allLinks[lk].linkNumCoSelected;
+		links.forEach(function(lk) {
+			if (lk.indexOf(thisID) >= 0) {
+				allLinks[lk].linkNumCoSelected -= 1;
+				if (allLinks[lk].linkNumCoSelected == 0)
+					highlightLinkSet.delete(lk);
+				else
+					highlightLinkList[lk] = allLinks[lk].linkNumCoSelected;
+			}
 		});
 		// update links
 		biset.linksUpdate(highlightLinkSet, highlightLinkList);
@@ -1655,6 +1668,23 @@ biset.addLink = function (obj1, obj2, line, d3obj, bg) {
 
 
 /*
+* add all orginial links to lists
+* @param linkLsts, a list of links (logically)
+*/
+biset.addOriginalLinks = function(linkLsts) {
+	for (var i = 0; i < linkLsts.length; i++) {
+		var obj1ID = linkLsts[i].obj1,
+			obj2ID = linkLsts[i].obj2,
+			lkID = linkLsts[i].oriLinkID;
+
+		var obj1 = d3.select("#" + obj1ID),
+			obj2 = d3.select("#" + obj2ID);
+		biset.addLink(obj1, obj2, biset.colors.lineNColor, canvas)
+	}
+}
+
+
+/*
 * update a set of links
 * @param links, an array of links
 */
@@ -1685,7 +1715,8 @@ biset.removeVis = function(thisCanvas) {
 	thisCanvas.selectAll("*").remove();
 	biset.visCanvas.inUse = 0;
 	// remove sort control
-	$('.listControlGroup').remove();	
+	$('.listControlGroup').remove();
+	$('.BiclistControlGroup').remove();
 }
 
 
