@@ -114,10 +114,14 @@ var relations = [], // new Set(),
 var allEnts = {},
 	// a global list for all bics (key: bicID, val: bic object), initialized in visctrl.js
 	allBics = {},
-	// a global list for all lists
+	// a global list for all lists connected with bics
 	allLinks = {},
+	// a global list for all original links
+	allOriLinks = {},
 	// number of list
 	selectedLists = [];
+	// // all radio button groups of bic list
+	// bListRadioGroups = [];
 
 // canvas for visualizations
 var canvas = d3.select("#biset_canvas")
@@ -255,11 +259,27 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 
     // add controller for link list (e.g., bics and links)
 	if (listNum < selectedLists.length) {
+		var bListRGroupName = "bListCtrl_" + selectedLists[listNum - 1] + "_" + selectedLists[listNum],
+			bicMode = "bic_" + selectedLists[listNum - 1] + "_" + selectedLists[listNum],
+			linkMode = "link_" + selectedLists[listNum - 1] + "_" + selectedLists[listNum],
+			HybridMode = "hybrid_" + selectedLists[listNum - 1] + "_" + selectedLists[listNum];
+
 		$("#biset_control").append("<div class='BiclistControlGroup'>" +
-			"<label class='radio-inline'><input type='radio' name='bListRGroup_" + selectedLists[listNum - 1] + "_" + selectedLists[listNum] + "'>Bic</label>" +
-			"<label class='radio-inline'><input type='radio' name='bListRGroup_" + selectedLists[listNum - 1] + "_" + selectedLists[listNum] + "'>Hybrid</label>" +
-			"<label class='radio-inline'><input type='radio' name='bListRGroup_" + selectedLists[listNum - 1] + "_" + selectedLists[listNum] + "'>Links</label>" +
+	    	"<select class='bListCtrl' id='" + bListRGroupName + "'>" + 
+	    		"<option value='" + bicMode + "'>Bic Only Mode</option>" +
+	    		"<option value='" + linkMode + "'>Link Only Mode</option>" +
+	    		"<option value='" + HybridMode + "'>Hybrid Mode</option>" +
+			"</select>" + 
 		"</div>");
+
+		// $("#biset_control").append("<div class='BiclistControlGroup'>" +
+		// 	"<label class='radio-inline'><input type='radio' name='" + bListRGroupName + "'>Bic</label>" +
+		// 	"<label class='radio-inline'><input type='radio' name='" + bListRGroupName + "'>Hybrid</label>" +
+		// 	"<label class='radio-inline'><input type='radio' name='" + bListRGroupName + "'>Links</label>" +
+
+
+		// bListRadioGroups.push(bListRGroupName);
+		// console.log(bListRadioGroups);
 	}
 
 	// add group to the svg
@@ -1563,6 +1583,116 @@ function addSortCtrl(listView) {
 }
 
 /*
+* add mode control for each bic list
+* @param lsts, a list of selected domains (e.g., people, location)
+*/
+biset.addBicListCtrl = function(lsts) {
+	var sel = []
+	for (var i = 0; i < lsts.length - 1; i++) {
+		var preMode;
+		$("#bListCtrl_" + lsts[i] + "_" + lsts[i + 1])
+		.on('click', function(){
+			var preSelValue = this.value.split("_");
+			preMode = preSelValue[0];
+		})
+		.change(function() {
+			var selValue = $(this).val().split("_"),
+				// get the domain on the left
+				field1 = selValue[1],
+				// get the domain on the right
+				field2 = selValue[2],
+				// get the selected mode
+				selMode = selValue[0];
+
+			console.log("now:::::");
+			console.log(selMode);
+
+			console.log("previous:::::");
+			console.log(preMode); 
+
+			// console.log(allLinks);
+
+			// var bicsFound = biset.findBicsInBetween(field1, field2);
+			// console.log(bicsFound);
+
+			// var oriLinksFound = biset.findOriLinksInBetween(field1, field2);
+			// console.log(oriLinksFound);
+
+			// var linksFound = biset.findLinksInBetween(field1, field2);
+			// console.log(linksFound);
+
+			// biset.connectionDisplayed(field1, field2, selMode, preMode);
+		});
+	}
+}
+
+
+/*
+* display links or bics based on selected mode
+* @param domain1, the list on the left
+* @param domain2, the list on the right
+* @param curMode, the current selected mode
+* @param preMode, previuosly selected mode
+*/
+biset.connectionDisplayed = function(ldomain, rdomain, curMode, preMode) {
+	if (curMode == "bic") {
+
+	}
+	if (curMode == "link") {
+
+	}
+	if (curMode == "Hybrid") {
+
+	}
+}
+
+
+/*
+* find all bics between two lists
+* @param ldomain, the type of left list
+* @param rdomain, the type of right list
+*/
+biset.findBicsInBetween = function(ldomain, rdomain) {
+	var bicsInbetween = [];
+	for (e in allBics) {
+		if (allBics[e].bicIDCmp.indexOf(ldomain) >=0 && allBics[e].bicIDCmp.indexOf(rdomain) >= 0)
+			bicsInbetween.push(e);
+	}
+	return bicsInbetween;
+}
+
+
+/*
+* find all orignial links between two lists
+* @param ldomain, the type of left list
+* @param rdomain, the type of right list
+*/
+biset.findOriLinksInBetween = function(ldomain, rdomain) {
+	var oriLinksInbetween = [];
+	for (e in allOriLinks) {
+		if (allOriLinks[e].oriLinkID.indexOf(ldomain) >= 0 && allOriLinks[e].oriLinkID.indexOf(rdomain) >= 0)
+			oriLinksInbetween.push(e);
+	}
+	return oriLinksInbetween;
+}
+
+
+/*
+* find all links between two lists
+* @param ldomain, the type of left list
+* @param rdomain, the type of right list
+*/
+biset.findLinksInBetween = function(ldomain, rdomain) {
+	var linksInbetween = [];
+	for (e in allLinks) {
+		if (allLinks[e].linkID.indexOf(ldomain) >= 0 && allLinks[e].linkID.indexOf(rdomain) >= 0)
+			linksInbetween.push(e);
+	}
+	return linksInbetween;
+}
+
+
+/*
 * add a line
 * reference: http://raphaeljs.com/graffle.html
 * @param obj1, the 1st object
@@ -1679,7 +1809,7 @@ biset.addOriginalLinks = function(linkLsts) {
 
 		var obj1 = d3.select("#" + obj1ID),
 			obj2 = d3.select("#" + obj2ID);
-		biset.addLink(obj1, obj2, biset.colors.lineNColor, canvas)
+		biset.addLink(obj1, obj2, biset.colors.lineNColor, canvas);
 	}
 }
 

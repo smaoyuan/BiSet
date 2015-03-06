@@ -300,9 +300,13 @@ function loadVisHelper(resData) {
 		allBics[bicList[key].bicIDCmp] = bicList[key];
 	}
 
-	// initalize all links
+	// initialize all links
 	for (lk in linkList)
 		allLinks[lk] = linkList[lk];
+
+	// initialize all original links
+	for (var i = 0; i < oriLinks.length; i++)
+		allOriLinks[oriLinks[i].oriLinkID] = oriLinks[i];
 
 	// get selected dimensions
 	var selDims = [];
@@ -337,6 +341,9 @@ function loadVisHelper(resData) {
 		biset.visCanvas.inUse = 1;
 		addSortCtrl(aListView);
 	}
+
+	// add control fro bic list
+	biset.addBicListCtrl(selDims);
 
 	// add all bics with lines
 	for (var i = 0; i < selDims.length - 1; i++) {
