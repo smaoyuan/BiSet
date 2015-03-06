@@ -10,6 +10,10 @@ from projects.models import Project, Collaborationship
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 
+# import numpy as np
+# from sklearn.metrics import pairwise_distances
+# from scipy.spatial.distance import cosine
+
 @login_required 
 def analytics(request):
     '''
@@ -326,10 +330,19 @@ def loadVis(request):
     lstsBisetsJson["relatedDocs"] = {}
     # all links
     lstsBisetsJson["links"] = {}
+    # all docs
+    lstsBisetsJson["docs"] = {}
+
 
     networkData = lstsBisetsJson["relNetwork"]
     relDocs = lstsBisetsJson["relatedDocs"]
     links = lstsBisetsJson["links"]
+    docs = lstsBisetsJson["docs"]
+
+    # A = np.array([[0,1,0,0,1], [0,0,1,1,1], [1,1,0,1,0]])
+    # dist_out = 1-pairwise_distances(A, metric="cosine")
+    # relDocs = dist_out
+
 
     linkName = Set()
 
@@ -402,13 +415,16 @@ def loadVis(request):
             if len(tmpArray) != 0:
                 networkData[entityID] = tmpArray
 
-            # retrieve document information for each entity
-            # if not table == "EMPTY":
-            #     cursor = connection.cursor()
-            #     sql_str = "SELECT * FROM datamng_" + listType + "doc as A, datamng_docname as B where " + listType + "_id = " + ent["entityID"] + "and A.doc_id = B.id"
-               
-            #     cursor.execute(sql_str)
-            #     table1_rows = cursor.fetchall()
+    # get data from doc table
+    cursor = connection.cursor()
+    sql_str = "SELECT * FROM datamng_docname"       
+    cursor.execute(sql_str)
+    doc_table_rows = cursor.fetchall()
+    # generate objects for doc
+    for row in doc_table_rows:
+        docs[row[0]] = {}
+        docs[row[0]]["docName"] = row[1]
+        docs[row[0]]["docContent"] = row[3]
 
     for lk in linkName:
         links[lk] = { "linkID": lk, "linkNumCoSelected": 0 }
@@ -420,7 +436,7 @@ def loadVis(request):
 PAIRS = Set(['person_location', 'person_phone', 'person_date', 'person_org', 'person_misc', 
     'location_phone', 'location_date', 'location_org', 'location_misc', 
     'phone_date', 'phone_org', 'phone_misc', 
-    'date_org', 'date_misc', 
+    'date_org', 'date_misc',
     'org_misc'])
     
 @login_required 
@@ -485,6 +501,8 @@ def getListDict(tableLeft, table, tableRight, leftClusCols, biclusDict):
                 table1_item_dict[row[0]]['entityID'] = row[0]
                 table1_item_dict[row[0]]['entValue'] = row[1]
                 table1_item_dict[row[0]]['entFreq'] = row[2]
+                table1_item_dict[row[0]]['entVisualOrder'] = 0
+                table1_item_dict[row[0]]['entSortedBy'] = "alph"
                 table1_item_dict[row[0]]['bicSetsLeft'] = []
                 table1_item_dict[row[0]]['bicSetsRight'] = []
                 table1_item_dict[row[0]]['numGroupsSelected'] = 0    # entSelected
@@ -493,6 +511,8 @@ def getListDict(tableLeft, table, tableRight, leftClusCols, biclusDict):
                 table1_item_dict[row[0]]['mouseovered'] = False
                 table1_item_dict[row[0]]['entType'] = table
                 table1_item_dict[row[0]]['entityIDCmp'] = str(table) + "_" + str(row[0])
+                table1_item_dict[row[0]]['xPos'] = 0
+                table1_item_dict[row[0]]['yPos'] = 0
     else:
         return None, None
     
@@ -516,7 +536,6 @@ def getListDict(tableLeft, table, tableRight, leftClusCols, biclusDict):
             sql_str = "SELECT * FROM datamng_clustercol as A, datamng_cluster as B where A.cluster_id = B.id and B.field1 = '" + table + "' and B.field2 = '" + tableRight + "' order by B.id"
             cursor.execute(sql_str)
             t1_t2_ClusCols = cursor.fetchall()
-            
             
             for row in t1_t2_ClusRows:
                 if not row[2] in biclusDict:
