@@ -344,7 +344,9 @@ def loadVis(request):
             tmpLinkDocList.append(rel["docID"])
             oriRelDict[rel["oriLinkID"]] = tmpLinkDocList
         else:
-            oriRelDict[rel["oriLinkID"]].append(rel["docID"])
+            tmpList = oriRelDict[rel["oriLinkID"]]
+            tmpList.append(rel["docID"])
+            oriRelDict[rel["oriLinkID"]] = tmpList
 
     linkName = Set()
 
@@ -381,16 +383,21 @@ def loadVis(request):
                 tmpLinkName = bicID + "__" + colID
             linkName.add(tmpLinkName)
 
-        for row in rows:
-            rowID = str(rowType) + "_" + str(row)
-            for col in cols:
-                colID = str(colType) + "_" + str(col)
+        # get a list of docs for a bic
+        tmpDocList = Set()
+        for rs in rows:
+            rowID = str(rowType) + "_" + str(rs)
+            for cs in cols:
+                colID = str(colType) + "_" + str(cs)
                 if (rowID > colID):
                     tmpID = rowID + "__" + colID
                 else:
                     tmpID = colID + "__" + rowID
+
                 if tmpID in oriRelDict:
-                    bics[bic]['docs'] = list(oriRelDict[tmpID])
+                    for e in oriRelDict[tmpID]:
+                        tmpDocList.add(e)
+        bics[bic]['docs'] = list(tmpDocList)
 
         networkData[bicID] = tmpArray
 
@@ -520,7 +527,7 @@ def getLstsRelations(lstNames):
             else:
                 lnk = obj2ID + "__" + obj1ID
             lstRelations.append({"oriLinkID": lnk, "obj1": obj1ID, "obj2": obj2ID, "docID": "Doc_" + str(row[2])})
-    
+
     return lstRelations
 
     
