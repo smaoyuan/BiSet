@@ -284,8 +284,9 @@ function loadVisHelper(resData) {
 	var listData = resData.lists,
 		bicList = resData.bics,
 		linkList = resData.links,
-		entHighlightData = resData.highlight_ent
-		networkData = resData.relNetwork;
+		entHighlightData = resData.highlight_ent,
+		networkData = resData.relNetwork,
+		oriLinks = resData.oriRelationsReduced;
 
 	console.log(resData);
 
@@ -303,11 +304,12 @@ function loadVisHelper(resData) {
 	for (lk in linkList)
 		allLinks[lk] = linkList[lk];
 
-	console.log(allLinks);
-
 	// get selected dimensions
 	var selDims = [];
 	for (key in listData) { selDims.push(listData[key].listType); }
+
+	// initialize the number of list
+	selectedLists = selDims;
 
 	// add all lists
 	for (var i = 0; i < selDims.length; i++) {
@@ -359,6 +361,9 @@ function loadVisHelper(resData) {
 
 		biset.addBics(entLists[i], aBicList, aListData, theList, bicStartPos, rowField, colField, networkData);
 	}
+
+	// add all original links
+	// biset.addOriginalLinks(oriLinks);
 
 	// load highlight entities
 	// this code block will not run, 
