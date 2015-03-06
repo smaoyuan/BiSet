@@ -312,8 +312,7 @@ def loadVis(request):
         listNames.append("misc")
     
     
-    lstsBisetsJson = getLstsBisets(listNames)
-    
+    lstsBisetsJson = getLstsBisets(listNames)  
     
     selectedNodes = VisNodes.objects.filter(vis = visID)
     
@@ -332,12 +331,15 @@ def loadVis(request):
     lstsBisetsJson["links"] = {}
     # all docs
     lstsBisetsJson["docs"] = {}
+    # all origial relations in the dataset
+    lstsBisetsJson["oriRelations"] = getLstsRelations(listNames)
 
 
     networkData = lstsBisetsJson["relNetwork"]
     relDocs = lstsBisetsJson["relatedDocs"]
     links = lstsBisetsJson["links"]
     docs = lstsBisetsJson["docs"]
+
 
     # A = np.array([[0,1,0,0,1], [0,0,1,1,1], [1,1,0,1,0]])
     # dist_out = 1-pairwise_distances(A, metric="cosine")
@@ -423,6 +425,7 @@ def loadVis(request):
     # generate objects for doc
     for row in doc_table_rows:
         docs[row[0]] = {}
+        docs[row[0]]["docID"] = "Doc_" + str(row[0])
         docs[row[0]]["docName"] = row[1]
         docs[row[0]]["docContent"] = row[3]
 
@@ -476,7 +479,35 @@ def getLstsBisets(lstNames):
             entryLists.append({"listID": i + 1, "leftType": lstNames[i-1], "listType": lstNames[i], "rightType": lstNames[i+1], "entities": theList})
    
     return {"lists":entryLists, "bics":biclusDict}
+
+
+def getLstsRelations(lstNames):
+    '''
+    Returns a json object for visualization. 
+    The json contains relations between lists.
+    @param lstNames: the names of lists
+    '''
+    length = len(lstNames)
+    lstRelations = []
+
+    for i in range(0, length - 1):
+        lstName1 = lstNames[i]
+        lstName2 = lstNames[i + 1]
+
+        print(lstName1)
+        print(lstName2)
+
+        # get data from doc table
+        cursor = connection.cursor()
+        sql_str = "SELECT A." + lstName1 + "_id, B." + lstName2 + "_id, A.doc_id FROM datamng_" + lstName1 + "doc as A, datamng_" + lstName2 + "doc as B where A.doc_id = B.doc_id order by A."+ lstName1 + "_id"
+        cursor.execute(sql_str)
+        relation_table_rows = cursor.fetchall()
+
+        for row in relation_table_rows:
+            lstRelations.append({"obj1": lstName1 + "_" + str(row[0]), "obj2": lstName2 + "_" + str(row[1]), "docID": "Doc_" + str(row[2])})
     
+    return lstRelations
+
     
 def getListDict(tableLeft, table, tableRight, leftClusCols, biclusDict):
     '''
