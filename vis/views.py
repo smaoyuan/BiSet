@@ -10,10 +10,6 @@ from projects.models import Project, Collaborationship
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 
-# import numpy as np
-# from sklearn.metrics import pairwise_distances
-# from scipy.spatial.distance import cosine
-
 @login_required 
 def analytics(request):
     '''
@@ -115,7 +111,6 @@ def addVisConfig(request):
         visconfigName = requestJson['vis_name']
         theProject = get_object_or_404(Project, pk = project_id)
         
-       
         
         # Only the project creator, super user can delete the project
         has_permission = theProject.is_creator(theUser) or theProject.is_collaborator(theUser) or theUser.is_superuser
@@ -340,11 +335,16 @@ def loadVis(request):
     links = lstsBisetsJson["links"]
     docs = lstsBisetsJson["docs"]
 
+    relations = lstsBisetsJson["oriRelations"]
 
-    # A = np.array([[0,1,0,0,1], [0,0,1,1,1], [1,1,0,1,0]])
-    # dist_out = 1-pairwise_distances(A, metric="cosine")
-    # relDocs = dist_out
-
+    oriRelDict = {}
+    for rel in relations:
+        if not rel["oriLinkID"] in oriRelDict:
+            tmpLinkDocList = []
+            tmpLinkDocList.append(rel["docID"])
+            oriRelDict[rel["oriLinkID"]] = tmpLinkDocList
+        else:
+            oriRelDict[rel["oriLinkID"]].append(rel["docID"])
 
     linkName = Set()
 
@@ -380,6 +380,17 @@ def loadVis(request):
             else:
                 tmpLinkName = bicID + "__" + colID
             linkName.add(tmpLinkName)
+
+        for row in rows:
+            rowID = str(rowType) + "_" + str(row)
+            for col in cols:
+                colID = str(colType) + "_" + str(col)
+                if (rowID > colID):
+                    tmpID = rowID + "__" + colID
+                else:
+                    tmpID = colID + "__" + rowID
+                if tmpID in oriRelDict:
+                    bics[bic]['docs'] = list(oriRelDict[tmpID])
 
         networkData[bicID] = tmpArray
 
@@ -494,9 +505,6 @@ def getLstsRelations(lstNames):
         lstName1 = lstNames[i]
         lstName2 = lstNames[i + 1]
 
-        print(lstName1)
-        print(lstName2)
-
         # get data from doc table
         cursor = connection.cursor()
         sql_str = "SELECT A." + lstName1 + "_id, B." + lstName2 + "_id, A.doc_id FROM datamng_" + lstName1 + "doc as A, datamng_" + lstName2 + "doc as B where A.doc_id = B.doc_id order by A."+ lstName1 + "_id"
@@ -504,7 +512,14 @@ def getLstsRelations(lstNames):
         relation_table_rows = cursor.fetchall()
 
         for row in relation_table_rows:
-            lstRelations.append({"obj1": lstName1 + "_" + str(row[0]), "obj2": lstName2 + "_" + str(row[1]), "docID": "Doc_" + str(row[2])})
+            obj1ID = lstName1 + "_" + str(row[0])
+            obj2ID = lstName2 + "_" + str(row[1])
+
+            if (obj1ID > obj2ID):
+                lnk = obj1ID + "__" + obj2ID
+            else:
+                lnk = obj2ID + "__" + obj1ID
+            lstRelations.append({"oriLinkID": lnk, "obj1": obj1ID, "obj2": obj2ID, "docID": "Doc_" + str(row[2])})
     
     return lstRelations
 
@@ -578,6 +593,7 @@ def getListDict(tableLeft, table, tableRight, leftClusCols, biclusDict):
                     biclusDict[row[2]]['colField'] = tableRight
                     biclusDict[row[2]]['bicIDCmp'] = str(table) + "_" + str(tableRight) + "_bic_" + str(row[2])
                     biclusDict[row[2]]['bicID'] = row[2]
+                    biclusDict[row[2]]['docs'] = []
                     biclusDict[row[2]]['bicSelected'] = False
                     biclusDict[row[2]]['bicMouseOvered'] = False
                     biclusDict[row[2]]['bicNumCoSelected'] = 0
