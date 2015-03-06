@@ -199,8 +199,13 @@ div.shade-container{
     width: 2560px;
 }
 
-.listTitle {
+.listTileContainer {
     margin-left: 10px;
+    width: 60px;
+    display: inline;    
+}
+
+.listTitle {
     display: inline;
 }
 
@@ -213,9 +218,16 @@ div.shade-container{
 }
 
 div.listControlGroup {
-    width: 640px;
+    width: 260px;
     float: left;
 }
+
+div.BiclistControlGroup {
+    width: 410px;
+    padding-left: 100px;
+    float: left;
+}
+
 
 #biset_canvas{
     position: absolute;
@@ -223,7 +235,7 @@ div.listControlGroup {
 
 #vis_wiki_summary {
     /*border: 1px solid;*/
-    width: 180px;
+    width: 200px;
     height: 250px;
     overflow-y: scroll;
 }
