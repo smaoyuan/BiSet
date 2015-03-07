@@ -14,7 +14,7 @@ var biset = {
 
 	// global settings
 	// the vis canvas
-	visCanvas: { width: 2560, height: 3550, inUse: 0 },
+	visCanvas: { width: 3200, height: 3550, inUse: 0 },
 	// an individual entity in a list
 	entity: { width: 260, height: 29, rdCorner: 5, freqWidth: 30, nBorder: 0, moBorder: 1.2, selBorder: 2.5 },
 	// a list
@@ -1465,7 +1465,6 @@ function sortList(aList, sortType) {
 	var orderTmp = [];
 	orderTmp = dataValues.slice().sort(function(a,b){return a.localeCompare(b);})
 	ValueOrder = dataValues.slice().map(function(v){ return orderTmp.indexOf(v)});
-	console.log(ValueOrder);
 
 	// hide the selected line
 	// d3.selectAll(".linkSelected").transition()
@@ -1600,11 +1599,11 @@ biset.addBicListCtrl = function(lsts) {
 				// get the selected mode
 				selMode = selValue[0];
 
-			console.log("now:::::");
-			console.log(selMode);
+			// console.log("now:::::");
+			// console.log(selMode);
 
-			console.log("previous:::::");
-			console.log(preMode); 
+			// console.log("previous:::::");
+			// console.log(preMode); 
 
 			// console.log(allLinks);
 
