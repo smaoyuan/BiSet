@@ -1615,15 +1615,15 @@ biset.addBicListCtrl = function(lsts) {
 			// var bicsFound = biset.findBicsInBetween(field1, field2);
 			// console.log(bicsFound);
 
-			// var oriLinksFound = biset.findOriLinksInBetween(field1, field2);
-			// console.log(oriLinksFound);
+			var oriLinksFound = biset.findOriLinksInBetween(field1, field2);
+			console.log(oriLinksFound);
 
 			// var linksFound = biset.findLinksInBetween(field1, field2);
 			// console.log(linksFound);
 
 			// var findOriLinks = biset.findLinksInBic("phone_org_bic_263");
 			// console.log(findOriLinks);
-			// biset.connectionDisplayed(field1, field2, selMode, preMode);
+			biset.connectionDisplayed(field1, field2, selMode, preMode);
 		});
 	}
 }
@@ -1638,21 +1638,31 @@ biset.addBicListCtrl = function(lsts) {
 */
 biset.connectionDisplayed = function(ldomain, rdomain, curMode, preMode) {
 	if (curMode == "bic") {
+		if (preMode == "link") {
 
+		}
+		if (preMode == "hybrid") {
+
+		}
 	}
 	if (curMode == "link") {
 		if (preMode == "bic") {
-			var targetBics = biset.findBicsInBetween(ldomain, rdomain);
-			for (var i = 0; i < targetBics.length; i++) {
-				// console.log(d3.select("#" + targetBics[i]));
-				d3.select("#" + targetBics[i])
-					.style("visibility", "hidden");
+			// hide inbetween bics
+			var inbetweenBics = biset.findBicsInBetween(ldomain, rdomain);
+			for (e in inbetweenBics)
+				biset.setVisibility(e, "hidden");
 
-				// d3.select("#" + targetBics[i] + "_frame")
-				// 	.style("fill", "rgba(0,0,0,0)");
-				// d3.select("#" + targetBics[i] + "_left")
-				// 	.style("fill", "rgba(0,0,0,0)");
-			}
+			// hide links connected with inbetween bics
+			var linksConnectedBics = biset.findLinksInBetween(ldomain, rdomain);
+			for (e in linksConnectedBics)
+				biset.setVisibility(e, "hidden");
+
+			var inbetweenLinks = biset.findOriLinksInBetween(ldomain, rdomain);
+			for (e in inbetweenLinks)
+				biset.setVisibility(e, "visible");
+		}
+		if (preMode == "hybrid") {
+
 		}
 	}
 	if (curMode == "hybrid") {
@@ -1665,14 +1675,23 @@ biset.connectionDisplayed = function(ldomain, rdomain, curMode, preMode) {
 				// console.log(d3.select("#" + targetBics[i]));
 				d3.select("#" + targetBics[i])
 					.style("visibility", "visible");
-
-				// d3.select("#" + targetBics[i] + "_frame")
-				// 	.style("fill", "rgba(0,0,0,0)");
-				// d3.select("#" + targetBics[i] + "_left")
-				// 	.style("fill", "rgba(0,0,0,0)");
 			}			
 		}
+		if (preMode == "bic") {
+
+		}
 	}
+}
+
+
+/*
+* set visibility of an ent
+* @param entID {string}, the id of an entity
+* @param visable {string}, "visible" or "hidden"
+*/
+biset.setVisibility = function(entID, visable) {
+	d3.select("#" + entID)
+		.style("visibility", visable);
 }
 
 
