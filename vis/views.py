@@ -653,6 +653,28 @@ def getListDict(tableLeft, table, tableRight, leftClusCols, biclusDict):
                         biclusDict[col[2]]['col'] = newCol
                     else:
                         biclusDict[col[2]]['col'].append(col[1]);
+
+            for bic in biclusDict:
+                rNum = len(biclusDict[bic]['row'])
+                cNum = len(biclusDict[bic]['col'])
+                # total entity number in a bic
+                eNum = rNum + cNum
+                biclusDict[bic]['totalEntNum'] = eNum
+                biclusDict[bic]['rowEntNum'] = rNum
+                biclusDict[bic]['colEntNum'] = cNum
+
+            # generate index of bic based on the number of its ents
+            tEntNum = []
+            for key, val in biclusDict.iteritems():
+                tEntNum.append(val)
+
+            bicList = sorted(tEntNum, key=lambda k: k['totalEntNum'], reverse=True)
+
+            bIndex = 0
+            for bic in bicList:
+                bic['index'] = bIndex
+                bIndex += 1
+
             
             for row in t1_t2_ClusRows:
                 if not row[1] in table1_item_dict:

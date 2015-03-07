@@ -120,8 +120,6 @@ var allEnts = {},
 	allOriLinks = {},
 	// number of list
 	selectedLists = [];
-	// // all radio button groups of bic list
-	// bListRadioGroups = [];
 
 // canvas for visualizations
 var canvas = d3.select("#biset_canvas")
@@ -276,10 +274,6 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 		// 	"<label class='radio-inline'><input type='radio' name='" + bListRGroupName + "'>Bic</label>" +
 		// 	"<label class='radio-inline'><input type='radio' name='" + bListRGroupName + "'>Hybrid</label>" +
 		// 	"<label class='radio-inline'><input type='radio' name='" + bListRGroupName + "'>Links</label>" +
-
-
-		// bListRadioGroups.push(bListRGroupName);
-		// console.log(bListRadioGroups);
 	}
 
 	// add group to the svg
@@ -1140,6 +1134,8 @@ biset.addBics = function(preListCanvas, bicListCanvas, listData, bicList, bicSta
 		.domain([0, bicEntsMax])
 		.range([0, biset.bic.frameWidth]);
 
+	biclusters.sort(function(a, b) { return a.index - b.index; });
+
     // add all bics
 	var bics = bicListCanvas.selectAll(".bics")
 		.data(biclusters)
@@ -1148,34 +1144,34 @@ biset.addBics = function(preListCanvas, bicListCanvas, listData, bicList, bicSta
 		.attr("class", "bics")
   		.attr("transform", function(d, i) {
 
-  			var cfield = d.colField,
-  				rfield = d.rowField,
-  				cols = d.col,
-  				rows = d.row,
-  				yPos = 0,
-  				xPos = 0;
+  	// 		var cfield = d.colField,
+  	// 			rfield = d.rowField,
+  	// 			cols = d.col,
+  	// 			rows = d.row,
+  	// 			yPos = 0,
+  	// 			xPos = 0;
 
-			// y pos of the row ents
-			for (var j = 0; j < rows.length; j++){
-				var rid = rfield + "_" + rows[j],
-					rY = d3.select("#" + rid)[0][0].getBoundingClientRect().top;
-				yPos += rY;
-			}
+			// // y pos of the row ents
+			// for (var j = 0; j < rows.length; j++){
+			// 	var rid = rfield + "_" + rows[j],
+			// 		rY = d3.select("#" + rid)[0][0].getBoundingClientRect().top;
+			// 	yPos += rY;
+			// }
 
-			// y pos of the col ents
-			for (var k = 0; k < cols.length; k++) {
-				var cid = cfield + "_" + cols[k],
-					cY = d3.select("#" + cid)[0][0].getBoundingClientRect().top;
-				yPos += cY;
-			}
+			// // y pos of the col ents
+			// for (var k = 0; k < cols.length; k++) {
+			// 	var cid = cfield + "_" + cols[k],
+			// 		cY = d3.select("#" + cid)[0][0].getBoundingClientRect().top;
+			// 	yPos += cY;
+			// }
 
-			// xPos = (biset.entList.gap * 4) * cols.length / (rows.length + cols.length) - biset.entList.gap * 2;
-			yPos = yPos / (rows.length + cols.length);
+			// // xPos = (biset.entList.gap * 4) * cols.length / (rows.length + cols.length) - biset.entList.gap * 2;
+			// yPos = yPos / (rows.length + cols.length);
 
-  			return "translate(" + xPos + "," + yPos + ")";
+  	// 		return "translate(" + xPos + "," + yPos + ")";
 
   			// original position
-  			// return "translate(" + 0 + "," + (i + 1) * biset.bic.frameHeight + ")"; 
+  			return "translate(" + 0 + "," + (i + 1) * biset.bic.frameHeight + ")"; 
   		});
 
 	// set the length of a bicluster based on its component
@@ -1185,7 +1181,7 @@ biset.addBics = function(preListCanvas, bicListCanvas, listData, bicList, bicSta
 				cfield = d.colField;  
 			return rfield + "_" + cfield + "_bic_" + d.bicID + "_frame"; 
 		})
-		.attr("width", function(d, i) { return bicEntsCount(bicTotalEnts[i]); })
+		.attr("width", function(d, i) { return bicEntsCount(d.totalEntNum); }) //bicTotalEnts[i]
 	    .attr("height", biset.entity.height - 1)
 	    .attr("rx", biset.bic.frameRdCorner)
 	    .attr("ry", biset.bic.frameRdCorner)
@@ -1198,7 +1194,7 @@ biset.addBics = function(preListCanvas, bicListCanvas, listData, bicList, bicSta
 				cfield = d.colField; 
   			return rfield + "_" + cfield + "_bic_" + d.bicID + "_left"; 
   		})
-	    .attr("width", function(d, i) { return bicEntsCount(bicLeftEnts[i]); })
+	    .attr("width", function(d, i) { return bicEntsCount(d.rowEntNum); }) // bicLeftEnts[i]
 	    .attr("height", biset.entity.height - 1)
 	    .attr("rx", biset.bic.innerRdCorner)
 	    .attr("ry", biset.bic.innerRdCorner)
