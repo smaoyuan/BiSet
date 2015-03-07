@@ -1174,19 +1174,6 @@ biset.addBics = function(preListCanvas, bicListCanvas, listData, bicList, bicSta
   			return "translate(" + 0 + "," + (i + 1) * biset.bic.frameHeight + ")"; 
   		});
 
-	// set the length of a bicluster based on its component
-	bics.append("rect")
-		.attr("id", function(d, i) {
-			var rfield = d.rowField,
-				cfield = d.colField;  
-			return rfield + "_" + cfield + "_bic_" + d.bicID + "_frame"; 
-		})
-		.attr("width", function(d, i) { return bicEntsCount(d.totalEntNum); }) //bicTotalEnts[i]
-	    .attr("height", biset.entity.height - 1)
-	    .attr("rx", biset.bic.frameRdCorner)
-	    .attr("ry", biset.bic.frameRdCorner)
-	    .attr("fill", biset.colors.bicFrameColor);
-
 	// proportion of row
 	bics.append("rect")
   		.attr("id", function(d, i) {
@@ -1199,6 +1186,30 @@ biset.addBics = function(preListCanvas, bicListCanvas, listData, bicList, bicSta
 	    .attr("rx", biset.bic.innerRdCorner)
 	    .attr("ry", biset.bic.innerRdCorner)
 	    .attr("fill", biset.colors.entFreColor);
+
+	// set the length of a bicluster based on its component
+	bics.append("rect")
+		.attr("id", function(d, i) {
+			var rfield = d.rowField,
+				cfield = d.colField;  
+			return rfield + "_" + cfield + "_bic_" + d.bicID + "_frame"; 
+		})
+		.attr("class", "bicFrame")
+		.attr("width", function(d, i) { return bicEntsCount(d.totalEntNum); }) //bicTotalEnts[i]
+	    .attr("height", biset.entity.height - 1)
+	    .attr("rx", biset.bic.frameRdCorner)
+	    .attr("ry", biset.bic.frameRdCorner)
+	    .attr("fill", biset.colors.bicFrameColor);
+
+
+	// add contextmenu to bics
+	$(".bics").contextmenu({
+		target: '#bic-context-menu',
+		onItem: function(e, item) {
+			alert($(item).text());
+		}
+	});
+
 
     // mouseover event for bic
     bics.on("mouseover", function(d) {
@@ -1221,6 +1232,15 @@ biset.addBics = function(preListCanvas, bicListCanvas, listData, bicList, bicSta
 		biset.linksUpdate(highlightLinkSet, highlightLinkList);
 
 		biset.barUpdate("#" + thisID + "_frame", "", biset.colors.bicFrameHColor, 2);
+
+		// console.log(d3.select("#" + thisID));
+
+		// d3.select("#" + thisID)
+		// 	.append("circle")
+		// 	.attr("cx", function(d) { return bicEntsCount(d.totalEntNum) + 2; })
+		// 	.attr("cy", 5)
+		// 	.attr("r", 4)
+		// 	.style("fill", "red");
     });
 
     // mouseout event for bic

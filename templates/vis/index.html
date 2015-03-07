@@ -95,9 +95,33 @@
 			<div id="biset_control"></div>
 			<div id="biset_canvas"></div>
 		</div>
+
+		<div id="bic-context-menu">
+			<ul class="dropdown-menu" role="menu">
+				<li>
+					<a tabindex="-1">
+						<span class="glyphicon glyphicon-arrow-up"></span> Move to Top
+					</a>
+				</li>
+				<li class="divider"></li>
+				<li>
+					<a tabindex="-1">
+						<span class="glyphicon glyphicon-file"></span> Show Document
+					</a>
+				</li>
+				<li class="divider"></li>
+				<li>
+					<a tabindex="-1">
+						<span class="glyphicon glyphicon-arrow-down"></span> Move to Bottom
+					</a>
+				</li>
+			</ul>
+		</div>
+
 	</div>
 
+	<script type="text/javascript" src="{%static 'vis/js/lib/bootstrap-contextmenu.js'%}"></script>
+	<script type="text/javascript" src="{%static 'vis/js/lib/jquery-ui.min.js'%}"></script>
 	<script type="text/javascript" src="{%static 'vis/js/biset.js'%}"></script>
 	<script type="text/javascript" src="{%static 'vis/js/visctrl.js'%}"></script>
-	<script type="text/javascript" src="{%static 'vis/js/lib/jquery-ui.min.js'%}"></script>
 {% endblock %}

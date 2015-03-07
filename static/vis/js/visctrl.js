@@ -1,3 +1,4 @@
+
 $('#btn_new_vis').click(function(){
 	$("#vis_name_config").removeClass('hide_this');	
 	// $("#vis_dim_select").removeClass('hide_this');	
@@ -315,13 +316,16 @@ function loadVisHelper(resData) {
 	// initialize the number of list
 	selectedLists = selDims;
 
+	// uncheck all
+	$(':checkbox').prop("checked", false);
+
 	// add all lists
 	for (var i = 0; i < selDims.length; i++) {
 
 		var lkey = selDims[i];
 
 		// check the selected domain
-		$('#d_' + lkey).prop( "checked", true );
+		$('#d_' + lkey).prop("checked", true);
 
 		biset.entList.count += 1;
 		biset.entList.startPos = (biset.entList.width + biset.entList.gap * 4 + biset.bic.frameWidth) * i;
