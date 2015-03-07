@@ -1615,8 +1615,8 @@ biset.addBicListCtrl = function(lsts) {
 			// var bicsFound = biset.findBicsInBetween(field1, field2);
 			// console.log(bicsFound);
 
-			var oriLinksFound = biset.findOriLinksInBetween(field1, field2);
-			console.log(oriLinksFound);
+			// var oriLinksFound = biset.findOriLinksInBetween(field1, field2);
+			// console.log(oriLinksFound);
 
 			// var linksFound = biset.findLinksInBetween(field1, field2);
 			// console.log(linksFound);
@@ -1639,50 +1639,110 @@ biset.addBicListCtrl = function(lsts) {
 biset.connectionDisplayed = function(ldomain, rdomain, curMode, preMode) {
 	if (curMode == "bic") {
 		if (preMode == "link") {
+			// hide original inbetween links
+			biset.setVisibilityToOriLinksInBetween(ldomain, rdomain, "hidden");
 
+			// show inbetween bics
+			biset.setVisibilityToBicsInBetween(ldomain, rdomain, "visible");
+			// show links connected with inbetween bics
+			biset.setVisibilityToLinksInBetween(ldomain, rdomain, "visible");		
 		}
 		if (preMode == "hybrid") {
-
+			// hide all original links between the two list
+			biset.setVisibilityToOriLinksInBetween(ldomain, rdomain, "hidden");
 		}
 	}
 	if (curMode == "link") {
 		if (preMode == "bic") {
 			// hide inbetween bics
-			var inbetweenBics = biset.findBicsInBetween(ldomain, rdomain);
-			for (e in inbetweenBics)
-				biset.setVisibility(e, "hidden");
-
+			biset.setVisibilityToBicsInBetween(ldomain, rdomain, "hidden");
 			// hide links connected with inbetween bics
-			var linksConnectedBics = biset.findLinksInBetween(ldomain, rdomain);
-			for (e in linksConnectedBics)
-				biset.setVisibility(e, "hidden");
+			biset.setVisibilityToLinksInBetween(ldomain, rdomain, "hidden");
 
-			var inbetweenLinks = biset.findOriLinksInBetween(ldomain, rdomain);
-			for (e in inbetweenLinks)
-				biset.setVisibility(e, "visible");
+			// show original inbetween links
+			biset.setVisibilityToOriLinksInBetween(ldomain, rdomain, "visible");
 		}
 		if (preMode == "hybrid") {
+			// show links belong to bics
+			biset.setVisibilityToOriLinksInBics(ldomain, rdomain, "visible");
 
+			// hide inbetween bics
+			biset.setVisibilityToBicsInBetween(ldomain, rdomain, "hidden");
+			// hide links connected with inbetween bics
+			biset.setVisibilityToLinksInBetween(ldomain, rdomain, "hidden");			
 		}
 	}
 	if (curMode == "hybrid") {
 		if (preMode == "link") {
+			// hide links belong to bics
+			biset.setVisibilityToOriLinksInBics(ldomain, rdomain, "hidden");
 
-			console.log("hereerer");
-
-			var targetBics = biset.findBicsInBetween(ldomain, rdomain);
-			for (var i = 0; i < targetBics.length; i++) {
-				// console.log(d3.select("#" + targetBics[i]));
-				d3.select("#" + targetBics[i])
-					.style("visibility", "visible");
-			}			
+			// show inbetween bics
+			biset.setVisibilityToBicsInBetween(ldomain, rdomain, "visible");
+			// show links connected with inbetween bics
+			biset.setVisibilityToLinksInBetween(ldomain, rdomain, "visible");			
 		}
 		if (preMode == "bic") {
+			// show original inbetween links
+			biset.setVisibilityToOriLinksInBetween(ldomain, rdomain, "visible");
 
+			// hide links belong to bics
+			biset.setVisibilityToOriLinksInBics(ldomain, rdomain, "hidden");
 		}
 	}
 }
 
+
+/*
+* set visibility to a list of bics between two domains
+* @param ldomain {string}, the type of left list
+* @param rdomain {string}, the type of right list
+* @param visable {string}, "visible" or "hidden"
+*/
+biset.setVisibilityToBicsInBetween = function(ldomain, rdomain, visable) {
+	var inbetweenBics = biset.findBicsInBetween(ldomain, rdomain);
+	for (e in inbetweenBics)
+		biset.setVisibility(e, visable);
+}
+
+/*
+* set visibility to a list of links (connected with bics) between two domains
+* @param ldomain {string}, the type of left list
+* @param rdomain {string}, the type of right list
+* @param visable {string}, "visible" or "hidden"
+*/
+biset.setVisibilityToLinksInBetween = function(ldomain, rdomain, visable) {
+	var linksConnectedBics = biset.findLinksInBetween(ldomain, rdomain);
+	for (e in linksConnectedBics)
+		biset.setVisibility(e, visable);
+}
+
+/*
+* set visibility to a list of original links between two domains
+* @param ldomain {string}, the type of left list
+* @param rdomain {string}, the type of right list
+* @param visable {string}, "visible" or "hidden"
+*/
+biset.setVisibilityToOriLinksInBetween = function(ldomain, rdomain, visable) {
+	var inbetweenLinks = biset.findOriLinksInBetween(ldomain, rdomain);
+	for (e in inbetweenLinks)
+		biset.setVisibility(e, visable);
+}
+
+/*
+* set visibility to a list of original links that belongs to bics in two domains
+* @param ldomain {string}, the type of left list
+* @param rdomain {string}, the type of right list
+* @param visable {string}, "visible" or "hidden"
+*/
+biset.setVisibilityToOriLinksInBics = function(ldomain, rdomain, visable) {
+	var inbetweenBics = biset.findBicsInBetween(ldomain, rdomain);
+	for (e in inbetweenBics) {
+		var lkToHide = biset.findLinksInBic(e);
+		for (l in lkToHide)
+			biset.setVisibility(l, visable);
+	}
+}
 
 /*
 * set visibility of an ent
@@ -1906,7 +1966,8 @@ biset.addOriginalLinks = function(linkLsts) {
 
 		var obj1 = d3.select("#" + obj1ID),
 			obj2 = d3.select("#" + obj2ID);
-		biset.addLink(obj1, obj2, biset.colors.lineNColor, canvas);
+		
+		connections.push(biset.addLink(obj1, obj2, biset.colors.lineNColor, canvas));
 	}
 }
 

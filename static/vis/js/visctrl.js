@@ -370,7 +370,11 @@ function loadVisHelper(resData) {
 	}
 
 	// add all original links
-	// biset.addOriginalLinks(oriLinks);
+	biset.addOriginalLinks(oriLinks);
+	// hide all original links
+	for (var i = 0; i < oriLinks.length; i++)
+		biset.setVisibility(oriLinks[i].oriLinkID, "hidden");
+	
 
 	// load highlight entities
 	// this code block will not run, 
