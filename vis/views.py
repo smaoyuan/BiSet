@@ -330,7 +330,7 @@ def loadVis(request):
     lstsBisetsJson["oriRelations"] = getLstsRelations(listNames)
     # origial relations reduced replicate ones in the dataset
     lstsBisetsJson["oriRelationsReduced"] = getReducedLstsRelations(listNames)
-    
+
 
     networkData = lstsBisetsJson["relNetwork"]
     relDocs = lstsBisetsJson["relatedDocs"]
@@ -450,7 +450,7 @@ def loadVis(request):
         docs[row[0]]["docContent"] = row[3]
 
     for lk in linkName:
-        links[lk] = { "linkID": lk, "linkNumCoSelected": 0 }
+        links[lk] = { "linkID": lk, "linkNumCoSelected": 0, "linkDisplayed": True }
 
     return HttpResponse(json.dumps(lstsBisetsJson))
     
@@ -560,7 +560,7 @@ def getReducedLstsRelations(lstNames):
                 lnk = obj1ID + "__" + obj2ID
             else:
                 lnk = obj2ID + "__" + obj1ID
-            lstRelations.append({"oriLinkID": lnk, "obj1": obj1ID, "obj2": obj2ID})
+            lstRelations.append({"oriLinkID": lnk, "obj1": obj1ID, "obj2": obj2ID, "oriLinkDisplayed": True})
 
     return lstRelations              
 
@@ -638,6 +638,7 @@ def getListDict(tableLeft, table, tableRight, leftClusCols, biclusDict):
                     biclusDict[row[2]]['bicSelected'] = False
                     biclusDict[row[2]]['bicMouseOvered'] = False
                     biclusDict[row[2]]['bicNumCoSelected'] = 0
+                    biclusDict[row[2]]['bicDisplayed'] = True
                 else:
                     biclusDict[row[2]]['row'].append(row[1]);
                     

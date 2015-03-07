@@ -1621,6 +1621,8 @@ biset.addBicListCtrl = function(lsts) {
 			// var linksFound = biset.findLinksInBetween(field1, field2);
 			// console.log(linksFound);
 
+			// var findOriLinks = biset.findLinksInBic("phone_org_bic_263");
+			// console.log(findOriLinks);
 			// biset.connectionDisplayed(field1, field2, selMode, preMode);
 		});
 	}
@@ -1639,11 +1641,92 @@ biset.connectionDisplayed = function(ldomain, rdomain, curMode, preMode) {
 
 	}
 	if (curMode == "link") {
+		if (preMode == "bic") {
+			var targetBics = biset.findBicsInBetween(ldomain, rdomain);
+			for (var i = 0; i < targetBics.length; i++) {
+				// console.log(d3.select("#" + targetBics[i]));
+				d3.select("#" + targetBics[i])
+					.style("visibility", "hidden");
 
+				// d3.select("#" + targetBics[i] + "_frame")
+				// 	.style("fill", "rgba(0,0,0,0)");
+				// d3.select("#" + targetBics[i] + "_left")
+				// 	.style("fill", "rgba(0,0,0,0)");
+			}
+		}
 	}
-	if (curMode == "Hybrid") {
+	if (curMode == "hybrid") {
+		if (preMode == "link") {
 
+			console.log("hereerer");
+
+			var targetBics = biset.findBicsInBetween(ldomain, rdomain);
+			for (var i = 0; i < targetBics.length; i++) {
+				// console.log(d3.select("#" + targetBics[i]));
+				d3.select("#" + targetBics[i])
+					.style("visibility", "visible");
+
+				// d3.select("#" + targetBics[i] + "_frame")
+				// 	.style("fill", "rgba(0,0,0,0)");
+				// d3.select("#" + targetBics[i] + "_left")
+				// 	.style("fill", "rgba(0,0,0,0)");
+			}			
+		}
 	}
+}
+
+
+/*
+* Find all original links belong to a bic
+* @param bicID, the id of a bicluster
+* @return List, a list of id
+*/
+biset.findLinksInBic = function(bicID) {
+
+	var thisBic = allBics[bicID],
+		rows = thisBic.row,
+		cols = thisBic.col,
+		rType = thisBic.rowField,
+		cType = thisBic.colField;
+
+	var linksInBic = [],
+		oriLinksInBic = {};
+
+	// get ori links that have been aggregated in this bic
+	for (var i = 0; i < rows.length; i++) {
+		for (var j = 0; j < cols.length; j++) {
+			var lEnt = rType + "_" + rows[i],
+				rEnt = cType + "_" + cols[j];
+			linksInBic.push(biset.genLinkID(lEnt, rEnt));
+		}
+	}
+
+	// check these identified links from the dictionary
+	for (var j = 0; j < linksInBic.length; j++) {
+		if (allOriLinks[linksInBic[j]] !== undefined) {
+			oriLinksInBic[linksInBic[j]] = allOriLinks[linksInBic[j]];
+		}
+	}
+
+	return oriLinksInBic;
+}
+
+
+/*
+* generate the link ID of two ents
+* @param lEntID {string}, the id of left ent
+* @param rEntID {string}, the id of right ent
+* @return {string}, the id of the link 
+*/
+biset.genLinkID = function(lEntID, rEntID){
+	var lkName = "";
+	if (lEntID.localeCompare(rEntID) < 0) {
+		var tmp = lEntID,
+			lEntID = rEntID,
+			rEntID = tmp;
+	}
+	lkName = lEntID + "__" + rEntID;
+	return lkName;
 }
 
 
@@ -1653,10 +1736,10 @@ biset.connectionDisplayed = function(ldomain, rdomain, curMode, preMode) {
 * @param rdomain, the type of right list
 */
 biset.findBicsInBetween = function(ldomain, rdomain) {
-	var bicsInbetween = [];
+	var bicsInbetween = {};
 	for (e in allBics) {
 		if (allBics[e].bicIDCmp.indexOf(ldomain) >=0 && allBics[e].bicIDCmp.indexOf(rdomain) >= 0)
-			bicsInbetween.push(e);
+			bicsInbetween[e] = allBics[e];
 	}
 	return bicsInbetween;
 }
@@ -1668,10 +1751,10 @@ biset.findBicsInBetween = function(ldomain, rdomain) {
 * @param rdomain, the type of right list
 */
 biset.findOriLinksInBetween = function(ldomain, rdomain) {
-	var oriLinksInbetween = [];
+	var oriLinksInbetween = {};
 	for (e in allOriLinks) {
 		if (allOriLinks[e].oriLinkID.indexOf(ldomain) >= 0 && allOriLinks[e].oriLinkID.indexOf(rdomain) >= 0)
-			oriLinksInbetween.push(e);
+			oriLinksInbetween[e] = allOriLinks[e];
 	}
 	return oriLinksInbetween;
 }
@@ -1686,7 +1769,7 @@ biset.findLinksInBetween = function(ldomain, rdomain) {
 	var linksInbetween = [];
 	for (e in allLinks) {
 		if (allLinks[e].linkID.indexOf(ldomain) >= 0 && allLinks[e].linkID.indexOf(rdomain) >= 0)
-			linksInbetween.push(e);
+			linksInbetween[e] = allLinks[e];
 	}
 	return linksInbetween;
 }
@@ -1776,12 +1859,7 @@ biset.addLink = function (obj1, obj2, line, d3obj, bg) {
             		.attr("id", function() {
             			var lid1 = obj1.attr("id"),
             				lid2 = obj2.attr("id");
-        				if (lid1.localeCompare(lid2) < 0) {
-        					var tmpID = lid1,
-        						lid1 = lid2,
-        						lid2 = tmpID;
-        				}
-            			return lid1 + "__" + lid2;
+        				return biset.genLinkID(lid1, lid2);
             		})
             		.attr("class", "lineNormal")
             		.style("stroke", biset.colors.lineNColor)
@@ -1890,3 +1968,38 @@ Array.max = function(array){
 Array.min = function(array){
     return Math.min.apply(Math, array);
 };
+
+
+// http://bl.ocks.org/alignedleft/9612839
+//Moves SVG elements to the end of their container, so they appear "on top".
+//Achieves a nice, smooth fade by duplicating the clicked element, moving the
+//dupe to the front, then fading it in, while fading out the original element
+//at the same time.  Tricky!
+var fadeToFront = function() {
+
+	//Select this element, that we want to move to front
+	var orig = d3.select(this);
+	var origNode = orig.node();
+	
+	//Clone it, and append the copy on "top" (meaning, at the end of
+	//the parent element, which is <svg> in this case)
+	var dupe = d3.select(origNode.parentNode.appendChild(origNode.cloneNode(true), origNode.nextSibling));
+
+	//Make the new element transparent immediately, then fade it in over time
+	dupe.style("opacity", 0.0)
+		// .transition()
+		// .duration(speed)
+		.style("opacity", 1.0)
+		.each("end", function() {
+
+			//When the fade-in is complete, add the click event…
+			d3.select(this).on("click", function() {
+				d3.select(this).each(fadeToFront);
+			});
+
+			//…and delete the original
+			orig.remove();
+
+		});
+
+}
