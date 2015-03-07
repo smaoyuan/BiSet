@@ -1,6 +1,6 @@
 $('#btn_new_vis').click(function(){
 	$("#vis_name_config").removeClass('hide_this');	
-	$("#vis_dim_select").removeClass('hide_this');	
+	// $("#vis_dim_select").removeClass('hide_this');	
 	// enable save button
 	$("#btn_save_config").prop('disabled',false);
 });
@@ -320,6 +320,9 @@ function loadVisHelper(resData) {
 
 		var lkey = selDims[i];
 
+		// check the selected domain
+		$('#d_' + lkey).prop( "checked", true );
+
 		biset.entList.count += 1;
 		biset.entList.startPos = (biset.entList.width + biset.entList.gap * 4 + biset.bic.frameWidth) * i;
 
@@ -374,7 +377,7 @@ function loadVisHelper(resData) {
 	// hide all original links
 	for (var i = 0; i < oriLinks.length; i++)
 		biset.setVisibility(oriLinks[i].oriLinkID, "hidden");
-	
+
 
 	// load highlight entities
 	// this code block will not run, 
