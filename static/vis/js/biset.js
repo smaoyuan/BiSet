@@ -1209,18 +1209,35 @@ biset.addBics = function(preListCanvas, bicListCanvas, listData, bicList, bicSta
 		target: '#bic-context-menu',
 		onItem: function(context, e) {
 			// alert($(e.target).text());
-			console.log(context);
-			var selItem = $(e.target).attr("data-index");
-			console.log(selItem);
 
-			console.log(allDocs);
+			var thisBicID = $(context).attr("id"),
+				selItem = $(e.target).attr("data-index");
 
-			// show document view
-			if ($("#doc_vis").is(":hidden") == true) {
-				$("#doc_vis").slideToggle("slow");
-				// change the control icon
-				$("#doc_ctrl_icon").removeClass('glyphicon-folder-close');
-				$("#doc_ctrl_icon").addClass('glyphicon-remove-sign');
+			if (selItem == "doc") {
+
+				var relDocs = allBics[thisBicID].docs;
+
+				// show document view
+				if ($("#doc_vis").is(":hidden") == true) {
+					$("#doc_vis").slideToggle("slow");
+					// change the control icon
+					$("#doc_ctrl_icon").removeClass('glyphicon-folder-close');
+					$("#doc_ctrl_icon").addClass('glyphicon-remove-sign');
+				}
+
+				$(".doc-list").click(function(e){
+					console.log($(this).attr("data-index"));
+					var thisDocID = $(this).attr("data-index"),
+						thisDocContent = allDocs[thisDocID].docContent,
+						thisDocTitle = allDocs[thisDocID].docName;
+
+					// $("#biset_doc_title").html("<h3 class='panel-title'>" + thisDocTitle + "</h3>");
+					// $("#biset_doc_body").html(thisDocContent);
+
+					console.log("document");
+					biset.docViewFresh(thisDocTitle, thisDocContent);
+
+				});
 			}
 
 		}
@@ -1462,6 +1479,17 @@ biset.addBics = function(preListCanvas, bicListCanvas, listData, bicList, bicSta
 			obj1.call(biset.objDrag);
 		}
     }
+}
+
+
+/*
+* refreshe the content of the document view
+* @param title {string}, the title of a doc
+* @param content {string}, content of a doc
+*/
+biset.docViewFresh = function(title, content) {
+	$("#biset_doc_title").html("<h3 class='panel-title'>" + title + "</h3>");
+	$("#biset_doc_body").html(content);
 }
 
 

@@ -354,4 +354,22 @@ div.BiclistControlGroup {
 
 #biset_doc_list {
     margin-top: 10px;
+    margin-right: 0px;
+}
+
+/* avoid '[]' in the document name list */
+a.doc-list::before { content:''; }
+
+#biset_doc_panel {
+    margin-top: 10px;
+}
+
+#biset_doc_title {
+    padding-top: 2px;
+    padding-bottom: 2px;
+}
+
+#biset_doc_body {
+    height: 310px;
+    overflow-y: auto; 
 }

@@ -332,34 +332,30 @@ function loadVisHelper(resData) {
 	// add the container for the list of doc names
 	$("#biset_doc_list").append("<form role='form'>" + 
 		"<div class='input-group'>" + 
-			"<span class='input-group-addon'>Name:</span>" + 
+			"<span class='input-group-addon'>File ID</span>" + 
 			"<input class='form-control' id='doc_name_search' type='search' placeholder='Search...'' />" +
 		"</div>" + 
-		"<div id='doc_name_list' class='list-group' style='overflow-y: auto; max-height: 300px; margin-top:15px'>" +
+		"<div id='doc_name_list' class='list-group' style='overflow-y:auto; max-height:300px; margin-top:15px'>" +
 		"</div>" +
 	"</form>");
 
 	// initialize all docs
 	for (e in docs) {
-		allDocs[docs[e].docName] = docs[e];
+		allDocs[docs[e].docID] = docs[e];
 
 		// append document names
-		$("#doc_name_list").append("<a href='#' class='list-group-item' style='margin-left: 0; padding-left:15px'>" +
-			docs[e].docName + 
+		$("#doc_name_list").append("<a href='#' class='list-group-item doc-list' data-index='" + docs[e].docID + "' style='margin-left:0; padding-left:15px'>" +
+			docs[e].docName +
 		"</a>");
 	}
 
-
+	// dynamic filter list based on user input
     $('#doc_name_search').keyup(function () {
-
-    	console.log("here");
-
         var rex = new RegExp($(this).val(), 'i');
         $('.list-group-item').hide();
         $('.list-group-item').filter(function () {
             return rex.test($(this).text());
         }).show();
-
     });
 
 
