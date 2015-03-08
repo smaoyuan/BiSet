@@ -128,7 +128,23 @@ div.shade-container{
     filter: alpha(opacity=97);
 }
 
-
+/* add shade in a container */
+div.shade-container-light{
+    z-index: 10;
+    background-color: #ffffff;
+    padding: 0 !important;
+    border-radius: 4px;
+    -moz-border-radius: 4px;
+    border:1px solid #ddd;
+    margin-top: 20px;
+    margin-left: 0px;
+    -webkit-box-shadow: 0 6px 12px rgba(0,0,0,.175);
+    box-shadow: 0 6px 12px rgba(0,0,0,.175);
+    -moz-box-shadow: 0 6px 12px rgba(0,0,0,.175);
+    background-clip: padding-box;
+    opacity: 0.6;
+    filter: alpha(opacity=60);
+}
 
 
 
@@ -240,6 +256,9 @@ div.BiclistControlGroup {
     overflow-y: scroll;
 }
 
+.dropdown-menu:hover {
+    cursor: pointer;
+}
 
 #pbasic_info {
     margin-left: 20px;
@@ -310,4 +329,27 @@ div.BiclistControlGroup {
 
 .plist_th_30 {
     width: 30%;
+}
+
+
+/* document view */
+#biset_doc {
+    position: fixed;
+    bottom: 3%;
+    right: 3%;
+}
+
+#doc_ctrl_icon {
+    position: absolute; 
+    top: 0; 
+    right: 0;
+    display: inline-block;
+    background-repeat: no-repeat;
+}
+
+#doc_vis {
+    display: none;
+    width: 1050px;
+    height: 380px;
+    border-radius: 5px;
 }

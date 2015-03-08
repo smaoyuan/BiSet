@@ -94,25 +94,29 @@
 		<div class="col-md-10" id="biset_vis_container">
 			<div id="biset_control"></div>
 			<div id="biset_canvas"></div>
+			<div id="biset_doc" class="shade-container-light">
+				<span class="glyphicon glyphicon-folder-close btn btn-xs" id="doc_ctrl_icon"></span>
+			    <div id="doc_vis"></div>
+			</div>
 		</div>
 
 		<div id="bic-context-menu">
 			<ul class="dropdown-menu" role="menu">
 				<li>
-					<a tabindex="-1">
-						<span class="glyphicon glyphicon-arrow-up"></span> Move to Top
+					<a tabindex="-1" data-index="top">
+						<span class="glyphicon glyphicon-arrow-up" data-index="top"></span> Move to Top
 					</a>
 				</li>
 				<li class="divider"></li>
 				<li>
-					<a tabindex="-1">
-						<span class="glyphicon glyphicon-file"></span> Show Document
+					<a tabindex="-1" data-index="doc">
+						<span class="glyphicon glyphicon-file" data-index="doc"></span> Show Document
 					</a>
 				</li>
 				<li class="divider"></li>
 				<li>
-					<a tabindex="-1">
-						<span class="glyphicon glyphicon-arrow-down"></span> Move to Bottom
+					<a tabindex="-1" data-index="bottom">
+						<span class="glyphicon glyphicon-arrow-down" data-index="bottom"></span> Move to Bottom
 					</a>
 				</li>
 			</ul>

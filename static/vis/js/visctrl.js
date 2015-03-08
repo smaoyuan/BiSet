@@ -1,3 +1,21 @@
+// control for doc view (hide the view)
+$("#doc_ctrl_icon").click(function(e){
+	// cancel default browser event
+	// e.preventDefault();
+	if ($("#doc_vis").is(":hidden") == true) {
+		$("#doc_vis").slideToggle("slow");
+		// change the control icon
+		$("#doc_ctrl_icon").removeClass('glyphicon-folder-close');
+		$("#doc_ctrl_icon").addClass('glyphicon-remove-sign');
+	}
+	else {
+		$("#doc_vis").slideToggle("hide");
+		// change the control icon
+		$("#doc_ctrl_icon").removeClass('glyphicon-remove-sign');
+		$("#doc_ctrl_icon").addClass('glyphicon-folder-close');		
+	}
+});
+
 
 $('#btn_new_vis').click(function(){
 	$("#vis_name_config").removeClass('hide_this');	

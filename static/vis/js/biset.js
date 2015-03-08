@@ -1205,8 +1205,20 @@ biset.addBics = function(preListCanvas, bicListCanvas, listData, bicList, bicSta
 	// add contextmenu to bics
 	$(".bics").contextmenu({
 		target: '#bic-context-menu',
-		onItem: function(e, item) {
-			alert($(item).text());
+		onItem: function(context, e) {
+			// alert($(e.target).text());
+			console.log(context);
+			var selItem = $(e.target).attr("data-index");
+			console.log(selItem);
+
+			// show document view
+			if ($("#doc_vis").is(":hidden") == true) {
+				$("#doc_vis").slideToggle("slow");
+				// change the control icon
+				$("#doc_ctrl_icon").removeClass('glyphicon-folder-close');
+				$("#doc_ctrl_icon").addClass('glyphicon-remove-sign');
+			}
+
 		}
 	});
 
