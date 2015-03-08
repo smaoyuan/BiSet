@@ -1215,7 +1215,61 @@ biset.addBics = function(preListCanvas, bicListCanvas, listData, bicList, bicSta
 
 			if (selItem == "doc") {
 
-				var relDocs = allBics[thisBicID].docs;
+				var relDocs = allBics[thisBicID].docs,
+					rType = allBics[thisBicID].rowField,
+					cType = allBics[thisBicID].colField,
+					rows = allBics[thisBicID].row
+					cols = allBics[thisBicID].col;
+
+				var docNames = {},
+					docNameIndex = [],
+					rNames = [],
+					cNames = [];
+
+				var docNameStr = "",
+					rNameStr = "",
+					cNameStr = "";
+
+				for (e in relDocs) {
+					docNameIndex.push(allDocs[relDocs[e]].docName);
+					docNames[allDocs[relDocs[e]].docName] = allDocs[relDocs[e]];
+					docNameStr += "<label class='btn btn-success btn-xs bicToDocLable' data-index='" + allDocs[relDocs[e]].docID 
+						+ "'>" + allDocs[relDocs[e]].docName + "</label> &nbsp";
+				}
+
+				for (e in rows) {
+					var tmp = rType + "_" + rows[e];
+					rNames.push(allEnts[tmp].entValue);
+					rNameStr += allEnts[tmp].entValue + ", ";
+				}
+
+				for (e in cols) {
+					var tmp = cType + "_" + cols[e];
+					cNames.push(allEnts[tmp].entValue);
+					cNameStr += allEnts[tmp].entValue + ", ";
+				}
+
+				console.log(docNames);
+
+				var docID = docNameIndex[0];
+				for (e in docNames) {
+					if (docNames[e].bicNum > docNames[docNameIndex[0]].bicNum)
+						docID = e;
+				}
+
+				// update the document view
+				biset.docViewReFresh(docID, docNames[e].docContent);
+
+				// append the bicluster ID
+				$("#bic_current_visit").html("Bicluster ID: " + allBics[thisBicID].bicID);
+
+				// append related documents
+				$("#bic_related_docs").html(docNameStr);
+
+				// append related entities
+				var tmpStr = rNameStr + cNameStr,
+					relEntNameStr = tmpStr.substr(0, tmpStr.length - 2);
+				$("#bic_related_ents").html(relEntNameStr);
 
 				// show document view
 				if ($("#doc_vis").is(":hidden") == true) {
@@ -1225,21 +1279,18 @@ biset.addBics = function(preListCanvas, bicListCanvas, listData, bicList, bicSta
 					$("#doc_ctrl_icon").addClass('glyphicon-remove-sign');
 				}
 
-				$(".doc-list").click(function(e){
-					console.log($(this).attr("data-index"));
-					var thisDocID = $(this).attr("data-index"),
-						thisDocContent = allDocs[thisDocID].docContent,
-						thisDocTitle = allDocs[thisDocID].docName;
+				// add click event handler for doc labels on the left
+				$(".bicToDocLable").click(function(){
+					var thisDocID = $(this).attr("data-index"), // e.g., DOC_1, DOC_12
+						thisDocName = allDocs[thisDocID].docName, // e.g., se5, fbi11
+						thisDocContent = allDocs[thisDocID].docContent;
 
-					// $("#biset_doc_title").html("<h3 class='panel-title'>" + thisDocTitle + "</h3>");
-					// $("#biset_doc_body").html(thisDocContent);
-
-					console.log("document");
-					biset.docViewFresh(thisDocTitle, thisDocContent);
-
+					biset.docViewReFresh(thisDocName, thisDocContent);
 				});
-			}
 
+				// add click event handler for each item in docID list
+				biset.docViewUpdateByClick(".doc-list");
+			}
 		}
 	});
 
@@ -1483,11 +1534,25 @@ biset.addBics = function(preListCanvas, bicListCanvas, listData, bicList, bicSta
 
 
 /*
+* update the document view by selecting a docID in the list
+* @param docListItem {string}, the css class of a doc list item
+*/
+biset.docViewUpdateByClick = function(docListItem) {
+	$(docListItem).click(function(e){
+	var thisDocID = $(this).attr("data-index"),
+		thisDocContent = allDocs[thisDocID].docContent,
+		thisDocTitle = allDocs[thisDocID].docName;
+
+		biset.docViewReFresh(thisDocTitle, thisDocContent);
+	});
+}  
+
+/*
 * refreshe the content of the document view
 * @param title {string}, the title of a doc
 * @param content {string}, content of a doc
 */
-biset.docViewFresh = function(title, content) {
+biset.docViewReFresh = function(title, content) {
 	$("#biset_doc_title").html("<h3 class='panel-title'>" + title + "</h3>");
 	$("#biset_doc_body").html(content);
 }

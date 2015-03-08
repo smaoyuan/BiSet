@@ -7,6 +7,9 @@ $("#doc_ctrl_icon").click(function(e){
 		// change the control icon
 		$("#doc_ctrl_icon").removeClass('glyphicon-folder-close');
 		$("#doc_ctrl_icon").addClass('glyphicon-remove-sign');
+
+		// add click event handler for each item in docID list
+		biset.docViewUpdateByClick(".doc-list");
 	}
 	else {
 		$("#doc_vis").slideToggle("hide");

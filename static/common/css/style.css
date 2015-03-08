@@ -360,18 +360,11 @@ div.BiclistControlGroup {
 /* avoid '[]' in the document name list */
 a.doc-list::before { content:''; }
 
-#biset_doc_panel {
-    margin-top: 10px;
-}
+.biset_docView_panel { margin-top: 10px; }
 
-#biset_doc_title {
+.biset_docView_panelTitle {
     padding-top: 2px;
     padding-bottom: 2px;
-}
-
-#biset_doc_body {
-    height: 310px;
-    overflow-y: auto; 
 }
 
 /*the list of document id*/
@@ -380,4 +373,9 @@ a.doc-list::before { content:''; }
     height: 300px; 
     margin-top: 15px;
     margin-left: 1px;
+}
+
+.biset_doc_view_panel_body {
+    height: 310px;
+    overflow-y: auto;
 }

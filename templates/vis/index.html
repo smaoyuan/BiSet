@@ -97,21 +97,36 @@
 			<div id="biset_doc" class="shade-container-light">
 				<span class="glyphicon glyphicon-folder-close btn btn-xs" id="doc_ctrl_icon"></span>
 			    <div id="doc_vis">
-			    	<div class="col-md-3" id="biset_doc_relevent_info"></div>
+			    	<div class="col-md-3" id="biset_doc_relevent_info">
+						<div class="panel panel-default biset_docView_panel" id="biset_doc_from_bic">
+							<div class="panel-heading biset_docView_panelTitle" id="biset_checked_bicID">
+								<h3 class="panel-title">Current Visited Bicluster</h3>
+							</div>
+							<div class="panel-body biset_doc_view_panel_body" id="biset_checked_bic_list">
+								<p id="bic_current_visit">Bicluster ID</p>
+								<hr>
+								<p>Related Documents</p>
+								<p id="bic_related_docs"></p>
+								<hr>
+								<p>Entities</p>
+								<p id="bic_related_ents"></p>
+							</div>
+						</div>			    		
+			    	</div>
 
-			    	<div class="col-md-6" id="biset_doc_content">
-						<div class="panel panel-default" id="biset_doc_panel">
-							<div class="panel-heading" id="biset_doc_title">
+			    	<div class="col-md-5" id="biset_doc_content">
+						<div class="panel panel-info biset_docView_panel" id="biset_doc_panel">
+							<div class="panel-heading biset_docView_panelTitle" id="biset_doc_title">
 								<h3 class="panel-title">Document ID</h3>
 							</div>
-							<div class="panel-body" id="biset_doc_body"></div>
+							<div class="panel-body biset_doc_view_panel_body" id="biset_doc_body"></div>
 						</div>
 			    	</div>
 
-			    	<div class="col-md-2" id="biset_doc_list">
+			    	<div class="col-md-3" id="biset_doc_list">
 			    		<form role="form">
 				    		<div class="input-group"> 
-								<span class="input-group-addon">File ID</span>
+								<span class="input-group-addon">Doc ID</span>
 								<input class="form-control" id="doc_name_search" type="search" placeholder="Search..."/>
 							</div>
 							<div id="doc_name_list" class="list-group"></div>
