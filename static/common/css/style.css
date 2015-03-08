@@ -373,3 +373,11 @@ a.doc-list::before { content:''; }
     height: 310px;
     overflow-y: auto; 
 }
+
+/*the list of document id*/
+#doc_name_list {
+    overflow-y: auto; 
+    height: 300px; 
+    margin-top: 15px;
+    margin-left: 1px;
+}

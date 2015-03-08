@@ -328,23 +328,15 @@ function loadVisHelper(resData) {
 	for (var i = 0; i < oriLinks.length; i++)
 		allOriLinks[oriLinks[i].oriLinkID] = oriLinks[i];
 
-
-	// add the container for the list of doc names
-	$("#biset_doc_list").append("<form role='form'>" + 
-		"<div class='input-group'>" + 
-			"<span class='input-group-addon'>File ID</span>" + 
-			"<input class='form-control' id='doc_name_search' type='search' placeholder='Search...'' />" +
-		"</div>" + 
-		"<div id='doc_name_list' class='list-group' style='overflow-y:auto; max-height:300px; margin-top:15px'>" +
-		"</div>" +
-	"</form>");
+	// remove previous data
+	// $("#doc_name_list").children().remove();
 
 	// initialize all docs
 	for (e in docs) {
 		allDocs[docs[e].docID] = docs[e];
 
 		// append document names
-		$("#doc_name_list").append("<a href='#' class='list-group-item doc-list' data-index='" + docs[e].docID + "' style='margin-left:0; padding-left:15px'>" +
+		$("#doc_name_list").append("<a href='#' class='list-group-item doc-list' data-index='" + docs[e].docID + "' style='margin-left:1px; padding-left:15px'>" +
 			docs[e].docName +
 		"</a>");
 	}
