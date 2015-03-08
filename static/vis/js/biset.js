@@ -118,6 +118,8 @@ var allEnts = {},
 	allLinks = {},
 	// a global list for all original links
 	allOriLinks = {},
+	// a global list of all docs
+	allDocs = {},
 	// number of list
 	selectedLists = [];
 
@@ -1210,6 +1212,8 @@ biset.addBics = function(preListCanvas, bicListCanvas, listData, bicList, bicSta
 			console.log(context);
 			var selItem = $(e.target).attr("data-index");
 			console.log(selItem);
+
+			console.log(allDocs);
 
 			// show document view
 			if ($("#doc_vis").is(":hidden") == true) {

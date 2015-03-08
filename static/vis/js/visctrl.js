@@ -12,7 +12,7 @@ $("#doc_ctrl_icon").click(function(e){
 		$("#doc_vis").slideToggle("hide");
 		// change the control icon
 		$("#doc_ctrl_icon").removeClass('glyphicon-remove-sign');
-		$("#doc_ctrl_icon").addClass('glyphicon-folder-close');		
+		$("#doc_ctrl_icon").addClass('glyphicon-folder-close');	
 	}
 });
 
@@ -305,7 +305,8 @@ function loadVisHelper(resData) {
 		linkList = resData.links,
 		entHighlightData = resData.highlight_ent,
 		networkData = resData.relNetwork,
-		oriLinks = resData.oriRelationsReduced;
+		oriLinks = resData.oriRelationsReduced,
+		docs = resData.docs;
 
 	console.log(resData);
 
@@ -326,6 +327,41 @@ function loadVisHelper(resData) {
 	// initialize all original links
 	for (var i = 0; i < oriLinks.length; i++)
 		allOriLinks[oriLinks[i].oriLinkID] = oriLinks[i];
+
+
+	// add the container for the list of doc names
+	$("#biset_doc_list").append("<form role='form'>" + 
+		"<div class='input-group'>" + 
+			"<span class='input-group-addon'>Name:</span>" + 
+			"<input class='form-control' id='doc_name_search' type='search' placeholder='Search...'' />" +
+		"</div>" + 
+		"<div id='doc_name_list' class='list-group' style='overflow-y: auto; max-height: 300px; margin-top:15px'>" +
+		"</div>" +
+	"</form>");
+
+	// initialize all docs
+	for (e in docs) {
+		allDocs[docs[e].docName] = docs[e];
+
+		// append document names
+		$("#doc_name_list").append("<a href='#' class='list-group-item' style='margin-left: 0; padding-left:15px'>" +
+			docs[e].docName + 
+		"</a>");
+	}
+
+
+    $('#doc_name_search').keyup(function () {
+
+    	console.log("here");
+
+        var rex = new RegExp($(this).val(), 'i');
+        $('.list-group-item').hide();
+        $('.list-group-item').filter(function () {
+            return rex.test($(this).text());
+        }).show();
+
+    });
+
 
 	// get selected dimensions
 	var selDims = [];

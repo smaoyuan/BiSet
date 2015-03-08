@@ -142,11 +142,9 @@ div.shade-container-light{
     box-shadow: 0 6px 12px rgba(0,0,0,.175);
     -moz-box-shadow: 0 6px 12px rgba(0,0,0,.175);
     background-clip: padding-box;
-    opacity: 0.6;
-    filter: alpha(opacity=60);
+    opacity: 0.85;
+    filter: alpha(opacity=85);
 }
-
-
 
 
 
@@ -336,7 +334,7 @@ div.BiclistControlGroup {
 #biset_doc {
     position: fixed;
     bottom: 3%;
-    right: 3%;
+    right: 2%;
 }
 
 #doc_ctrl_icon {
@@ -352,4 +350,8 @@ div.BiclistControlGroup {
     width: 1050px;
     height: 380px;
     border-radius: 5px;
+}
+
+#biset_doc_list {
+    margin-top: 10px;
 }
