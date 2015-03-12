@@ -253,7 +253,8 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
     	"<span class='orderCtrlLabel glyphicon glyphicon-sort-by-alphabet' id='list_" + listNum + "_ctrl_label'></span>" + 
     	"<select class='orderCtrl' id='list_" + listNum + "_sortCtrl'>" + 
     		"<option value='alph'>alphabeic</option>" +
-    		"<option value='freq'>frequency</option>" + 
+    		"<option value='freq'>frequency</option>" +
+    		"<option value='cluster'>edge-bundles</option>" + 
 		"</select>" + 
 	"</div>");
 
@@ -1680,6 +1681,10 @@ function sortList(aList, sortType) {
 				// 	.delay(10)
 				// 	.style("stroke", biset.colors.lineNColor);
 			});
+	}
+
+	if (sortType = "cluster") {
+		console.log("cluster!!!!");
 	}
 }
 
