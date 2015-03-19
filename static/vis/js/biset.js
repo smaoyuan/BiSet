@@ -139,16 +139,6 @@ var svgPos = canvas[0][0].getBoundingClientRect(),
 	svgCanvasOffset = { left: svgPos.left, top: svgPos.top };
 
 
-var getOffset = function(element) {
-        var $element = $(element[0][0]);
-        return {
-            left: $element.position().left,
-            top: $element.position().top,
-            width: element[0][0].getBoundingClientRect().width,
-            height: element[0][0].getBoundingClientRect().height,
-        };
-    }
-
 $('.selectpicker').selectpicker({
 	style: 'btn-default',
 	size: 10
@@ -166,43 +156,6 @@ $("#dataDimensionList").append(
     "<input type='checkbox' name='dimensions' value='org' id='d_org'> Organization<br />" +
     "<input type='checkbox' name='dimensions' value='misc' id='d_misc'> Misc<br />"     
 );
-
-
-// drag function for a d3 object
-biset.objDrag = d3.behavior.drag()
-    .origin(function() {
-    	// position of current selected item
-    	thisOffset = getOffset(d3.select(this));
-    	// position of the parent
-    	parentOffset = getOffset(d3.select(this.parentNode));
-    	return { x: thisOffset.left - parentOffset.left, y: thisOffset.top};
-    })
-    .on("dragstart", function (d) {
-    	draged = 1;
-        d3.event.sourceEvent.stopPropagation();
-        d3.select(this).classed("dragging", true);
-    })
-    .on("drag", function (d) {
-    	var dragX = d3.event.x,
-    		dragY = d3.event.y;
-
-    	// boundary check
-		if (dragY < 0)
-			dragY = 0;
-		if (dragX >= biset.entList.gap * 2)
-			dragX = biset.entList.gap * 2;
-		if (dragX + biset.entList.gap * 2 <= 0)
-			dragX = -biset.entList.gap * 2;
-		// move the element
-		d3.select(this).attr("transform", "translate(" + dragX + "," + dragY + ")");
-		// update related lines
-		biset.updateLink(connections);
-    })
-    .on("dragend", function (d) {
-    	draged = 0;
-    	biset.updateLink(connections);			            	
-        d3.select(this).classed("dragging", false);			                
-	});	
 
 
 /*
@@ -254,7 +207,6 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
     	"<select class='orderCtrl' id='list_" + listNum + "_sortCtrl'>" + 
     		"<option value='alph'>alphabeic</option>" +
     		"<option value='freq'>frequency</option>" +
-    		"<option value='cluster'>edge-bundles</option>" + 
 		"</select>" + 
 	"</div>");
 
@@ -264,12 +216,18 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 			bicMode = "bic_" + selectedLists[listNum - 1] + "_" + selectedLists[listNum],
 			linkMode = "link_" + selectedLists[listNum - 1] + "_" + selectedLists[listNum],
 			HybridMode = "hybrid_" + selectedLists[listNum - 1] + "_" + selectedLists[listNum];
+			ClusterMode = "cluster_" + selectedLists[listNum - 1] + "_" + selectedLists[listNum];
+			ClusterModeLeft = "clusterLeft_" + selectedLists[listNum - 1] + "_" + selectedLists[listNum];
+			ClusterModeRight = "clusterRight_" + selectedLists[listNum - 1] + "_" + selectedLists[listNum];
 
 		$("#biset_control").append("<div class='BiclistControlGroup'>" +
 	    	"<select class='bListCtrl' id='" + bListRGroupName + "'>" + 
 	    		"<option value='" + bicMode + "'>Bic Only Mode</option>" +
 	    		"<option value='" + linkMode + "'>Link Only Mode</option>" +
 	    		"<option value='" + HybridMode + "'>Hybrid Mode</option>" +
+	    		"<option value='" + ClusterMode + "'>Cluster Mode</option>" +
+	    		"<option value='" + ClusterModeLeft + "'>Cluster Mode Left</option>" +
+	    		"<option value='" + ClusterModeRight + "'>Cluster Mode Right</option>" +
 			"</select>" + 
 		"</div>");
 
@@ -1106,6 +1064,9 @@ biset.linksUpdateHelper = function(linkID, newColor, newWidth) { // newClass
 }
 
 
+//place the bic based on their entities positiones
+
+
 biset.addBics = function(preListCanvas, bicListCanvas, listData, bicList, bicStartPos, row, col, networkData) {
 		// total entities in bics
 	var	bicTotalEnts = [],
@@ -1147,34 +1108,33 @@ biset.addBics = function(preListCanvas, bicListCanvas, listData, bicList, bicSta
 		.attr("class", "bics")
   		.attr("transform", function(d, i) {
 
-  	// 		var cfield = d.colField,
-  	// 			rfield = d.rowField,
-  	// 			cols = d.col,
-  	// 			rows = d.row,
-  	// 			yPos = 0,
-  	// 			xPos = 0;
+  			var cfield = d.colField,
+  				rfield = d.rowField,
+  				cols = d.col,
+  				rows = d.row,
+  				yPos = 0,
+  				xPos = 0;
 
-			// // y pos of the row ents
-			// for (var j = 0; j < rows.length; j++){
-			// 	var rid = rfield + "_" + rows[j],
-			// 		rY = d3.select("#" + rid)[0][0].getBoundingClientRect().top;
-			// 	yPos += rY;
-			// }
+			// y pos of the row ents
+			for (var j = 0; j < rows.length; j++){
+				var rid = rfield + "_" + rows[j],
+					rY = d3.select("#" + rid)[0][0].getBoundingClientRect().top;
+				yPos += rY;
+			}
 
-			// // y pos of the col ents
-			// for (var k = 0; k < cols.length; k++) {
-			// 	var cid = cfield + "_" + cols[k],
-			// 		cY = d3.select("#" + cid)[0][0].getBoundingClientRect().top;
-			// 	yPos += cY;
-			// }
+			// y pos of the col ents
+			for (var k = 0; k < cols.length; k++) {
+				var cid = cfield + "_" + cols[k],
+					cY = d3.select("#" + cid)[0][0].getBoundingClientRect().top;
+				yPos += cY;
+			}
 
-			// // xPos = (biset.entList.gap * 4) * cols.length / (rows.length + cols.length) - biset.entList.gap * 2;
-			// yPos = yPos / (rows.length + cols.length);
-
-  	// 		return "translate(" + xPos + "," + yPos + ")";
-
+			// xPos = (biset.entList.gap * 4) * cols.length / (rows.length + cols.length) - biset.entList.gap * 2;
+			yPos = yPos / (rows.length + cols.length);
+			d.yPos = yPos;
+  			return "translate(" + xPos + "," + yPos + ")";
   			// original position
-  			return "translate(" + 0 + "," + (i + 1) * biset.bic.frameHeight + ")"; 
+  			// return "translate(" + 0 + "," + (i + 1) * biset.bic.frameHeight + ")"; 
   		});
 
 	// proportion of row
@@ -1318,14 +1278,6 @@ biset.addBics = function(preListCanvas, bicListCanvas, listData, bicList, bicSta
 
 		biset.barUpdate("#" + thisID + "_frame", "", biset.colors.bicFrameHColor, 2);
 
-		// console.log(d3.select("#" + thisID));
-
-		// d3.select("#" + thisID)
-		// 	.append("circle")
-		// 	.attr("cx", function(d) { return bicEntsCount(d.totalEntNum) + 2; })
-		// 	.attr("cy", 5)
-		// 	.attr("r", 4)
-		// 	.style("fill", "red");
     });
 
     // mouseout event for bic
@@ -1357,16 +1309,17 @@ biset.addBics = function(preListCanvas, bicListCanvas, listData, bicList, bicSta
     // click event for bic
     bics.on("click", function(d) {
 	
-		var // bicID = d.bicID,
-			bicVisID = d.bicIDCmp,
+		console.log("Bic Click");
+
+		var bicVisID = d.bicIDCmp,
 			lListType = d.rowField,
 			rListType = d.colField;
 		
-		var leftList =[]; //only need update the visualOrder
-		var rightList =[];//only need update the visualOrder
-		var idx = 0;
-		var leftItemList = [];
-		var rightItemList = [];
+		var leftList =[],//only need update the visualOrder
+			rightList =[],//only need update the visualOrder
+			idx = 0,
+			leftItemList = [],
+			rightItemList = [];
 		
 		//prepare the left part data
 		d3.selectAll("." + lListType).each(function(d){
@@ -1397,11 +1350,11 @@ biset.addBics = function(preListCanvas, bicListCanvas, listData, bicList, bicSta
 		leftItemList.sort(function(a, b){ return a.yPos - b.yPos; });
 		rightItemList.sort(function(a, b){ return a.yPos - b.yPos; });
 		
-		var item_set_left = new Set(d.row);
-		var item_set_right = new Set(d.col);
-		var pos = -1;
-		var newListLeft = [];
-		var newListRight = [];
+		var item_set_left = new Set(d.row),
+			item_set_right = new Set(d.col),
+			pos = -1,
+			newListLeft = [],
+			newListRight = [];
 		
 		//prepare the data
 		for(var i = 0; i < leftItemList.length; i++) {
@@ -1422,8 +1375,28 @@ biset.addBics = function(preListCanvas, bicListCanvas, listData, bicList, bicSta
 			newListRight.push(item);
 		}
 		
+		var avgPos = 0;
+		avgPos = biset.entList.topGap + item_set_left.size/2*biset.entity.height;
+		var inc_num = 0;
+		while(avgPos < d.yPos){
+			if(avgPos + biset.entity.height > d.yPos)
+				break;
+			else{
+				inc_num++;
+				avgPos += biset.entity.height;
+			}
+		}
+		if(avgPos+biset.entity.height - d.yPos < d.yPos - avgPos) {
+			inc_num++;
+			avgPos += biset.entity.height;
+		}
+
+		if(inc_num+item_set_left.size >= leftItemList.length)
+			inc_num = leftItemList.length - item_set_left.size;
 		//shuffling the left part
-		var pos_2 = item_set_left.size;
+		//var pos_2 = item_set_left.size;
+		var pos_2 = 0;
+		pos = inc_num-1;
 		for(var i = 0; i < leftItemList.length; i++) {
 			if(item_set_left.has(leftItemList[i].id)) {
 				pos++;
@@ -1432,6 +1405,8 @@ biset.addBics = function(preListCanvas, bicListCanvas, listData, bicList, bicSta
 				newListLeft[pos]['index'] = leftItemList[i]['index'];
 			}
 			else {
+				if(pos_2 == inc_num)
+					pos_2 += item_set_left.size;
 				newListLeft[pos_2]['visualIndex'] = pos_2;
 				newListLeft[pos_2]['id'] = leftItemList[i]['id'];
 				newListLeft[pos_2]['index'] = leftItemList[i]['index'];
@@ -1442,6 +1417,25 @@ biset.addBics = function(preListCanvas, bicListCanvas, listData, bicList, bicSta
 		// shuffling the right part
 		pos = -1;
 		pos_2 = item_set_right.size;
+		avgPos = biset.entList.topGap + item_set_right.size/2*biset.entity.height;
+		inc_num = 0;
+		while(avgPos < d.yPos) {
+			if(avgPos + biset.entity.height > d.yPos)
+				break;
+			else{
+				inc_num++;
+				avgPos += biset.entity.height;
+			}
+		}
+		if(avgPos+biset.entity.height - d.yPos < d.yPos - avgPos) {
+			inc_num++;
+			avgPos += biset.entity.height;
+		}
+
+		if(inc_num+item_set_right.size >= rightItemList.length)
+			inc_num = rightItemList.length - item_set_right.size;
+		pos_2 = 0;
+		pos = inc_num-1;
 		for(var i = 0; i < rightItemList.length; i++) {
 			if(item_set_right.has(rightItemList[i].id)) {
 				pos++;
@@ -1450,6 +1444,8 @@ biset.addBics = function(preListCanvas, bicListCanvas, listData, bicList, bicSta
 				newListRight[pos]['index'] = rightItemList[i]['index'];
 			}
 			else {
+				if(pos_2 == inc_num)
+					pos_2 += item_set_right.size;
 				newListRight[pos_2]['visualIndex'] = pos_2;
 				newListRight[pos_2]['id'] = rightItemList[i]['id'];
 				newListRight[pos_2]['index'] = rightItemList[i]['index'];
@@ -1483,7 +1479,6 @@ biset.addBics = function(preListCanvas, bicListCanvas, listData, bicList, bicSta
 				d.yPos = yAxis(d.entVisualOrder);
 				return "translate(2," + yAxis(d.entVisualOrder) + ")";
 			})
-
 			.call(endall, function() {
 				biset.updateLink(connections);
 			});
@@ -1498,7 +1493,6 @@ biset.addBics = function(preListCanvas, bicListCanvas, listData, bicList, bicSta
 				d.yPos = yAxis(d.entVisualOrder);
 				return "translate(2," + yAxis(d.entVisualOrder) + ")";
 			})
-
 			.call(endall, function() {
 				biset.updateLink(connections);
 			});
@@ -1569,6 +1563,46 @@ function endall(transition, callback) {
 
 
 /*
+* order bics based on entity
+* @param aList {object}, info of a list
+*/
+biset.BicOrderBasedOnEntity = function(aList){
+	var relatedBic = [];
+	var clickedList = aList.dataType;
+	
+	for(e in allBics) {
+		if(allBics[e].bicIDCmp.indexOf(clickedList) >=0)
+			relatedBic.push(allBics[e]);
+	}
+	
+	for(e in relatedBic) {
+		var yPos = 0;
+		var lType = relatedBic[e].colField;
+		var rType = relatedBic[e].rowField;
+		var bic_name = rType +"_" + lType + "_bic_" + relatedBic[e].bicID.toString();
+		console.log(bic_name);
+		for(e2 in relatedBic[e].col) {
+			var enty_id = lType + "_" + relatedBic[e].col[e2];
+			yPos += allEnts[enty_id].yPos; 
+		}
+		
+		for(e2 in relatedBic[e].row) {
+			var enty_id = rType + "_" + relatedBic[e].row[e2];
+			yPos += allEnts[enty_id].yPos;
+		}
+
+		yPos = yPos/(relatedBic[e].col.length+ relatedBic[e].row.length);
+		d3.select("#" + bic_name).transition()
+			.attr("transform", function(d) {
+				d.xPos = 2;
+				d.yPos = yPos;
+				return "translate(2," + d.yPos + ")";
+			});
+	}
+}
+
+
+/*
 * sort a list visually
 * @param aList, svg objects in a list selected by d3 with associated data
 * @param sortType, sorting orders
@@ -1604,7 +1638,7 @@ function sortList(aList, sortType) {
 	// sort by frequency
 	if (sortType == "freq") {
 		dataIndex.sort(function(a, b) { return a - b; });
-
+ 
 		aList.yAxis.domain(dataIndex);
 		// dataFrequency.sort(function(a, b) { return b - a; });
 		// new positions for each entity
@@ -1620,14 +1654,17 @@ function sortList(aList, sortType) {
 				// return "translate(" + aList.startPos + "," + aList.yAxis(d.index) + ")";
 				return "translate(2," + aList.yAxis(d.index) + ")";
 			})
+			 
 
 			.call(endall, function() {
 
 				var allBics = d3.selectAll(".bics"),
 					bicToBeMove = [];
-
-				console.log(allBics);
-
+					
+				//console.log("test");
+				//console.log(allBics);
+				 
+				 
 				for (var i = 0; i < allBics[0].length; i++) {
 					// console.log(allBics[0][i]);
 					// console.log(d3.select(allBics[i]).attr("id"));
@@ -1652,6 +1689,11 @@ function sortList(aList, sortType) {
 				// 	.delay(150)
 				// 	.style("stroke", biset.colors.lineNColor);
 			});
+			
+		
+		biset.BicOrderBasedOnEntity(aList);
+		
+		 
 	}
 
 	// sort by alphabeic order
@@ -1675,12 +1717,17 @@ function sortList(aList, sortType) {
 			})
 			.call(endall, function() { 
 			    biset.updateLink(connections);
-
 				// hide the selected line
 				// d3.selectAll(".linkSelected").transition()
 				// 	.delay(10)
 				// 	.style("stroke", biset.colors.lineNColor);
 			});
+
+		
+		biset.BicOrderBasedOnEntity(aList); 
+
+
+
 	}
 
 	if (sortType = "cluster") {
@@ -1733,26 +1780,315 @@ biset.addBicListCtrl = function(lsts) {
 				// get the selected mode
 				selMode = selValue[0];
 
-			// console.log("now:::::");
-			// console.log(selMode);
+			 
+			console.log(selMode);
+			if(selMode.indexOf("cluster") < 0)
+				biset.connectionDisplayed(field1, field2, selMode, preMode);
+			else{
 
-			// console.log("previous:::::");
-			// console.log(preMode); 
+				var cluster_type = 0;
+				if(selMode == "clusterLeft")
+					cluster_type = 1;
+				else if(selMode == "clusterRight")
+					cluster_type = 2;
+				//step one
+				//obtain the correspoing colom of bic
+				var cur_bic = [];
+				var idx_left = 0;
+				var idx_right = 0;
+				for( e in allBics){
+					if(e.indexOf(field1) >=0 && e.indexOf(field2) >=0){
+						cur_bic.push(allBics[e]);
+					}
+				}
 
-			// console.log(allLinks);
+				 //sort based on the left item values from large to small
+				 cur_bic.sort(function(a, b) { return b.totalEntNum - a.totalEntNum; });
+				 //console.log(cur_bic);
+				 var lListType;
+				 var rListType;
+				 //generate map, to shuffle the left entities based on bic order
+				 var leftHashTable ={};
+				 var rightHashTable={};
+				 for(e in cur_bic){
+				 	 for(e2 in cur_bic[e].row){
+				 	 	lListType = cur_bic[e].rowField;
+				 	 	if(leftHashTable[cur_bic[e].row[e2]] == undefined)
+				 	 		leftHashTable[parseInt(cur_bic[e].row[e2])] = idx_left++;
+				 	 }
+				 	 for(e2 in cur_bic[e].col){
+				 	 	rListType = cur_bic[e].colField;
+				 	 	if(rightHashTable[cur_bic[e].col[e2]] == undefined)
+				 	 		rightHashTable[parseInt(cur_bic[e].col[e2])] = idx_right++;
+				 	 }
+				 }
 
-			// var bicsFound = biset.findBicsInBetween(field1, field2);
-			// console.log(bicsFound);
+				 var arr_left = [];
+				 var leftList =[];
+				 var rightList =[];
+				 var arr_right =[];
+				 var idx_index = -1;
+				 //other isolated entities of the left part
+				 d3.selectAll("." + lListType).each(function(d){
+					var index = d3.select(this).attr("id");
+					leftList.push(d);
+					var item= {};
+					idx_index++;
+					item['yPos'] = d.yPos;
+					item['id'] = d.entityID;
+					item['index'] = idx_index;
+					item['order'] = -1;
+					item['visualOrder'] = -1;
+					if(leftHashTable[d.entityID] == undefined )
+						 item['order'] = idx_left++;
+					else
+						 item['order'] = leftHashTable[d.entityID];
+					arr_left.push(item);
+				});
+			
+				idx_index = -1; 	
+				d3.selectAll("." + rListType).each(function(d){
+					var index = d3.select(this).attr("id");
+					rightList.push(d);
+					var item= {};
+					idx_index++;
+					item['yPos'] = d.yPos;
+					item['id'] = d.entityID;
+					item['index'] = idx_index;
+					item['order'] = -1;
+					item['visualOrder'] = -1;
+					if(rightHashTable[d.entityID] == undefined )
+						 item['order'] = idx_right++;
+					else
+						 item['order'] = rightHashTable[d.entityID];
+					arr_right.push(item);
+				});
 
-			// var oriLinksFound = biset.findOriLinksInBetween(field1, field2);
-			// console.log(oriLinksFound);
 
-			// var linksFound = biset.findLinksInBetween(field1, field2);
-			// console.log(linksFound);
+				//for each cluster do the calculaton to shuffle in the cluster
+				var process_item = new Set();
+				var bic_prefix;
+				//if(lListType > rListType)
+					bic_prefix = lListType + "_" + rListType + "_bic_";
+				//else bic_prefix = rListType + "_" + lListType + "_bic_";
+				 
+				  
+				for(e in cur_bic){
+					 var cur_range = [];
+					 var cur_bic_id = cur_bic[e].bicID;
+					 for(e2 in cur_bic[e].row){
+					 	var ent_val = cur_bic[e].row[e2];
+					 	lListType = cur_bic[e].rowField;
+					 	var ent_id = cur_bic[e].rowField + "_" + ent_val;
+					 	if(!process_item.has(ent_id))
+				 	 	{
+				 	 		var bic_cluster = allEnts[ent_id].bicSetsRight;
+				 	 		var bic_order = [];
+				 	 		 
+				 	 		for(e3 in bic_cluster){
+				 	 			var bic_id = bic_cluster[e3];
+				 	 			 
+				 	 			if(bic_id != cur_bic_id)
+				 	 			{
+				 	 				var bic_name = bic_prefix + bic_id.toString();	
+				 	 				bic_order.push(allBics[bic_name].index);
+				 	 			}
+				 	 		}
+				 	 		var item = {};
+				 	 		if(bic_order.length == 0){
+				 	 			item.value = 0;
+				 	 			item.id = ent_val;
+				 	 			cur_range.push(item);
+				 	 		} else {
+				 	 			var sum = bic_order.reduce(function (a, b){ return a + b;});
+				 	 			var avg = sum/bic_order.length;
+				 	 			item.value = avg;
+				 	 			item.id = ent_val;
+				 	 			cur_range.push(item);
+				 	 		}
 
-			// var findOriLinks = biset.findLinksInBic("phone_org_bic_263");
-			// console.log(findOriLinks);
-			biset.connectionDisplayed(field1, field2, selMode, preMode);
+				 	 		process_item.add(ent_id);
+				 	 	}
+				 	 }
+
+				 	 //shuffle the result based on the cur_range's 
+				 	  cur_range.sort(function(a, b) { return a.value - b.value; });
+				 	  var id_set = new Set();
+				 	  for(var i = 0; i < cur_range.length; i++)
+				 	  	 id_set.add(cur_range[i].id);
+				 	  var cur_order = [];
+				 	  for(var i = 0; i < arr_left.length; i++){
+				 	  	if(id_set.has(arr_left[i].id))
+				 	  		cur_order.push(arr_left[i].order);
+				 	  }
+				 	  cur_order.sort(function(a, b){return a - b;});
+				 	  var id_map = {};
+				 	  for(var i = 0; i < cur_order.length; i++){
+				 	  		id_map[cur_range[i].id] = cur_order[i];
+				 	  }
+				 	  for(var i = 0; i < arr_left.length; i++){
+				 	  	if(id_set.has(arr_left[i].id))
+				 	  		arr_left[i].order = id_map[arr_left[i].id];
+				 	  }
+
+				 	  // the right side 
+				 	 cur_range.length = 0;
+					 for(e2 in cur_bic[e].col){
+					 	var ent_val = cur_bic[e].col[e2];
+					 	rListType = cur_bic[e].colField;
+					 	var ent_id = cur_bic[e].colField + "_" + ent_val;
+					 	if(!process_item.has(ent_id))
+				 	 	{
+				 	 		var bic_cluster = allEnts[ent_id].bicSetsLeft;
+				 	 		var bic_order = [];
+				 	 		 
+				 	 		for(e3 in bic_cluster){
+				 	 			var bic_id = bic_cluster[e3];
+				 	 			 
+				 	 			if(bic_id != cur_bic_id)
+				 	 			{
+				 	 				var bic_name = bic_prefix + bic_id.toString();	
+				 	 				bic_order.push(allBics[bic_name].index);
+				 	 			}
+				 	 		}
+				 	 		var item = {};
+				 	 		if(bic_order.length == 0){
+				 	 			item.value = 0;
+				 	 			item.id = ent_val;
+				 	 			cur_range.push(item);
+				 	 		} else {
+				 	 			var sum = bic_order.reduce(function (a, b){ return a + b;});
+				 	 			var avg = sum/bic_order.length;
+				 	 			item.value = avg;
+				 	 			item.id = ent_val;
+				 	 			cur_range.push(item);
+				 	 		}
+
+				 	 		process_item.add(ent_id);
+				 	 	}
+				 	 }
+
+				 	 //shuffle the result based on the cur_range's 
+				 	  cur_range.sort(function(a, b) { return a.value - b.value; });
+				 	  id_set.clear();
+				 	  for(var i = 0; i < cur_range.length; i++)
+				 	  	 id_set.add(cur_range[i].id);
+				 	  cur_order.length = 0;
+				 	  for(var i = 0; i < arr_right.length; i++){
+				 	  	if(id_set.has(arr_right[i].id))
+				 	  		cur_order.push(arr_right[i].order);
+				 	  }
+				 	  cur_order.sort(function(a, b){return a - b;});
+				 	  id_map = {};
+				 	  for(var i = 0; i < cur_order.length; i++){
+				 	  		id_map[cur_range[i].id] = cur_order[i];
+				 	  }
+				 	  for(var i = 0; i < arr_right.length; i++){
+				 	  	if(id_set.has(arr_right[i].id))
+				 	  		arr_right[i].order = id_map[arr_right[i].id];
+				 	  }
+				}   	
+				  
+				
+				// arr_left.sort(function(a, b) { return a.order - b.order; });
+				 var yAxisOrderLeft = [];
+				for(var i = 0; i < arr_left.length; i++)
+					yAxisOrderLeft.push(i);
+				 
+				for(var i = 0; i < arr_left.length; i++)
+					leftList[arr_left[i].index].entVisualOrder = arr_left[i].order;
+				 	 
+ 
+				var yAxis = d3.scale.ordinal()
+		    	.domain(yAxisOrderLeft)
+		    	.rangePoints([biset.entList.topGap, leftList.length * biset.entity.height + biset.entList.topGap], 0); 
+			 
+
+				d3.selectAll("." + lListType).transition()
+					.attr("transform", function(d, i) {
+						d.xPos = 2;
+						d.yPos = yAxis(d.entVisualOrder);
+						return "translate(2," + yAxis(d.entVisualOrder) + ")";
+					})
+
+					.call(endall, function() {
+						biset.updateLink(connections);
+					});
+
+
+
+
+				var yAxisOrderRight = [];
+				for(var i = 0; i < arr_right.length; i++)
+					yAxisOrderRight.push(i);
+				 
+				for(var i = 0; i < arr_right.length; i++)
+					rightList[arr_right[i].index].entVisualOrder = arr_right[i].order;
+				 	 
+ 
+				yAxis = d3.scale.ordinal()
+		    	.domain(yAxisOrderRight)
+		    	.rangePoints([biset.entList.topGap, rightList.length * biset.entity.height + biset.entList.topGap], 0); 
+			 
+
+				d3.selectAll("." + rListType).transition()
+					.attr("transform", function(d, i) {
+						d.xPos = 2;
+						d.yPos = yAxis(d.entVisualOrder);
+						return "translate(2," + yAxis(d.entVisualOrder) + ")";
+					})
+
+					.call(endall, function() {
+						biset.updateLink(connections);
+					});	
+
+
+				//move the bic_cluster
+				for(e in cur_bic)
+				{
+					var bic_name = bic_prefix + cur_bic[e].bicID.toString();
+					var y_pos = 0;
+					//var right_pos = 0;
+					var num_items = 0;
+					if(cluster_type == 0 || cluster_type == 1)
+					{	
+						for(e2 in cur_bic[e].row){
+							var ent_val = cur_bic[e].row[e2];
+							var ent_id = cur_bic[e].rowField + "_" + ent_val;
+							y_pos += allEnts[ent_id].yPos;
+							num_items++;
+						}
+					}
+					if(cluster_type == 0 || cluster_type == 2)
+					{
+						for(e2 in cur_bic[e].col){
+							var ent_val = cur_bic[e].col[e2];
+							var ent_id = cur_bic[e].colField + "_" + ent_val;
+							y_pos += allEnts[ent_id].yPos;
+							num_items++;
+						}
+					}
+
+
+					y_pos = y_pos/num_items;
+
+					d3.select("#" + bic_name).transition()
+					.attr("transform", function(d) {
+						d.xPos = 2;
+						d.yPos = y_pos;
+						return "translate(2," + d.yPos + ")";
+					});	
+
+				}
+				/*
+				d3.select("#" + bic_prefix_id).transition()
+				.attr("transform", function(d) {
+					d.xPos = 2;
+					d.yPos = 100;
+					return "translate(2," + d.yPos + ")";
+				});	*/
+
+			}
 		});
 	}
 }
@@ -1984,6 +2320,59 @@ biset.findLinksInBetween = function(ldomain, rdomain) {
 
 
 /*
+* get coordinates of a svg object
+* @param element {d3 object}, a d3 object
+*/
+biset.getOffset = function(element) {
+    var $element = $(element[0][0]);
+    return {
+        left: $element.position().left,
+        top: $element.position().top,
+        width: element[0][0].getBoundingClientRect().width,
+        height: element[0][0].getBoundingClientRect().height,
+    };
+}
+
+// drag function for a d3 object
+biset.objDrag = d3.behavior.drag()
+    .origin(function() {
+    	// position of current selected item
+    	thisOffset = biset.getOffset(d3.select(this));
+    	// position of the parent
+    	parentOffset = biset.getOffset(d3.select(this.parentNode));
+    	return { x: thisOffset.left - parentOffset.left, y: thisOffset.top};
+    })
+    .on("dragstart", function (d) {
+    	draged = 1;
+        d3.event.sourceEvent.stopPropagation();
+        d3.select(this).classed("dragging", true);
+    })
+    .on("drag", function (d) {
+    	var dragX = d3.event.x,
+    		dragY = d3.event.y;
+
+    	// boundary check
+		if (dragY < 0)
+			dragY = 0;
+		if (dragX >= biset.entList.gap * 2)
+			dragX = biset.entList.gap * 2;
+		if (dragX + biset.entList.gap * 2 <= 0)
+			dragX = -biset.entList.gap * 2;
+		// move the element
+		d3.select(this).attr("transform", "translate(" + dragX + "," + dragY + ")");
+		// log the y position
+		d.yPos = dragY;
+		// update related lines
+		biset.updateLink(connections);
+    })
+    .on("dragend", function (d) {
+    	draged = 0;
+    	biset.updateLink(connections);			            	
+        d3.select(this).classed("dragging", false);			                
+	});
+
+
+/*
 * add a line
 * reference: http://raphaeljs.com/graffle.html
 * @param obj1, the 1st object
@@ -2013,8 +2402,8 @@ biset.addLink = function (obj1, obj2, line, d3obj, bg) {
     //     {x: bb2.left - 1 - svgPos.left, y: bb2.top + bb2.height / 2 - svgPos.top},
     //     {x: bb2.left + bb2.width + 1 - svgPos.left, y: bb2.top + bb2.height / 2 - svgPos.top}],
 
-	var bb1 = getOffset(obj1),
-        bb2 = getOffset(obj2),
+	var bb1 = biset.getOffset(obj1),
+        bb2 = biset.getOffset(obj2),
 
         p = [{x: bb1.left + bb1.width / 2, y: bb1.top - 1},
         {x: bb1.left + bb1.width / 2, y: bb1.top + bb1.height + 1},
@@ -2096,7 +2485,7 @@ biset.addOriginalLinks = function(linkLsts) {
 		var obj1 = d3.select("#" + obj1ID),
 			obj2 = d3.select("#" + obj2ID);
 		
-		connections.push(biset.addLink(obj1, obj2, biset.colors.lineNColor, canvas));
+		// connections.push(biset.addLink(obj1, obj2, biset.colors.lineNColor, canvas));
 	}
 }
 
@@ -2178,37 +2567,3 @@ Array.min = function(array){
     return Math.min.apply(Math, array);
 };
 
-
-// http://bl.ocks.org/alignedleft/9612839
-//Moves SVG elements to the end of their container, so they appear "on top".
-//Achieves a nice, smooth fade by duplicating the clicked element, moving the
-//dupe to the front, then fading it in, while fading out the original element
-//at the same time.  Tricky!
-var fadeToFront = function() {
-
-	//Select this element, that we want to move to front
-	var orig = d3.select(this);
-	var origNode = orig.node();
-	
-	//Clone it, and append the copy on "top" (meaning, at the end of
-	//the parent element, which is <svg> in this case)
-	var dupe = d3.select(origNode.parentNode.appendChild(origNode.cloneNode(true), origNode.nextSibling));
-
-	//Make the new element transparent immediately, then fade it in over time
-	dupe.style("opacity", 0.0)
-		// .transition()
-		// .duration(speed)
-		.style("opacity", 1.0)
-		.each("end", function() {
-
-			//When the fade-in is complete, add the click event…
-			d3.select(this).on("click", function() {
-				d3.select(this).each(fadeToFront);
-			});
-
-			//…and delete the original
-			orig.remove();
-
-		});
-
-}
