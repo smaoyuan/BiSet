@@ -962,9 +962,14 @@ biset.entsUpdate = function(entSet, entValList, updateType) {
 
 	if (updateType == "ent") {
 		entSet.forEach(function(e) {
-			var alfaVal = 0.15 + 0.08 * (entValList[e] - 1),
-				colEntNewColor = "rgba(228, 122, 30, " + alfaVal + ")";
-			biset.barUpdate("#" + e + "_frame", colEntNewColor, "", ""); 
+			if (entValList[e] > 0) {
+				var alfaVal = 0.15 + 0.08 * (entValList[e] - 1),
+					colEntNewColor = "rgba(228, 122, 30, " + alfaVal + ")";
+				biset.barUpdate("#" + e + "_frame", colEntNewColor, "", "");				
+			}
+			else
+				// change back to normal color
+				biset.barUpdate("#" + e + "_frame", biset.colors.entNormal, "", "");
 		});
 	}
 	else if (updateType == "bic") {
@@ -1255,6 +1260,40 @@ biset.addBics = function(preListCanvas, bicListCanvas, listData, bicList, bicSta
 		}
 	});
 
+/*
+* find all related ent id for a bic
+* @param bicID {string}, a bic id
+* @param allBics {map}, a dictionary of all bic data
+* @retrun {array}, an array of ent ids
+*/
+biset.findEntIDsInBic = function(bicID, allBics) {
+	var thisBic = allBics[bicID],
+		lType = thisBic.rowField,
+		rType = thisBic.colField,
+		rows = thisBic.row,
+		cols = thisBic.col,
+		lEntIDs = [],
+		rEntIDs = [],
+		allEntIDs = [],
+		entIDsInThisBic = {};
+
+	for (var i = 0; i < rows.length; i++) {
+		lEntIDs.push(lType + "_" + rows[i]);
+		allEntIDs.push(lType + "_" + rows[i]);
+	}
+
+	for (var j = 0; j < cols.length; j++) {
+		rEntIDs.push(rType + "_" + cols[j]);
+		allEntIDs.push(rType + "_" + cols[j]);
+	}
+
+	entIDsInThisBic.leftEnts = lEntIDs;
+	entIDsInThisBic.rightEnts = rEntIDs;
+	entIDsInThisBic.allEnts = allEntIDs;
+
+	return entIDsInThisBic;
+}
+
 
     // mouseover event for bic
     bics.on("mouseover", function(d) {
@@ -1265,6 +1304,18 @@ biset.addBics = function(preListCanvas, bicListCanvas, listData, bicList, bicSta
 		var relInfo = biset.findAllCons(thisID, networkData, entPathCaled),
 			nodes = relInfo.ents,
 			links = relInfo.paths;
+
+		var entsInfo = biset.findEntIDsInBic(thisID, allBics),
+			entIDs = entsInfo.allEnts;
+
+		for (var i = 0; i < entIDs.length; i++) {
+			highlightEntSet.add(entIDs[i]);
+			allEnts[entIDs[i]].numCoSelected += 1;
+			highlightEntList[entIDs[i]] = allEnts[entIDs[i]].numCoSelected;
+		}
+
+		// update the color of ents in highlight set
+		biset.entsUpdate(highlightEntSet, highlightEntList, "ent");
 
 		links.forEach(function(lk){
 			if (lk.indexOf(thisID) >= 0) {
@@ -1289,6 +1340,23 @@ biset.addBics = function(preListCanvas, bicListCanvas, listData, bicList, bicSta
 			nodes = relInfo.ents,
 			links = relInfo.paths;
 
+		var entsInfo = biset.findEntIDsInBic(thisID, allBics),
+			entIDs = entsInfo.allEnts;
+
+		for (var i = 0; i < entIDs.length; i++) {
+			highlightEntSet.add(entIDs[i]);
+			allEnts[entIDs[i]].numCoSelected -= 1;
+			highlightEntList[entIDs[i]] = allEnts[entIDs[i]].numCoSelected;
+		}
+
+		// console.log(highlightEntList);
+
+		// update the color of ents in highlight set
+		biset.entsUpdate(highlightEntSet, highlightEntList, "ent");
+		// unhighlight the rest nodes
+		// biset.entsBackToNormal(allEnts, "ent");
+
+
 		links.forEach(function(lk) {
 			if (lk.indexOf(thisID) >= 0) {
 				allLinks[lk].linkNumCoSelected -= 1;
@@ -1309,8 +1377,6 @@ biset.addBics = function(preListCanvas, bicListCanvas, listData, bicList, bicSta
     // click event for bic
     bics.on("click", function(d) {
 	
-		console.log("Bic Click");
-
 		var bicVisID = d.bicIDCmp,
 			lListType = d.rowField,
 			rListType = d.colField;
@@ -1479,9 +1545,7 @@ biset.addBics = function(preListCanvas, bicListCanvas, listData, bicList, bicSta
 				d.yPos = yAxis(d.entVisualOrder);
 				return "translate(2," + yAxis(d.entVisualOrder) + ")";
 			})
-			.call(endall, function() {
-				biset.updateLink(connections);
-			});
+			.call(endall, function(){ biset.updateLink(connections); });
 			 
 		yAxis = d3.scale.ordinal()
 	    	.domain(yAxisOrderRight)
@@ -1493,9 +1557,7 @@ biset.addBics = function(preListCanvas, bicListCanvas, listData, bicList, bicSta
 				d.yPos = yAxis(d.entVisualOrder);
 				return "translate(2," + yAxis(d.entVisualOrder) + ")";
 			})
-			.call(endall, function() {
-				biset.updateLink(connections);
-			});
+			.call(endall, function(){ biset.updateLink(connections); });
     });
 
     // add links between bic and ent
@@ -1508,20 +1570,19 @@ biset.addBics = function(preListCanvas, bicListCanvas, listData, bicList, bicSta
 
 		for (var j = 0; j < rowIDs.length; j++) {
 			var obj1 = d3.select("#" + rowType + "_" + rowIDs[j]);
-				obj2 = d3.select("#" + rowType + "_" + colType + "_bic_" + bicID);
-			// append lines to previous list g
-			connections.push(biset.addLink(obj1, obj2, biset.colors.lineNColor, canvas));
-			// obj2.attr({cursor: "move"});
+				obj2 = d3.select("#" + rowType + "_" + colType + "_bic_" + bicID),
+				lineObj = biset.addLink(obj1, obj2, biset.colors.lineNColor, canvas);
+
+			connections[lineObj.lineID] = lineObj;
 			obj2.call(biset.objDrag);
 		}
 
 		for (var k = 0; k < colIDs.length; k++) {
 			var obj1 = d3.select("#" + rowType + "_" + colType + "_bic_" + bicID),
-				obj2 = d3.select("#" + colType + "_" + colIDs[k]);
+				obj2 = d3.select("#" + colType + "_" + colIDs[k]),
+				lineObj = biset.addLink(obj1, obj2, biset.colors.lineNColor, canvas);
 
-			// append lines to previous list g
-			connections.push(biset.addLink(obj1, obj2, biset.colors.lineNColor, canvas));
-			// obj2.attr({cursor: "move"});
+			connections[lineObj.lineID] = lineObj;
 			obj1.call(biset.objDrag);
 		}
     }
@@ -2237,59 +2298,6 @@ biset.findLinksInBetween = function(ldomain, rdomain) {
 
 
 /*
-* get coordinates of a svg object
-* @param element {d3 object}, a d3 object
-*/
-biset.getOffset = function(element) {
-    var $element = $(element[0][0]);
-    return {
-        left: $element.position().left,
-        top: $element.position().top,
-        width: element[0][0].getBoundingClientRect().width,
-        height: element[0][0].getBoundingClientRect().height,
-    };
-}
-
-// drag function for a d3 object
-biset.objDrag = d3.behavior.drag()
-    .origin(function() {
-    	// position of current selected item
-    	thisOffset = biset.getOffset(d3.select(this));
-    	// position of the parent
-    	parentOffset = biset.getOffset(d3.select(this.parentNode));
-    	return { x: thisOffset.left - parentOffset.left, y: thisOffset.top};
-    })
-    .on("dragstart", function (d) {
-    	draged = 1;
-        d3.event.sourceEvent.stopPropagation();
-        d3.select(this).classed("dragging", true);
-    })
-    .on("drag", function (d) {
-    	var dragX = d3.event.x,
-    		dragY = d3.event.y;
-
-    	// boundary check
-		if (dragY < 0)
-			dragY = 0;
-		if (dragX >= biset.entList.gap * 2)
-			dragX = biset.entList.gap * 2;
-		if (dragX + biset.entList.gap * 2 <= 0)
-			dragX = -biset.entList.gap * 2;
-		// move the element
-		d3.select(this).attr("transform", "translate(" + dragX + "," + dragY + ")");
-		// log the y position
-		d.yPos = dragY;
-		// update related lines
-		biset.updateLink(connections);
-    })
-    .on("dragend", function (d) {
-    	draged = 0;
-    	biset.updateLink(connections);			            	
-        d3.select(this).classed("dragging", false);			                
-	});
-
-
-/*
 * add a line
 * reference: http://raphaeljs.com/graffle.html
 * @param obj1, the 1st object
@@ -2365,22 +2373,21 @@ biset.addLink = function (obj1, obj2, line, d3obj, bg) {
         line.line.attr("d", path);
     } else {
         // var color = typeof line == "string" ? line : "#000";
+
+		var lid1 = obj1.attr("id"),
+			lid2 = obj2.attr("id"),
+			lID = biset.genLinkID(lid1, lid2);
+
         return {      
             //bg: bg && bg.split && robj.path(path).attr({stroke: bg.split("|")[0], fill: "none", "stroke-width": bg.split("|")[1] || 3}),
-            // default to be hide
+            lineID: lID,
             line: d3obj.append("path")
             		.attr("d", path)
-            		.attr("id", function() {
-            			var lid1 = obj1.attr("id"),
-            				lid2 = obj2.attr("id");
-        				return biset.genLinkID(lid1, lid2);
-            		})
+            		.attr("id", lID)
             		.attr("class", "lineNormal")
             		.style("stroke", biset.colors.lineNColor)
             		.style("stroke-width", biset.conlink.nwidth)
             		.style("fill", "none"),
-
-            		// .style({stroke: color.lineNColor, fill: "none", display:"none" }), // opacity: 0
             from: obj1,
             to: obj2,
             d3Canvas: d3obj            
@@ -2400,7 +2407,10 @@ biset.addOriginalLinks = function(linkLsts) {
 			lkID = linkLsts[i].oriLinkID;
 
 		var obj1 = d3.select("#" + obj1ID),
-			obj2 = d3.select("#" + obj2ID);
+			obj2 = d3.select("#" + obj2ID),
+			lineObj = biset.addLink(obj1, obj2, biset.colors.lineNColor, canvas);
+
+		// connections[lineObj.lineID] = biset.addLink(obj1, obj2, biset.colors.lineNColor, canvas);
 		
 		// connections.push(biset.addLink(obj1, obj2, biset.colors.lineNColor, canvas));
 	}
@@ -2441,6 +2451,59 @@ biset.removeVis = function(thisCanvas) {
 	$('.listControlGroup').remove();
 	$('.BiclistControlGroup').remove();
 }
+
+
+/*
+* get coordinates of a svg object
+* @param element {d3 object}, a d3 object
+*/
+biset.getOffset = function(element) {
+    var $element = $(element[0][0]);
+    return {
+        left: $element.position().left,
+        top: $element.position().top,
+        width: element[0][0].getBoundingClientRect().width,
+        height: element[0][0].getBoundingClientRect().height,
+    };
+}
+
+// drag function for a d3 object
+biset.objDrag = d3.behavior.drag()
+    .origin(function() {
+    	// position of current selected item
+    	thisOffset = biset.getOffset(d3.select(this));
+    	// position of the parent
+    	parentOffset = biset.getOffset(d3.select(this.parentNode));
+    	return { x: thisOffset.left - parentOffset.left, y: thisOffset.top};
+    })
+    .on("dragstart", function (d) {
+    	draged = 1;
+        d3.event.sourceEvent.stopPropagation();
+        d3.select(this).classed("dragging", true);
+    })
+    .on("drag", function (d) {
+    	var dragX = d3.event.x,
+    		dragY = d3.event.y;
+
+    	// boundary check
+		if (dragY < 0)
+			dragY = 0;
+		if (dragX >= biset.entList.gap * 2)
+			dragX = biset.entList.gap * 2;
+		if (dragX + biset.entList.gap * 2 <= 0)
+			dragX = -biset.entList.gap * 2;
+		// move the element
+		d3.select(this).attr("transform", "translate(" + dragX + "," + dragY + ")");
+		// log the y position
+		d.yPos = dragY;
+		// update related lines
+		biset.updateLink(connections);
+    })
+    .on("dragend", function (d) {
+    	draged = 0;
+    	biset.updateLink(connections);
+        d3.select(this).classed("dragging", false);
+	});
 
 
 /*
