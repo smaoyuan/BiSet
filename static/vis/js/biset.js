@@ -14,7 +14,7 @@ var biset = {
 
 	// global settings
 	// the vis canvas
-	visCanvas: { width: 3200, height: 3550, inUse: 0 },
+	visCanvas: { width: 3800, height: 3550, inUse: 0 },
 	// an individual entity in a list
 	entity: { width: 260, height: 29, rdCorner: 5, freqWidth: 30, nBorder: 0, moBorder: 1.8, selBorder: 2.5 },
 	// a list
@@ -33,7 +33,7 @@ var biset = {
 	// a bicluster list
 	bicList: { width: 90, height: 2650 },
 	// a connection link between two elements
-	conlink: { nwidth: 0.8, hwidth: 1.5 },
+	conlink: { nwidth: 0.8, hwidth: 1.5 }, // 0.8
 
 	// color settings
 	colors: {
@@ -62,7 +62,7 @@ var biset = {
 		// bicFrameBorderColor: "rgba(0, 0, 0, 0.6)",
 
 		// normal line (light gray)
-		lineNColor: "rgba(0, 0, 0, 0.06)",
+		lineNColor: "rgba(0, 0, 0, 0.18)", // 0.06
 		// line almost hide
 		lineHDColor: "rgba(0, 0, 0, 0.04)",
 		// hover entity to show links
@@ -227,10 +227,18 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 	    		"<option value='" + bicMode + "'>Bic Only Mode</option>" +
 	    		"<option value='" + linkMode + "'>Link Only Mode</option>" +
 	    		"<option value='" + HybridMode + "'>Hybrid Mode</option>" +
-	    		"<option value='" + ClusterMode + "'>Cluster Mode</option>" +
-	    		"<option value='" + ClusterModeLeft + "'>Cluster Mode Left</option>" +
-	    		"<option value='" + ClusterModeRight + "'>Cluster Mode Right</option>" +
+	    		// "<option value='" + ClusterMode + "'>Cluster Mode</option>" +
+	    		// "<option value='" + ClusterModeLeft + "'>Sort Left List</option>" +
+	    		// "<option value='" + ClusterModeRight + "'>Sort Right List</option>" +
 			"</select>" + 
+
+			// "<span class='btn btn-xs btn-default bListCtrlSortList' style='margin-left: 15px;'>Organize List</span>" + 
+
+			"<select class='bListCtrlSortBic' id='" + bListRGroupName + "_sort_bic' style='margin-left: 45px'>" +
+	    		"<option value='" + ClusterMode + "'>Organized by two list</option>" +
+	    		"<option value='" + ClusterModeLeft + "'>Organized by Left List</option>" +
+	    		"<option value='" + ClusterModeRight + "'>Organized by Right List</option>" +
+			"</select>" + 			
 		"</div>");
 
 		// $("#biset_control").append("<div class='BiclistControlGroup'>" +
@@ -282,6 +290,33 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 	    .attr("id", function(d, i) { return type + "_" + d.entityID + "_frame";})
 	    .attr("class", "entNormal")
 	    .attr("fill", biset.colors.entNormal);
+
+
+	// add contextmenu to bics
+	$("." + type).contextmenu({
+		target: '#ent-context-menu',
+		onItem: function(context, e) {
+			// console.log(context.attr("id"));
+			var thisID = context.attr("id"),
+				thisFrameID = thisID + "_frame";
+
+			// consider nodes with biclusters
+			if (networkData[thisID] !== undefined) {
+
+				// releated info for current node
+				var relInfo = biset.findAllCons(thisID, networkData, entPathCaled),
+					nodes = relInfo.ents,
+					links = relInfo.paths;
+
+				nodes.forEach(function(n){
+					if (n.indexOf("bic") < 0)
+						console.log(allEnts[n].numCoSelected);
+					else
+						console.log(allBics[n].bicNumCoSelected);
+				});
+			}
+		}
+	});
 
 	// mouseover event
     bar.on("mouseover", function(d, i) {
@@ -374,7 +409,7 @@ biset.addList = function(canvas, listData, bicList, startPos, networkData) {
 					// releated info for current node
 					var relInfo = biset.findAllCons(thisID, networkData, entPathCaled),
 						nodes = relInfo.ents,
-						links = relInfo.paths; 					
+						links = relInfo.paths;
 
 	    			// unhighlight all relevent entities
 					nodes.forEach(function(node) {
@@ -1171,6 +1206,29 @@ biset.addBics = function(preListCanvas, bicListCanvas, listData, bicList, bicSta
 	    .attr("ry", biset.bic.frameRdCorner)
 	    .attr("fill", biset.colors.bicFrameColor);
 
+	$("[name='bicSelectSwitch']").bootstrapSwitch();
+
+	
+	// event handler when showing the menu
+	$('#bic-context-menu').on('show.bs.context',function(context, e) {
+
+		var thisBicID = $(context.target).attr("id"),
+			thisBicSelOption = allBics[thisBicID].bicSelectOn;
+
+		// set the switch for each bic
+		if (thisBicSelOption == false)
+			$("[name='bicSelectSwitch']").bootstrapSwitch('state', false, true);
+		else
+			$("[name='bicSelectSwitch']").bootstrapSwitch('state', true, true);
+
+
+		$('input[name="bicSelectSwitch"]').on('switchChange.bootstrapSwitch', function(event, state) {
+			allBics[thisBicID].bicSelectOn = state;
+
+			console.log(allBics[thisBicID].bicSelectOn);
+		});
+
+	});
 
 	// add contextmenu to bics
 	$(".bics").contextmenu({
@@ -1180,6 +1238,8 @@ biset.addBics = function(preListCanvas, bicListCanvas, listData, bicList, bicSta
 
 			var thisBicID = $(context).attr("id"),
 				selItem = $(e.target).attr("data-index");
+
+			console.log("here");
 
 			if (selItem == "doc") {
 
@@ -1260,6 +1320,10 @@ biset.addBics = function(preListCanvas, bicListCanvas, listData, bicList, bicSta
 				biset.docViewUpdateByClick(".doc-list");
 			}
 
+			if (selItem == "selection") {
+				console.log("here");
+			}
+
 			// enable selection for this bic
 			if (selItem == "selOn") {
 				allBics[thisBicID].bicSelectOn = true;
@@ -1267,6 +1331,33 @@ biset.addBics = function(preListCanvas, bicListCanvas, listData, bicList, bicSta
 			// disable selection for this bic
 			if (selItem == "selOff") {
 				allBics[thisBicID].bicSelectOn = false;
+			}
+
+			if (selItem == "hide") {
+				d3.select("#" + thisBicID).attr("visibility", "hidden");
+
+				for (e in connections) {
+					if (e.indexOf(thisBicID) >= 0) {
+						d3.select("#" + e).attr("visibility", "hidden");
+					}
+				}
+			}
+
+			if (selItem == "hideLine") {
+				for (e in connections) {
+					if (e.indexOf(thisBicID) >= 0) {
+						d3.select("#" + e).attr("visibility", "hidden");
+					}
+				}				
+			}
+
+			if (selItem == "showLine") {
+				for (e in connections) {
+					if (e.indexOf(thisBicID) >= 0) {
+						// console.log(here);
+						d3.select("#" + e).attr("visibility", "visable");
+					}
+				}					
 			}
 		}
 	});
@@ -1471,6 +1562,8 @@ biset.addBics = function(preListCanvas, bicListCanvas, listData, bicList, bicSta
 
     // click event for bic
     bics.on("click", function(d) {
+
+    	console.log(d.bicSelectOn);
 
     	if (d.bicSelectOn == true) {
 
@@ -1935,6 +2028,305 @@ function addSortCtrl(listView) {
 biset.addBicListCtrl = function(lsts) {
 	var sel = []
 	for (var i = 0; i < lsts.length - 1; i++) {
+
+		$("#bListCtrl_" + lsts[i] + "_" + lsts[i + 1] + "_sort_bic")
+		.on('click', function() {
+			var preSelValue = this.value.split("_");
+			preMode = preSelValue[0];
+		})
+		.change(function() {
+			var selValue = $(this).val().split("_"),
+				// get the domain on the left
+				field1 = selValue[1],
+				// get the domain on the right
+				field2 = selValue[2],
+				// get the selected mode
+				selMode = selValue[0];
+
+			var cluster_type = 0;
+			if(selMode == "clusterLeft")
+				cluster_type = 1;
+			else if(selMode == "clusterRight")
+				cluster_type = 2;
+			//step one
+			//obtain the correspoing colom of bic
+			var cur_bic = [],
+				idx_left = 0,
+				idx_right = 0;
+			for( e in allBics) {
+				if(e.indexOf(field1) >=0 && e.indexOf(field2) >=0) {
+					cur_bic.push(allBics[e]);
+				}
+			}
+
+			//sort based on the left item values from large to small
+			cur_bic.sort(function(a, b) { return b.totalEntNum - a.totalEntNum; });
+			//console.log(cur_bic);
+			var lListType,
+				rListType;
+
+			//generate map, to shuffle the left entities based on bic order
+			var leftHashTable ={},
+				rightHashTable={};
+			for(e in cur_bic){
+				for(e2 in cur_bic[e].row) {
+					lListType = cur_bic[e].rowField;
+					if(leftHashTable[cur_bic[e].row[e2]] == undefined)
+						leftHashTable[parseInt(cur_bic[e].row[e2])] = idx_left++;
+				}
+				for(e2 in cur_bic[e].col) {
+					rListType = cur_bic[e].colField;
+					if(rightHashTable[cur_bic[e].col[e2]] == undefined)
+						rightHashTable[parseInt(cur_bic[e].col[e2])] = idx_right++;
+				}
+			}
+
+			var arr_left = [],
+				leftList =[],
+				rightList =[],
+				arr_right =[],
+				idx_index = -1;
+			//other isolated entities of the left part
+			d3.selectAll("." + lListType).each(function(d){
+				var index = d3.select(this).attr("id");
+				leftList.push(d);
+				var item= {};
+				idx_index++;
+				item['yPos'] = d.yPos;
+				item['id'] = d.entityID;
+				item['index'] = idx_index;
+				item['order'] = -1;
+				item['visualOrder'] = -1;
+				if(leftHashTable[d.entityID] == undefined )
+					 item['order'] = idx_left++;
+				else
+					 item['order'] = leftHashTable[d.entityID];
+				arr_left.push(item);
+			});
+		
+			idx_index = -1; 	
+			d3.selectAll("." + rListType).each(function(d){
+				var index = d3.select(this).attr("id");
+				rightList.push(d);
+				var item= {};
+				idx_index++;
+				item['yPos'] = d.yPos;
+				item['id'] = d.entityID;
+				item['index'] = idx_index;
+				item['order'] = -1;
+				item['visualOrder'] = -1;
+				if(rightHashTable[d.entityID] == undefined )
+					 item['order'] = idx_right++;
+				else
+					 item['order'] = rightHashTable[d.entityID];
+				arr_right.push(item);
+			});
+
+
+			//for each cluster do the calculaton to shuffle in the cluster
+			var process_item = new Set();
+			var bic_prefix;
+			//if(lListType > rListType)
+				bic_prefix = lListType + "_" + rListType + "_bic_";
+			//else bic_prefix = rListType + "_" + lListType + "_bic_";
+			 
+			  
+			for(e in cur_bic) {
+				 var cur_range = [],
+				 	cur_bic_id = cur_bic[e].bicID;
+				 for(e2 in cur_bic[e].row){
+				 	var ent_val = cur_bic[e].row[e2];
+				 	lListType = cur_bic[e].rowField;
+				 	var ent_id = cur_bic[e].rowField + "_" + ent_val;
+				 	if(!process_item.has(ent_id)) {
+
+			 	 		var bic_cluster = allEnts[ent_id].bicSetsRight,
+			 	 			bic_order = [];
+			 	 		 
+			 	 		for(e3 in bic_cluster) {
+			 	 			var bic_id = bic_cluster[e3];
+			 	 			 
+			 	 			if(bic_id != cur_bic_id) {
+			 	 				var bic_name = bic_prefix + bic_id.toString();	
+			 	 				bic_order.push(allBics[bic_name].index);
+			 	 			}
+			 	 		}
+			 	 		var item = {};
+			 	 		if(bic_order.length == 0) {
+			 	 			item.value = 0;
+			 	 			item.id = ent_val;
+			 	 			cur_range.push(item);
+			 	 		} else {
+			 	 			var sum = bic_order.reduce(function (a, b){ return a + b;}),
+			 	 				avg = sum/bic_order.length;
+			 	 			item.value = avg;
+			 	 			item.id = ent_val;
+			 	 			cur_range.push(item);
+			 	 		}
+
+			 	 		process_item.add(ent_id);
+			 	 	}
+			 	 }
+
+			 	 //shuffle the result based on the cur_range's 
+			 	  cur_range.sort(function(a, b) { return a.value - b.value; });
+			 	  var id_set = new Set();
+			 	  for(var i = 0; i < cur_range.length; i++)
+			 	  	 id_set.add(cur_range[i].id);
+			 	  var cur_order = [];
+			 	  for(var i = 0; i < arr_left.length; i++){
+			 	  	if(id_set.has(arr_left[i].id))
+			 	  		cur_order.push(arr_left[i].order);
+			 	  }
+			 	  cur_order.sort(function(a, b){return a - b;});
+			 	  var id_map = {};
+			 	  for(var i = 0; i < cur_order.length; i++){
+			 	  		id_map[cur_range[i].id] = cur_order[i];
+			 	  }
+			 	  for(var i = 0; i < arr_left.length; i++) {
+			 	  	if(id_set.has(arr_left[i].id))
+			 	  		arr_left[i].order = id_map[arr_left[i].id];
+			 	  }
+
+			 	  // the right side 
+			 	 cur_range.length = 0;
+				 for(e2 in cur_bic[e].col) {
+				 	var ent_val = cur_bic[e].col[e2];
+				 	rListType = cur_bic[e].colField;
+				 	var ent_id = cur_bic[e].colField + "_" + ent_val;
+				 	if(!process_item.has(ent_id)) {
+
+			 	 		var bic_cluster = allEnts[ent_id].bicSetsLeft,
+			 	 			bic_order = [];
+			 	 		 
+			 	 		for(e3 in bic_cluster) {
+			 	 			var bic_id = bic_cluster[e3];
+			 	 			 
+			 	 			if(bic_id != cur_bic_id) {
+			 	 				var bic_name = bic_prefix + bic_id.toString();	
+			 	 				bic_order.push(allBics[bic_name].index);
+			 	 			}
+			 	 		}
+
+			 	 		var item = {};
+			 	 		if(bic_order.length == 0){
+			 	 			item.value = 0;
+			 	 			item.id = ent_val;
+			 	 			cur_range.push(item);
+			 	 		} else {
+			 	 			var sum = bic_order.reduce(function (a, b){ return a + b;}),
+			 	 				avg = sum/bic_order.length;
+			 	 			item.value = avg;
+			 	 			item.id = ent_val;
+			 	 			cur_range.push(item);
+			 	 		}
+
+			 	 		process_item.add(ent_id);
+			 	 	}
+			 	 }
+
+			 	 //shuffle the result based on the cur_range's 
+			 	  cur_range.sort(function(a, b) { return a.value - b.value; });
+			 	  id_set.clear();
+			 	  for(var i = 0; i < cur_range.length; i++)
+			 	  	 id_set.add(cur_range[i].id);
+			 	  cur_order.length = 0;
+			 	  for(var i = 0; i < arr_right.length; i++) {
+			 	  	if(id_set.has(arr_right[i].id))
+			 	  		cur_order.push(arr_right[i].order);
+			 	  }
+			 	  cur_order.sort(function(a, b){return a - b;});
+			 	  id_map = {};
+			 	  for(var i = 0; i < cur_order.length; i++) {
+			 	  		id_map[cur_range[i].id] = cur_order[i];
+			 	  }
+			 	  for(var i = 0; i < arr_right.length; i++) {
+			 	  	if(id_set.has(arr_right[i].id))
+			 	  		arr_right[i].order = id_map[arr_right[i].id];
+			 	  }
+			}   	
+			  
+			
+			// arr_left.sort(function(a, b) { return a.order - b.order; });
+			 var yAxisOrderLeft = [];
+			for(var i = 0; i < arr_left.length; i++)
+				yAxisOrderLeft.push(i);
+			 
+			for(var i = 0; i < arr_left.length; i++)
+				leftList[arr_left[i].index].entVisualOrder = arr_left[i].order;
+			 	 
+
+			var yAxis = d3.scale.ordinal()
+	    	.domain(yAxisOrderLeft)
+	    	.rangePoints([biset.entList.topGap, leftList.length * biset.entity.height + biset.entList.topGap], 0); 
+		 
+
+			d3.selectAll("." + lListType).transition()
+				.attr("transform", function(d, i) {
+					d.xPos = 2;
+					d.yPos = yAxis(d.entVisualOrder);
+					return "translate(2," + yAxis(d.entVisualOrder) + ")";
+				})
+				.call(endall, function(){ biset.updateLink(connections); });
+
+
+			var yAxisOrderRight = [];
+			for(var i = 0; i < arr_right.length; i++)
+				yAxisOrderRight.push(i);
+			 
+			for(var i = 0; i < arr_right.length; i++)
+				rightList[arr_right[i].index].entVisualOrder = arr_right[i].order;
+			 	 
+
+			yAxis = d3.scale.ordinal()
+	    	.domain(yAxisOrderRight)
+	    	.rangePoints([biset.entList.topGap, rightList.length * biset.entity.height + biset.entList.topGap], 0); 
+		 
+
+			d3.selectAll("." + rListType).transition()
+				.attr("transform", function(d, i) {
+					d.xPos = 2;
+					d.yPos = yAxis(d.entVisualOrder);
+					return "translate(2," + yAxis(d.entVisualOrder) + ")";
+				})
+				.call(endall, function(){ biset.updateLink(connections); });	
+
+
+			//move the bic_cluster
+			for(e in cur_bic) {
+				var bic_name = bic_prefix + cur_bic[e].bicID.toString(),
+					y_pos = 0,
+					num_items = 0;
+
+				if(cluster_type == 0 || cluster_type == 1) {	
+					for(e2 in cur_bic[e].row) {
+						var ent_val = cur_bic[e].row[e2],
+							ent_id = cur_bic[e].rowField + "_" + ent_val;
+						y_pos += allEnts[ent_id].yPos;
+						num_items++;
+					}
+				}
+				if(cluster_type == 0 || cluster_type == 2) {
+					for(e2 in cur_bic[e].col) {
+						var ent_val = cur_bic[e].col[e2],
+							ent_id = cur_bic[e].colField + "_" + ent_val;
+						y_pos += allEnts[ent_id].yPos;
+						num_items++;
+					}
+				}
+
+				y_pos = y_pos/num_items;
+
+				d3.select("#" + bic_name).transition()
+					.attr("transform", function(d) {
+						d.xPos = 2;
+						d.yPos = y_pos;
+						return "translate(2," + d.yPos + ")";
+					});
+			}			
+		});
+
+
 		var preMode;
 		$("#bListCtrl_" + lsts[i] + "_" + lsts[i + 1])
 		.on('click', function(){
@@ -1950,294 +2342,10 @@ biset.addBicListCtrl = function(lsts) {
 				// get the selected mode
 				selMode = selValue[0];
 
-			 
 			console.log(selMode);
 			if(selMode.indexOf("cluster") < 0)
 				biset.connectionDisplayed(field1, field2, selMode, preMode);
-			else{
 
-				var cluster_type = 0;
-				if(selMode == "clusterLeft")
-					cluster_type = 1;
-				else if(selMode == "clusterRight")
-					cluster_type = 2;
-				//step one
-				//obtain the correspoing colom of bic
-				var cur_bic = [],
-					idx_left = 0,
-					idx_right = 0;
-				for( e in allBics) {
-					if(e.indexOf(field1) >=0 && e.indexOf(field2) >=0) {
-						cur_bic.push(allBics[e]);
-					}
-				}
-
-				//sort based on the left item values from large to small
-				cur_bic.sort(function(a, b) { return b.totalEntNum - a.totalEntNum; });
-				//console.log(cur_bic);
-				var lListType,
-					rListType;
-
-				//generate map, to shuffle the left entities based on bic order
-				var leftHashTable ={},
-					rightHashTable={};
-				for(e in cur_bic){
-					for(e2 in cur_bic[e].row) {
-						lListType = cur_bic[e].rowField;
-						if(leftHashTable[cur_bic[e].row[e2]] == undefined)
-							leftHashTable[parseInt(cur_bic[e].row[e2])] = idx_left++;
-					}
-					for(e2 in cur_bic[e].col) {
-						rListType = cur_bic[e].colField;
-						if(rightHashTable[cur_bic[e].col[e2]] == undefined)
-							rightHashTable[parseInt(cur_bic[e].col[e2])] = idx_right++;
-					}
-				}
-
-				var arr_left = [],
-					leftList =[],
-					rightList =[],
-					arr_right =[],
-					idx_index = -1;
-				//other isolated entities of the left part
-				d3.selectAll("." + lListType).each(function(d){
-					var index = d3.select(this).attr("id");
-					leftList.push(d);
-					var item= {};
-					idx_index++;
-					item['yPos'] = d.yPos;
-					item['id'] = d.entityID;
-					item['index'] = idx_index;
-					item['order'] = -1;
-					item['visualOrder'] = -1;
-					if(leftHashTable[d.entityID] == undefined )
-						 item['order'] = idx_left++;
-					else
-						 item['order'] = leftHashTable[d.entityID];
-					arr_left.push(item);
-				});
-			
-				idx_index = -1; 	
-				d3.selectAll("." + rListType).each(function(d){
-					var index = d3.select(this).attr("id");
-					rightList.push(d);
-					var item= {};
-					idx_index++;
-					item['yPos'] = d.yPos;
-					item['id'] = d.entityID;
-					item['index'] = idx_index;
-					item['order'] = -1;
-					item['visualOrder'] = -1;
-					if(rightHashTable[d.entityID] == undefined )
-						 item['order'] = idx_right++;
-					else
-						 item['order'] = rightHashTable[d.entityID];
-					arr_right.push(item);
-				});
-
-
-				//for each cluster do the calculaton to shuffle in the cluster
-				var process_item = new Set();
-				var bic_prefix;
-				//if(lListType > rListType)
-					bic_prefix = lListType + "_" + rListType + "_bic_";
-				//else bic_prefix = rListType + "_" + lListType + "_bic_";
-				 
-				  
-				for(e in cur_bic) {
-					 var cur_range = [],
-					 	cur_bic_id = cur_bic[e].bicID;
-					 for(e2 in cur_bic[e].row){
-					 	var ent_val = cur_bic[e].row[e2];
-					 	lListType = cur_bic[e].rowField;
-					 	var ent_id = cur_bic[e].rowField + "_" + ent_val;
-					 	if(!process_item.has(ent_id)) {
-
-				 	 		var bic_cluster = allEnts[ent_id].bicSetsRight,
-				 	 			bic_order = [];
-				 	 		 
-				 	 		for(e3 in bic_cluster) {
-				 	 			var bic_id = bic_cluster[e3];
-				 	 			 
-				 	 			if(bic_id != cur_bic_id) {
-				 	 				var bic_name = bic_prefix + bic_id.toString();	
-				 	 				bic_order.push(allBics[bic_name].index);
-				 	 			}
-				 	 		}
-				 	 		var item = {};
-				 	 		if(bic_order.length == 0) {
-				 	 			item.value = 0;
-				 	 			item.id = ent_val;
-				 	 			cur_range.push(item);
-				 	 		} else {
-				 	 			var sum = bic_order.reduce(function (a, b){ return a + b;}),
-				 	 				avg = sum/bic_order.length;
-				 	 			item.value = avg;
-				 	 			item.id = ent_val;
-				 	 			cur_range.push(item);
-				 	 		}
-
-				 	 		process_item.add(ent_id);
-				 	 	}
-				 	 }
-
-				 	 //shuffle the result based on the cur_range's 
-				 	  cur_range.sort(function(a, b) { return a.value - b.value; });
-				 	  var id_set = new Set();
-				 	  for(var i = 0; i < cur_range.length; i++)
-				 	  	 id_set.add(cur_range[i].id);
-				 	  var cur_order = [];
-				 	  for(var i = 0; i < arr_left.length; i++){
-				 	  	if(id_set.has(arr_left[i].id))
-				 	  		cur_order.push(arr_left[i].order);
-				 	  }
-				 	  cur_order.sort(function(a, b){return a - b;});
-				 	  var id_map = {};
-				 	  for(var i = 0; i < cur_order.length; i++){
-				 	  		id_map[cur_range[i].id] = cur_order[i];
-				 	  }
-				 	  for(var i = 0; i < arr_left.length; i++) {
-				 	  	if(id_set.has(arr_left[i].id))
-				 	  		arr_left[i].order = id_map[arr_left[i].id];
-				 	  }
-
-				 	  // the right side 
-				 	 cur_range.length = 0;
-					 for(e2 in cur_bic[e].col) {
-					 	var ent_val = cur_bic[e].col[e2];
-					 	rListType = cur_bic[e].colField;
-					 	var ent_id = cur_bic[e].colField + "_" + ent_val;
-					 	if(!process_item.has(ent_id)) {
-
-				 	 		var bic_cluster = allEnts[ent_id].bicSetsLeft,
-				 	 			bic_order = [];
-				 	 		 
-				 	 		for(e3 in bic_cluster) {
-				 	 			var bic_id = bic_cluster[e3];
-				 	 			 
-				 	 			if(bic_id != cur_bic_id) {
-				 	 				var bic_name = bic_prefix + bic_id.toString();	
-				 	 				bic_order.push(allBics[bic_name].index);
-				 	 			}
-				 	 		}
-
-				 	 		var item = {};
-				 	 		if(bic_order.length == 0){
-				 	 			item.value = 0;
-				 	 			item.id = ent_val;
-				 	 			cur_range.push(item);
-				 	 		} else {
-				 	 			var sum = bic_order.reduce(function (a, b){ return a + b;}),
-				 	 				avg = sum/bic_order.length;
-				 	 			item.value = avg;
-				 	 			item.id = ent_val;
-				 	 			cur_range.push(item);
-				 	 		}
-
-				 	 		process_item.add(ent_id);
-				 	 	}
-				 	 }
-
-				 	 //shuffle the result based on the cur_range's 
-				 	  cur_range.sort(function(a, b) { return a.value - b.value; });
-				 	  id_set.clear();
-				 	  for(var i = 0; i < cur_range.length; i++)
-				 	  	 id_set.add(cur_range[i].id);
-				 	  cur_order.length = 0;
-				 	  for(var i = 0; i < arr_right.length; i++) {
-				 	  	if(id_set.has(arr_right[i].id))
-				 	  		cur_order.push(arr_right[i].order);
-				 	  }
-				 	  cur_order.sort(function(a, b){return a - b;});
-				 	  id_map = {};
-				 	  for(var i = 0; i < cur_order.length; i++) {
-				 	  		id_map[cur_range[i].id] = cur_order[i];
-				 	  }
-				 	  for(var i = 0; i < arr_right.length; i++) {
-				 	  	if(id_set.has(arr_right[i].id))
-				 	  		arr_right[i].order = id_map[arr_right[i].id];
-				 	  }
-				}   	
-				  
-				
-				// arr_left.sort(function(a, b) { return a.order - b.order; });
-				 var yAxisOrderLeft = [];
-				for(var i = 0; i < arr_left.length; i++)
-					yAxisOrderLeft.push(i);
-				 
-				for(var i = 0; i < arr_left.length; i++)
-					leftList[arr_left[i].index].entVisualOrder = arr_left[i].order;
-				 	 
- 
-				var yAxis = d3.scale.ordinal()
-		    	.domain(yAxisOrderLeft)
-		    	.rangePoints([biset.entList.topGap, leftList.length * biset.entity.height + biset.entList.topGap], 0); 
-			 
-
-				d3.selectAll("." + lListType).transition()
-					.attr("transform", function(d, i) {
-						d.xPos = 2;
-						d.yPos = yAxis(d.entVisualOrder);
-						return "translate(2," + yAxis(d.entVisualOrder) + ")";
-					})
-					.call(endall, function(){ biset.updateLink(connections); });
-
-
-				var yAxisOrderRight = [];
-				for(var i = 0; i < arr_right.length; i++)
-					yAxisOrderRight.push(i);
-				 
-				for(var i = 0; i < arr_right.length; i++)
-					rightList[arr_right[i].index].entVisualOrder = arr_right[i].order;
-				 	 
- 
-				yAxis = d3.scale.ordinal()
-		    	.domain(yAxisOrderRight)
-		    	.rangePoints([biset.entList.topGap, rightList.length * biset.entity.height + biset.entList.topGap], 0); 
-			 
-
-				d3.selectAll("." + rListType).transition()
-					.attr("transform", function(d, i) {
-						d.xPos = 2;
-						d.yPos = yAxis(d.entVisualOrder);
-						return "translate(2," + yAxis(d.entVisualOrder) + ")";
-					})
-					.call(endall, function(){ biset.updateLink(connections); });	
-
-
-				//move the bic_cluster
-				for(e in cur_bic) {
-					var bic_name = bic_prefix + cur_bic[e].bicID.toString(),
-						y_pos = 0,
-						num_items = 0;
-
-					if(cluster_type == 0 || cluster_type == 1) {	
-						for(e2 in cur_bic[e].row) {
-							var ent_val = cur_bic[e].row[e2],
-								ent_id = cur_bic[e].rowField + "_" + ent_val;
-							y_pos += allEnts[ent_id].yPos;
-							num_items++;
-						}
-					}
-					if(cluster_type == 0 || cluster_type == 2) {
-						for(e2 in cur_bic[e].col) {
-							var ent_val = cur_bic[e].col[e2],
-								ent_id = cur_bic[e].colField + "_" + ent_val;
-							y_pos += allEnts[ent_id].yPos;
-							num_items++;
-						}
-					}
-
-					y_pos = y_pos/num_items;
-
-					d3.select("#" + bic_name).transition()
-						.attr("transform", function(d) {
-							d.xPos = 2;
-							d.yPos = y_pos;
-							return "translate(2," + d.yPos + ")";
-						});
-				}
-			}
 		});
 	}
 }

@@ -64,7 +64,7 @@
             	<hr>
             </div>
 
-			<!-- a popup to ask user to confirm the deletion -->
+			<!-- a popup to ask user to confirm the deletion vis -->
 			<div class="modal fade" id="vis_delete_alert" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
 				<div class="modal-dialog">
 					<div class="modal-content">
@@ -138,12 +138,12 @@
 
 		<div id="bic-context-menu">
 			<ul class="dropdown-menu" role="menu">
-				<li>
+<!-- 				<li>
 					<a tabindex="-1" data-index="top">
 						<span class="glyphicon glyphicon-arrow-up" data-index="top"></span> Move to Top
 					</a>
 				</li>
-				<li class="divider"></li>
+				<li class="divider"></li> -->
 				<li>
 					<a tabindex="-1" data-index="doc">
 						<span class="glyphicon glyphicon-file" data-index="doc"></span> Show Document
@@ -151,34 +151,61 @@
 				</li>
 				<li class="divider"></li>
 				<li>
-					<a tabindex="-1" data-index="selOn">
-						<span class="" data-index="selOn"></span> Select On
+					<a tabindex="-1" data-index="selection">
+						<span class="glyphicon glyphicon-bookmark" data-index="selection"></span> Mark
+						<input type="checkbox" name="bicSelectSwitch" data-size="mini" data-on-color="info">
 					</a>
 				</li>
 				<li class="divider"></li>
 				<li>
-					<a tabindex="-1" data-index="selOff">
-						<span class="" data-index="selOff"></span> Select Off
+					<a tabindex="-1" data-index="hide">
+						<span class="glyphicon glyphicon-remove" data-index="hide"></span> Delete
 					</a>
-				</li>				
+				</li>
 				<li class="divider"></li>
+				<li>
+					<a tabindex="-1" data-index="hideLine">
+						<span class="glyphicon glyphicon-eye-close" data-index="hide"></span> Hide Edges
+					</a>
+				</li>
+				<li class="divider"></li>
+				<li>
+					<a tabindex="-1" data-index="showLine">
+						<span class="glyphicon glyphicon-eye-open" data-index="hide"></span> Show Edges
+					</a>
+				</li>
+<!--				<li class="divider"></li>
 				<li>
 					<a tabindex="-1" data-index="del">
 						<span class="glyphicon glyphicon-remove" data-index="del"></span> Remove
 					</a>
 				</li>
-				<li class="divider"></li>
+ 				<li class="divider"></li>
 				<li>
 					<a tabindex="-1" data-index="bottom">
 						<span class="glyphicon glyphicon-arrow-down" data-index="bottom"></span> Move to Bottom
+					</a>
+				</li> -->
+			</ul>
+		</div>
+
+		<div id="ent-context-menu">
+			<ul class="dropdown-menu" role="menu">
+				<li>
+					<a tabindex="-1" data-index="del">
+						<span class="glyphicon glyphicon-remove" data-index="del"></span> Remove
 					</a>
 				</li>
 			</ul>
 		</div>
 
+
 	</div>
 
 	<script type="text/javascript" src="{%static 'vis/js/lib/bootstrap-contextmenu.js'%}"></script>
+
+	<script type="text/javascript" src="{%static 'vis/js/lib/bootstrap-switch.min.js'%}"></script>
+
 	<script type="text/javascript" src="{%static 'vis/js/lib/jquery-ui.min.js'%}"></script>
 	<script type="text/javascript" src="{%static 'vis/js/biset.js'%}"></script>
 	<script type="text/javascript" src="{%static 'vis/js/visctrl.js'%}"></script>
