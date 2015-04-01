@@ -424,8 +424,12 @@ function loadVisHelper(resData) {
 	// add all original links
 	biset.addOriginalLinks(oriLinks);
 	// hide all original links
-	for (var i = 0; i < oriLinks.length; i++)
-		biset.setVisibility(oriLinks[i].oriLinkID, "hidden");
+	// for (var i = 0; i < oriLinks.length; i++) {
+	// 	console.log(oriLinks[i].oriLinkID);
+	// 	biset.setVisibility(oriLinks[i].oriLinkID, "hidden");
+	// }
+
+
 
 
 	// load highlight entities

@@ -62,7 +62,7 @@ var biset = {
 		// bicFrameBorderColor: "rgba(0, 0, 0, 0.6)",
 
 		// normal line (light gray)
-		lineNColor: "rgba(0, 0, 0, 0.18)", // 0.06
+		lineNColor: "rgba(0, 0, 0, 0.06)", // 0.06
 		// line almost hide
 		lineHDColor: "rgba(0, 0, 0, 0.04)",
 		// hover entity to show links
@@ -2680,6 +2680,9 @@ biset.addLink = function (obj1, obj2, line, d3obj, bg) {
 * @param linkLsts, a list of links (logically)
 */
 biset.addOriginalLinks = function(linkLsts) {
+
+	console.log("call here");
+
 	for (var i = 0; i < linkLsts.length; i++) {
 		var obj1ID = linkLsts[i].obj1,
 			obj2ID = linkLsts[i].obj2,
@@ -2689,7 +2692,11 @@ biset.addOriginalLinks = function(linkLsts) {
 			obj2 = d3.select("#" + obj2ID),
 			lineObj = biset.addLink(obj1, obj2, biset.colors.lineNColor, canvas);
 
-		// connections[lineObj.lineID] = biset.addLink(obj1, obj2, biset.colors.lineNColor, canvas);
+
+
+		biset.setVisibility(lineObj.lineID, "hidden");
+
+		connections[lineObj.lineID] = lineObj;
 		
 		// connections.push(biset.addLink(obj1, obj2, biset.colors.lineNColor, canvas));
 	}
