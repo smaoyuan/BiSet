@@ -210,7 +210,7 @@ div.shade-container-light{
 /*size of the list control group*/
 #biset_control {
     height: 30px;
-    width: 3200px;
+    width: 3800px;
 }
 
 .listTileContainer {
@@ -238,10 +238,9 @@ div.listControlGroup {
 
 div.BiclistControlGroup {
     width: 410px;
-    padding-left: 150px;
+    padding-left: 40px;
     float: left;
 }
-
 
 #biset_canvas{
     position: absolute;
@@ -379,3 +378,8 @@ a.doc-list::before { content:''; }
     height: 310px;
     overflow-y: auto;
 }
+
+/*this code is for debugging*/
+/*#vis_canvas {
+    background: #fff;
+}*/
